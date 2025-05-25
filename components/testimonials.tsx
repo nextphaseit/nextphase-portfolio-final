@@ -45,7 +45,7 @@ export function Testimonials() {
     },
     {
       author: "Alexis A.",
-      position: "Business Owner",
+      position: "Founder, Strokes of Faith",
       image: "/images/about-img.png",
       title: "Website & Automation Setup",
       content:
