@@ -24,8 +24,8 @@ export function Services() {
       <div className="text-center mb-12">
         <h2 className="text-3xl font-bold mb-4">What I Do</h2>
         <p className="text-gray-400 max-w-2xl mx-auto">
-          I help small businesses build secure, modern websites that integrate seamlessly with cloud services and IT
-          systems. From custom development to email setup, hosting, and automation — I deliver end-to-end web solutions
+          We help small businesses build secure, modern websites that integrate seamlessly with cloud services and IT
+          systems. From custom development to email setup, hosting, and automation — we deliver end-to-end web solutions
           that support growth, efficiency, and peace of mind.
         </p>
       </div>
@@ -33,17 +33,17 @@ export function Services() {
         <ServiceCard
           icon={<Users size={24} />}
           title="Professional & Client-Facing"
-          description="I help small businesses modernize their technology with custom websites, secure cloud solutions, and automated workflows. My goal is to simplify IT so business owners can focus on what they do best."
+          description="We help small businesses modernize their technology with custom websites, secure cloud solutions, and automated workflows. Our goal is to simplify IT so business owners can focus on what they do best."
         />
         <ServiceCard
           icon={<Settings size={24} />}
           title="Technical & Service-Oriented"
-          description="I design and implement web-based solutions, manage Microsoft 365 environments, and build automation using Power Platform tools. I ensure each system is secure, efficient, and tailored to client needs."
+          description="We design and implement web-based solutions, manage Microsoft 365 environments, and build automation using Power Platform tools. We ensure each system is secure, efficient, and tailored to client needs."
         />
         <ServiceCard
           icon={<Zap size={24} />}
           title="Marketing-Friendly & Engaging"
-          description="I bring business tech to life—whether it's building a sleek website, setting up professional email, or streamlining your day-to-day with automation. If it makes your business run smoother, I make it happen."
+          description="We bring business tech to life—whether it's building a sleek website, setting up professional email, or streamlining your day-to-day with automation. If it makes your business run smoother, we make it happen."
         />
       </div>
     </section>
