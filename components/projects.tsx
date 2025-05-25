@@ -1,6 +1,6 @@
 import type React from "react"
 import { CardWrapper } from "./ui/card-wrapper"
-import { Globe, Mail, CalendarCheck, CloudUpload, ShieldCheck, Workflow } from "lucide-react"
+import { Globe, Mail, CalendarCheck, Cloud, ShieldCheck, Workflow } from "lucide-react"
 
 interface ServiceProps {
   title: string
@@ -40,7 +40,7 @@ export function Projects() {
     {
       title: "IT Infrastructure & Cloud Migrations",
       description: "Seamless migration to Microsoft 365 and SharePoint for remote-friendly operations.",
-      icon: <CloudUpload size={32} />,
+      icon: <Cloud size={32} />,
     },
     {
       title: "Data Security Audits & Compliance Consulting",
