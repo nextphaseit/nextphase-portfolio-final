@@ -18,7 +18,7 @@ export function Stats() {
       <StatItem value="3" label="Years of Experience" />
       <StatItem value="5+" label="Projects Completed" />
       <StatItem value="5" label="Happy Clients" />
-      <StatItem value="3" label="Years of Experience" />
+      <StatItem value="24/7" label="Support Available" />
     </div>
   )
 }
