@@ -60,14 +60,14 @@ export function Navbar() {
                   </a>
 
                   <a
-                    href="mailto:adrian.knight@nextphaseit.org"
+                    href="mailto:support@nextphaseit.org"
                     className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
                     onClick={() => setIsContactOpen(false)}
                   >
                     <Mail size={18} className="text-primary" />
                     <div>
                       <div className="font-medium">Send Email</div>
-                      <div className="text-sm text-gray-500">adrian.knight@nextphaseit.org</div>
+                      <div className="text-sm text-gray-500">support@nextphaseit.org</div>
                     </div>
                   </a>
 
@@ -140,7 +140,7 @@ export function Navbar() {
                   <Phone size={18} /> Call Now
                 </a>
                 <a
-                  href="mailto:adrian.knight@nextphaseit.org"
+                  href="mailto:support@nextphaseit.org"
                   className="flex items-center gap-2 text-white hover:text-primary transition-colors"
                   onClick={() => setIsOpen(false)}
                 >

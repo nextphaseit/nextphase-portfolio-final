@@ -98,7 +98,7 @@ export default function Home() {
                       </div>
                       <div>
                         <h3 className="font-semibold">Email</h3>
-                        <p className="text-gray-400">adrian.knight@nextphaseit.org</p>
+                        <p className="text-gray-400">support@nextphaseit.org</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-4">
@@ -173,7 +173,7 @@ export default function Home() {
               <div>
                 <h4 className="font-semibold mb-4">Contact Us</h4>
                 <ul className="space-y-2 text-gray-400">
-                  <li>adrian.knight@nextphaseit.org</li>
+                  <li>support@nextphaseit.org</li>
                   <li>+1 984-310-9533</li>
                   <li>Clayton, NC</li>
                 </ul>
