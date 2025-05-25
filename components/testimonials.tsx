@@ -36,7 +36,7 @@ function TestimonialCard({ content, author, position, image, title }: Testimonia
 export function Testimonials() {
   const testimonials = [
     {
-      author: "Lucien Rattray",
+      author: "Lucien R.",
       position: "Owner, Inner Clarity Inc.",
       image: "/images/lucien.jpg",
       title: "IT Consulting Service",
@@ -44,7 +44,7 @@ export function Testimonials() {
         "NextPhase IT completely transformed our tech infrastructure. From email migration to securing our data with compliance in mind, Adrian and his team were responsive, knowledgeable, and truly professional. As a small business owner, I now feel confident knowing our systems are protected and efficient.",
     },
     {
-      author: "Sarah Williams",
+      author: "Alexis A.",
       position: "Business Owner",
       image: "/images/about-img.png",
       title: "Website & Automation Setup",
