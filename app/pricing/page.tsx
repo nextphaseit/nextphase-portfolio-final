@@ -1,3 +1,5 @@
+"use client"
+
 import type React from "react"
 import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
@@ -186,8 +188,22 @@ export default function PricingPage() {
                   Get Custom Quote
                 </a>
               </Button>
-              <Button size="lg" variant="outline" asChild>
-                <Link href="/#contact">Schedule Consultation</Link>
+              <Button
+                size="lg"
+                variant="outline"
+                onClick={() => {
+                  // Scroll to top and trigger contact dropdown
+                  window.scrollTo({ top: 0, behavior: "smooth" })
+                  // Small delay to ensure we're at the top, then trigger contact menu
+                  setTimeout(() => {
+                    const contactButton = document.querySelector("[data-contact-trigger]")
+                    if (contactButton) {
+                      contactButton.click()
+                    }
+                  }, 500)
+                }}
+              >
+                Schedule Consultation
               </Button>
             </div>
           </div>

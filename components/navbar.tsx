@@ -47,6 +47,7 @@ export function Navbar() {
               <Button
                 onClick={() => setIsContactOpen(!isContactOpen)}
                 className="flex items-center gap-2 bg-primary hover:bg-primary/90"
+                data-contact-trigger
               >
                 Contact <ChevronDown size={16} />
               </Button>
