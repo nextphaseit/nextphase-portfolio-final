@@ -37,7 +37,7 @@ export function Testimonials() {
   const testimonials = [
     {
       author: "Lucien R.",
-      position: "Owner, Inner Clarity Inc.",
+      position: "Owner, Lu's Kitchen",
       image: "/images/lucien.jpg",
       title: "IT Consulting Service",
       content:
