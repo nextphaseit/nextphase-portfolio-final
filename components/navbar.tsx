@@ -2,12 +2,13 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { Menu, X } from "lucide-react"
+import { Menu, X, Phone, Mail, FileText, ChevronDown } from "lucide-react"
 import { Button } from "./ui/button"
 import Image from "next/image"
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
+  const [isContactOpen, setIsContactOpen] = useState(false)
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/60">
@@ -37,7 +38,55 @@ export function Navbar() {
             <Link href="#testimonials" className="text-white hover:text-primary transition-colors">
               Testimonials
             </Link>
-            <Button>Contact</Button>
+
+            {/* Contact Dropdown */}
+            <div className="relative">
+              <Button onClick={() => setIsContactOpen(!isContactOpen)} className="flex items-center gap-2">
+                Contact <ChevronDown size={16} />
+              </Button>
+
+              {isContactOpen && (
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                  <a
+                    href="tel:+19843109533"
+                    className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                    onClick={() => setIsContactOpen(false)}
+                  >
+                    <Phone size={18} className="text-primary" />
+                    <div>
+                      <div className="font-medium">Call Now</div>
+                      <div className="text-sm text-gray-500">+1 984-310-9533</div>
+                    </div>
+                  </a>
+
+                  <a
+                    href="mailto:adrian.knight@nextphaseit.org"
+                    className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                    onClick={() => setIsContactOpen(false)}
+                  >
+                    <Mail size={18} className="text-primary" />
+                    <div>
+                      <div className="font-medium">Send Email</div>
+                      <div className="text-sm text-gray-500">adrian.knight@nextphaseit.org</div>
+                    </div>
+                  </a>
+
+                  <a
+                    href="https://forms.cloud.microsoft/r/5Ad9WuMA3G"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 transition-colors"
+                    onClick={() => setIsContactOpen(false)}
+                  >
+                    <FileText size={18} className="text-primary" />
+                    <div>
+                      <div className="font-medium">Get Started</div>
+                      <div className="text-sm text-gray-500">Fill out intake form</div>
+                    </div>
+                  </a>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Mobile Navigation */}
@@ -80,7 +129,33 @@ export function Navbar() {
               >
                 Testimonials
               </Link>
-              <Button className="w-full">Contact</Button>
+
+              {/* Mobile Contact Options */}
+              <div className="space-y-2 pt-2 border-t border-gray-700">
+                <a
+                  href="tel:+19843109533"
+                  className="flex items-center gap-2 text-white hover:text-primary transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Phone size={18} /> Call Now
+                </a>
+                <a
+                  href="mailto:adrian.knight@nextphaseit.org"
+                  className="flex items-center gap-2 text-white hover:text-primary transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <Mail size={18} /> Send Email
+                </a>
+                <a
+                  href="https://forms.cloud.microsoft/r/5Ad9WuMA3G"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-white hover:text-primary transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <FileText size={18} /> Get Started
+                </a>
+              </div>
             </div>
           </div>
         )}
