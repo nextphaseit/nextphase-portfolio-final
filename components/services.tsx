@@ -22,7 +22,7 @@ export function Services() {
   return (
     <section className="py-16" id="services">
       <div className="text-center mb-12">
-        <h2 className="text-3xl font-bold mb-4">What I Do</h2>
+        <h2 className="text-3xl font-bold mb-4">What We Do</h2>
         <p className="text-gray-400 max-w-2xl mx-auto">
           We help small businesses build secure, modern websites that integrate seamlessly with cloud services and IT
           systems. From custom development to email setup, hosting, and automation — we deliver end-to-end web solutions
