@@ -1,5 +1,7 @@
 "use server"
 
+import nodemailer from "nodemailer"
+
 export async function submitContactForm(formData: FormData) {
   // Get form data
   const firstName = formData.get("firstName") as string
@@ -25,86 +27,119 @@ export async function submitContactForm(formData: FormData) {
   }
 
   try {
-    // Simulate processing time
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-
-    // Send email using fetch to a simple email API
-    const emailData = {
-      to: "support@nextphaseit.org",
-      subject: `New Contact Form Submission from ${firstName} ${lastName}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <div style="background: #1E5AA8; color: white; padding: 20px; text-align: center;">
-            <h1 style="margin: 0;">NextPhase IT - New Contact Form Submission</h1>
-          </div>
-          
-          <div style="padding: 20px; background: #f9f9f9;">
-            <h2 style="color: #1E5AA8; margin-top: 0;">Contact Details</h2>
-            <table style="width: 100%; border-collapse: collapse;">
-              <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold; width: 120px;">Name:</td>
-                <td style="padding: 10px; border-bottom: 1px solid #ddd;">${firstName} ${lastName}</td>
-              </tr>
-              <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">Email:</td>
-                <td style="padding: 10px; border-bottom: 1px solid #ddd;">
-                  <a href="mailto:${email}" style="color: #1E5AA8;">${email}</a>
-                </td>
-              </tr>
-              <tr>
-                <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">Submitted:</td>
-                <td style="padding: 10px; border-bottom: 1px solid #ddd;">${new Date().toLocaleString()}</td>
-              </tr>
-            </table>
-            
-            <h3 style="color: #1E5AA8; margin-top: 30px;">Message:</h3>
-            <div style="background: white; padding: 15px; border-left: 4px solid #1E5AA8; margin: 10px 0;">
-              ${message.replace(/\n/g, "<br>")}
-            </div>
-            
-            <div style="margin-top: 30px; padding: 15px; background: #e8f4f8; border-radius: 5px;">
-              <p style="margin: 0; color: #666;">
-                <strong>Next Steps:</strong><br>
-                • Reply to this email to respond directly to ${firstName}<br>
-                • Add to CRM/follow-up system<br>
-                • Expected response time: Within 24 hours
-              </p>
-            </div>
-          </div>
-          
-          <div style="background: #333; color: white; padding: 15px; text-align: center; font-size: 12px;">
-            <p style="margin: 0;">NextPhase IT | Clayton, NC | support@nextphaseit.org | +1 984-310-9533</p>
-          </div>
-        </div>
-      `,
-      replyTo: email,
-    }
-
-    // For now, we'll use a simple email service API
-    // You can replace this with your preferred email service
-    const response = await fetch("https://api.emailjs.com/api/v1.0/email/send", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+    // Create transporter for Microsoft Exchange/Outlook
+    const transporter = nodemailer.createTransporter({
+      host: "smtp-mail.outlook.com", // Microsoft Exchange SMTP server
+      port: 587,
+      secure: false, // Use STARTTLS
+      auth: {
+        user: process.env.EXCHANGE_EMAIL, // Your business email
+        pass: process.env.EXCHANGE_PASSWORD, // Your email password or app password
       },
-      body: JSON.stringify({
-        service_id: "your_service_id", // You'll need to set this up
-        template_id: "your_template_id", // You'll need to set this up
-        user_id: "your_user_id", // You'll need to set this up
-        template_params: {
-          to_email: "support@nextphaseit.org",
-          from_name: `${firstName} ${lastName}`,
-          from_email: email,
-          subject: `New Contact Form Submission from ${firstName} ${lastName}`,
-          message: message,
-          reply_to: email,
-        },
-      }),
+      tls: {
+        ciphers: "SSLv3",
+      },
     })
 
-    if (!response.ok) {
-      throw new Error("Failed to send email")
-    }
+    // Professional email template
+    const emailTemplate = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: #1E5AA8; color: white; padding: 20px; text-align: center;">
+          <h1 style="margin: 0;">NextPhase IT - New Contact Form Submission</h1>
+        </div>
+        
+        <div style="padding: 20px; background: #f9f9f9;">
+          <h2 style="color: #1E5AA8; margin-top: 0;">Contact Details</h2>
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold; width: 120px;">Name:</td>
+              <td style="padding: 10px; border-bottom: 1px solid #ddd;">${firstName} ${lastName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">Email:</td>
+              <td style="padding: 10px; border-bottom: 1px solid #ddd;">
+                <a href="mailto:${email}" style="color: #1E5AA8;">${email}</a>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding: 10px; border-bottom: 1px solid #ddd; font-weight: bold;">Submitted:</td>
+              <td style="padding: 10px; border-bottom: 1px solid #ddd;">${new Date().toLocaleString()}</td>
+            </tr>
+          </table>
+          
+          <h3 style="color: #1E5AA8; margin-top: 30px;">Message:</h3>
+          <div style="background: white; padding: 15px; border-left: 4px solid #1E5AA8; margin: 10px 0;">
+            ${message.replace(/\n/g, "<br>")}
+          </div>
+          
+          <div style="margin-top: 30px; padding: 15px; background: #e8f4f8; border-radius: 5px;">
+            <p style="margin: 0; color: #666;">
+              <strong>Next Steps:</strong><br>
+              • Reply to this email to respond directly to ${firstName}<br>
+              • Add to CRM/follow-up system<br>
+              • Expected response time: Within 24 hours
+            </p>
+          </div>
+        </div>
+        
+        <div style="background: #333; color: white; padding: 15px; text-align: center; font-size: 12px;">
+          <p style="margin: 0;">NextPhase IT | Clayton, NC | support@nextphaseit.org | +1 984-310-9533</p>
+        </div>
+      </div>
+    `
+
+    // Send email to your business email
+    await transporter.sendMail({
+      from: `"NextPhase IT Contact Form" <${process.env.EXCHANGE_EMAIL}>`,
+      to: "support@nextphaseit.org",
+      subject: `New Contact Form Submission from ${firstName} ${lastName}`,
+      html: emailTemplate,
+      replyTo: email, // When you reply, it goes directly to the customer
+    })
+
+    // Optional: Send confirmation email to customer
+    const customerEmailTemplate = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <div style="background: #1E5AA8; color: white; padding: 20px; text-align: center;">
+          <h1 style="margin: 0;">Thank You for Contacting NextPhase IT</h1>
+        </div>
+        
+        <div style="padding: 20px; background: #f9f9f9;">
+          <p>Hi ${firstName},</p>
+          
+          <p>Thank you for reaching out to NextPhase IT! We've received your message and will get back to you within 24 hours.</p>
+          
+          <div style="background: white; padding: 15px; border-left: 4px solid #1E5AA8; margin: 20px 0;">
+            <h3 style="margin-top: 0; color: #1E5AA8;">Your Message:</h3>
+            <p style="margin-bottom: 0;">${message.replace(/\n/g, "<br>")}</p>
+          </div>
+          
+          <p>In the meantime, feel free to:</p>
+          <ul>
+            <li>Call us directly at <strong>+1 984-310-9533</strong></li>
+            <li>Check out our <a href="https://nextphaseit.org/pricing" style="color: #1E5AA8;">pricing page</a></li>
+            <li>Fill out our <a href="https://forms.cloud.microsoft/r/5Ad9WuMA3G" style="color: #1E5AA8;">detailed intake form</a></li>
+          </ul>
+          
+          <p>Best regards,<br>
+          <strong>Adrian Knight</strong><br>
+          NextPhase IT<br>
+          Clayton, NC</p>
+        </div>
+        
+        <div style="background: #333; color: white; padding: 15px; text-align: center; font-size: 12px;">
+          <p style="margin: 0;">NextPhase IT | Clayton, NC | support@nextphaseit.org | +1 984-310-9533</p>
+        </div>
+      </div>
+    `
+
+    // Send confirmation to customer
+    await transporter.sendMail({
+      from: `"Adrian Knight - NextPhase IT" <${process.env.EXCHANGE_EMAIL}>`,
+      to: email,
+      subject: "Thank you for contacting NextPhase IT - We'll be in touch soon!",
+      html: customerEmailTemplate,
+    })
 
     // Log successful submission
     console.log("Contact Form Submission Sent:", {
@@ -117,7 +152,7 @@ export async function submitContactForm(formData: FormData) {
 
     return {
       success: true,
-      message: `Thank you ${firstName}! Your message has been sent successfully. We'll get back to you within 24 hours at ${email}.`,
+      message: `Thank you ${firstName}! Your message has been sent successfully. We'll get back to you within 24 hours at ${email}. You should also receive a confirmation email shortly.`,
     }
   } catch (error) {
     console.error("Contact form error:", error)
