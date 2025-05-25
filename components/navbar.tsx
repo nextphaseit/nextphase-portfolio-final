@@ -38,6 +38,9 @@ export function Navbar() {
             <Link href="#skills" className="text-white hover:text-primary transition-colors">
               Skills
             </Link>
+            <Link href="/faq" className="text-white hover:text-primary transition-colors">
+              FAQ
+            </Link>
             <Link href="#testimonials" className="text-white hover:text-primary transition-colors">
               Testimonials
             </Link>
@@ -152,6 +155,13 @@ export function Navbar() {
                 onClick={() => setIsOpen(false)}
               >
                 Skills
+              </Link>
+              <Link
+                href="/faq"
+                className="text-white hover:text-primary transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                FAQ
               </Link>
               <Link
                 href="#testimonials"

@@ -9,6 +9,7 @@ import { Chatbot } from "@/components/chatbot"
 import { ContactForm } from "@/components/contact-form"
 import { Phone, Mail, MapPin } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 
 export default function Home() {
   return (
@@ -125,8 +126,41 @@ export default function Home() {
               <div>
                 <h4 className="font-semibold mb-4">Company</h4>
                 <ul className="space-y-2 text-gray-400">
-                  <li>About</li>
-                  <li>Contact</li>
+                  <li>
+                    <Link href="/#services" className="hover:text-primary transition-colors">
+                      About
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/#works" className="hover:text-primary transition-colors">
+                      Services
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/pricing" className="hover:text-primary transition-colors">
+                      Pricing
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/faq" className="hover:text-primary transition-colors">
+                      FAQ
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/#skills" className="hover:text-primary transition-colors">
+                      Skills
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/#testimonials" className="hover:text-primary transition-colors">
+                      Testimonials
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/#contact" className="hover:text-primary transition-colors">
+                      Contact
+                    </Link>
+                  </li>
                 </ul>
               </div>
               <div>
