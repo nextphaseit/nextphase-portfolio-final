@@ -210,7 +210,7 @@ export function Chatbot() {
           className="w-16 h-16 rounded-full bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 group"
           size="lg"
         >
-          <MessageCircle size={24} className="group-hover:scale-110 transition-transform" />
+          <MessageCircle size={24} className="group-hover:scale-110 transition-transform text-white" />
         </Button>
       </div>
     )
@@ -222,10 +222,10 @@ export function Chatbot() {
         {/* Header */}
         <div className="bg-primary text-white p-4 rounded-t-lg flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Bot size={20} />
+            <Bot size={20} className="text-white" />
             <div>
-              <h3 className="font-semibold">NextPhase IT Assistant</h3>
-              <p className="text-xs opacity-90">Online now</p>
+              <h3 className="font-semibold text-white">NextPhase IT Assistant</h3>
+              <p className="text-xs opacity-90 text-white">Online now</p>
             </div>
           </div>
           <div className="flex gap-2">
@@ -243,20 +243,22 @@ export function Chatbot() {
               onClick={() => setIsOpen(false)}
               className="text-white hover:bg-white/20 p-1 h-auto"
             >
-              <X size={16} />
+              <X size={16} className="text-white" />
             </Button>
           </div>
         </div>
 
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
           {messages.map((message) => (
             <div key={message.id} className={`flex ${message.isBot ? "justify-start" : "justify-end"}`}>
               <div className={`max-w-[80%] ${message.isBot ? "order-2" : "order-1"}`}>
                 <div
-                  className={`p-3 rounded-lg ${message.isBot ? "bg-gray-100 text-gray-800" : "bg-primary text-white"}`}
+                  className={`p-3 rounded-lg ${
+                    message.isBot ? "bg-white text-gray-800 border border-gray-200 shadow-sm" : "bg-primary text-white"
+                  }`}
                 >
-                  <p className="text-sm whitespace-pre-line">{message.text}</p>
+                  <p className="text-sm whitespace-pre-line font-medium">{message.text}</p>
                 </div>
                 {message.options && (
                   <div className="mt-2 space-y-1">
@@ -266,7 +268,7 @@ export function Chatbot() {
                         variant="outline"
                         size="sm"
                         onClick={() => handleOptionClick(option)}
-                        className="w-full text-left justify-start text-xs h-auto py-2 border-primary/20 hover:bg-primary/5"
+                        className="w-full text-left justify-start text-xs h-auto py-2 px-3 border-primary/30 hover:bg-primary/10 hover:border-primary/50 text-gray-700 font-medium bg-white"
                       >
                         {option.text}
                       </Button>
@@ -283,8 +285,8 @@ export function Chatbot() {
               )}
               {!message.isBot && (
                 <div className="order-2 ml-2">
-                  <div className="w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center">
-                    <User size={12} className="text-gray-600" />
+                  <div className="w-6 h-6 bg-gray-400 rounded-full flex items-center justify-center">
+                    <User size={12} className="text-white" />
                   </div>
                 </div>
               )}
@@ -298,7 +300,7 @@ export function Chatbot() {
                   <Bot size={12} className="text-white" />
                 </div>
               </div>
-              <div className="bg-gray-100 p-3 rounded-lg">
+              <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
                 <div className="flex space-x-1">
                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
                   <div
