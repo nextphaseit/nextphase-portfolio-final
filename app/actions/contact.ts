@@ -1,6 +1,8 @@
 "use server"
 
-import nodemailer from "nodemailer"
+import { Resend } from "resend"
+
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function submitContactForm(formData: FormData) {
   // Get form data
@@ -27,22 +29,8 @@ export async function submitContactForm(formData: FormData) {
   }
 
   try {
-    // Create transporter for Microsoft Exchange/Outlook
-    const transporter = nodemailer.createTransporter({
-      host: "smtp-mail.outlook.com", // Microsoft Exchange SMTP server
-      port: 587,
-      secure: false, // Use STARTTLS
-      auth: {
-        user: process.env.EXCHANGE_EMAIL, // Your business email
-        pass: process.env.EXCHANGE_PASSWORD, // Your email password or app password
-      },
-      tls: {
-        ciphers: "SSLv3",
-      },
-    })
-
-    // Professional email template
-    const emailTemplate = `
+    // Professional email template for business notification
+    const businessEmailTemplate = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: #1E5AA8; color: white; padding: 20px; text-align: center;">
           <h1 style="margin: 0;">NextPhase IT - New Contact Form Submission</h1>
@@ -88,16 +76,7 @@ export async function submitContactForm(formData: FormData) {
       </div>
     `
 
-    // Send email to your business email
-    await transporter.sendMail({
-      from: `"NextPhase IT Contact Form" <${process.env.EXCHANGE_EMAIL}>`,
-      to: "support@nextphaseit.org",
-      subject: `New Contact Form Submission from ${firstName} ${lastName}`,
-      html: emailTemplate,
-      replyTo: email, // When you reply, it goes directly to the customer
-    })
-
-    // Optional: Send confirmation email to customer
+    // Customer confirmation email template
     const customerEmailTemplate = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: #1E5AA8; color: white; padding: 20px; text-align: center;">
@@ -133,16 +112,25 @@ export async function submitContactForm(formData: FormData) {
       </div>
     `
 
-    // Send confirmation to customer
-    await transporter.sendMail({
-      from: `"Adrian Knight - NextPhase IT" <${process.env.EXCHANGE_EMAIL}>`,
+    // Send notification email to business
+    await resend.emails.send({
+      from: "NextPhase IT Contact Form <noreply@nextphaseit.org>",
+      to: "support@nextphaseit.org",
+      subject: `New Contact Form Submission from ${firstName} ${lastName}`,
+      html: businessEmailTemplate,
+      replyTo: email,
+    })
+
+    // Send confirmation email to customer
+    await resend.emails.send({
+      from: "Adrian Knight - NextPhase IT <noreply@nextphaseit.org>",
       to: email,
       subject: "Thank you for contacting NextPhase IT - We'll be in touch soon!",
       html: customerEmailTemplate,
     })
 
     // Log successful submission
-    console.log("Contact Form Submission Sent:", {
+    console.log("Contact Form Submission Sent via Resend:", {
       firstName,
       lastName,
       email,
