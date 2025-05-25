@@ -32,6 +32,9 @@ export function Navbar() {
             <Link href="#works" className="text-white hover:text-primary transition-colors">
               Services
             </Link>
+            <Link href="/pricing" className="text-white hover:text-primary transition-colors">
+              Pricing
+            </Link>
             <Link href="#skills" className="text-white hover:text-primary transition-colors">
               Skills
             </Link>
@@ -134,6 +137,13 @@ export function Navbar() {
                 onClick={() => setIsOpen(false)}
               >
                 Services
+              </Link>
+              <Link
+                href="/pricing"
+                className="text-white hover:text-primary transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                Pricing
               </Link>
               <Link
                 href="#skills"
