@@ -6,6 +6,7 @@ import { Skills } from "@/components/skills"
 import { Testimonials } from "@/components/testimonials"
 import { Navbar } from "@/components/navbar"
 import { Chatbot } from "@/components/chatbot"
+import { ContactForm } from "@/components/contact-form"
 import { Phone, Mail, MapPin } from "lucide-react"
 import Image from "next/image"
 
@@ -104,33 +105,7 @@ export default function Home() {
                     </div>
                   </div>
                 </div>
-                <form className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <input
-                      type="text"
-                      placeholder="First Name"
-                      className="bg-card border border-primary/20 rounded-lg p-3 w-full focus:outline-none focus:border-primary"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Last Name"
-                      className="bg-card border border-primary/20 rounded-lg p-3 w-full focus:outline-none focus:border-primary"
-                    />
-                  </div>
-                  <input
-                    type="email"
-                    placeholder="Email"
-                    className="bg-card border border-primary/20 rounded-lg p-3 w-full focus:outline-none focus:border-primary"
-                  />
-                  <textarea
-                    placeholder="Message"
-                    rows={6}
-                    className="bg-card border border-primary/20 rounded-lg p-3 w-full focus:outline-none focus:border-primary"
-                  />
-                  <Button size="lg" className="w-full">
-                    Send Message
-                  </Button>
-                </form>
+                <ContactForm />
               </div>
             </div>
           </section>
