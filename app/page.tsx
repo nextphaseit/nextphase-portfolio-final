@@ -31,24 +31,15 @@ export default function Home() {
         {/* Hero Section */}
         <section className="container mx-auto px-4 pt-32 pb-20">
           <div className="grid grid-cols-1 gap-12 items-center">
-            <div>
-              <div className="mb-6">
-                <Image
-                  src="/images/nextphase-logo.png"
-                  alt="NextPhase IT"
-                  width={400}
-                  height={120}
-                  className="h-20 w-auto"
-                />
-              </div>
+            <div className="text-center">
               <h1 className="text-4xl lg:text-6xl font-bold mb-4">
                 <span className="block text-primary">Web & IT Solutions Consultant.</span>
               </h1>
-              <p className="text-gray-400 mb-8">
+              <p className="text-gray-400 mb-8 max-w-2xl mx-auto">
                 I serve as a Web & IT Solutions Consultant, for NextPhase IT helping small businesses build secure,
                 scalable websites integrated with modern cloud tools.
               </p>
-              <div className="flex gap-4">
+              <div className="flex justify-center">
                 <Button
                   size="lg"
                   asChild
