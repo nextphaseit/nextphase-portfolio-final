@@ -7,15 +7,23 @@ interface TestimonialProps {
   author: string
   position: string
   image: string
+  title: string
 }
 
-function TestimonialCard({ content, author, position, image }: TestimonialProps) {
+function TestimonialCard({ content, author, position, image, title }: TestimonialProps) {
   return (
     <CardWrapper>
       <Quote className="text-primary mb-4 h-8 w-8" />
+      <h4 className="font-semibold text-primary mb-2">{title}</h4>
       <p className="text-gray-400 mb-6">{content}</p>
       <div className="flex items-center gap-4">
-        <Image src={image || "/placeholder.svg"} alt={author} width={48} height={48} className="rounded-full" />
+        <Image
+          src={image || "/placeholder.svg"}
+          alt={author}
+          width={48}
+          height={48}
+          className="rounded-full object-cover"
+        />
         <div>
           <h4 className="font-semibold">{author}</h4>
           <p className="text-sm text-gray-400">{position}</p>
@@ -29,17 +37,19 @@ export function Testimonials() {
   const testimonials = [
     {
       author: "Lucien Rattray",
-      position: "CEO at TechStart",
+      position: "Owner, Inner Clarity Inc.",
       image: "/images/lucien.jpg",
+      title: "IT Consulting Service",
       content:
-        "Working with NextPhase IT was an absolute pleasure. Their attention to detail and creative solutions made our project a success.",
+        "NextPhase IT completely transformed our tech infrastructure. From email migration to securing our data with compliance in mind, Adrian and his team were responsive, knowledgeable, and truly professional. As a small business owner, I now feel confident knowing our systems are protected and efficient.",
     },
     {
-      author: "Michael Chen",
-      position: "Product Manager",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&auto=format&fit=crop&q=60",
+      author: "Sarah Williams",
+      position: "Business Owner",
+      image: "/images/about-img.png",
+      title: "Website & Automation Setup",
       content:
-        "Exceptional work! NextPhase IT delivered beyond our expectations and was always responsive to our needs.",
+        "I needed a booking website with integrated payments and automated emails. NextPhase IT delivered exactly what I envisioned—clean design, seamless user experience, and everything works like clockwork. I highly recommend their services to any business needing tech done right.",
     },
   ]
 
