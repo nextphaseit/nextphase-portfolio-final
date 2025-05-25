@@ -5,6 +5,7 @@ import { Projects } from "@/components/projects"
 import { Skills } from "@/components/skills"
 import { Testimonials } from "@/components/testimonials"
 import { Navbar } from "@/components/navbar"
+import { Chatbot } from "@/components/chatbot"
 import { Phone, Mail, MapPin } from "lucide-react"
 import Image from "next/image"
 
@@ -185,6 +186,9 @@ export default function Home() {
           </div>
         </footer>
       </div>
+
+      {/* Chatbot */}
+      <Chatbot />
     </main>
   )
 }

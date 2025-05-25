@@ -4,6 +4,7 @@ import type React from "react"
 import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
 import { CardWrapper } from "@/components/ui/card-wrapper"
+import { Chatbot } from "@/components/chatbot"
 import { Cloud, Mail, Globe, Database, Shield, Headphones, Workflow, Users, Star, Check } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -338,6 +339,9 @@ export default function PricingPage() {
           </div>
         </footer>
       </div>
+
+      {/* Chatbot */}
+      <Chatbot />
     </main>
   )
 }
