@@ -2,6 +2,7 @@
 import { useState } from "react"
 import { Navbar } from "@/components/navbar"
 import { Chatbot } from "@/components/chatbot"
+import { AuthProvider } from "@/providers/auth-provider"
 import { ChevronDown, ChevronUp, Phone, Mail, MessageCircle, ExternalLink } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -59,7 +60,7 @@ function FAQSection({ title, faqs, openItems, onToggle, startIndex }: FAQSection
   )
 }
 
-export default function FAQPage() {
+function FAQContent() {
   const [openItems, setOpenItems] = useState<number[]>([])
 
   const toggleItem = (index: number) => {
@@ -363,5 +364,13 @@ export default function FAQPage() {
       {/* Chatbot */}
       <Chatbot />
     </main>
+  )
+}
+
+export default function FAQPage() {
+  return (
+    <AuthProvider>
+      <FAQContent />
+    </AuthProvider>
   )
 }

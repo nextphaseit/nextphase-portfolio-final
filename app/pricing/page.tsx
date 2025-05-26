@@ -5,6 +5,7 @@ import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
 import { CardWrapper } from "@/components/ui/card-wrapper"
 import { Chatbot } from "@/components/chatbot"
+import { AuthProvider } from "@/providers/auth-provider"
 import { Cloud, Mail, Globe, Database, Shield, Headphones, Workflow, Users, Star, Check } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -59,7 +60,7 @@ function ServiceCard({ title, pricing, description, icon, features, popular }: S
   )
 }
 
-export default function PricingPage() {
+function PricingContent() {
   const services = [
     {
       title: "Microsoft 365 Setup & Support",
@@ -374,5 +375,13 @@ export default function PricingPage() {
       {/* Chatbot */}
       <Chatbot />
     </main>
+  )
+}
+
+export default function PricingPage() {
+  return (
+    <AuthProvider>
+      <PricingContent />
+    </AuthProvider>
   )
 }

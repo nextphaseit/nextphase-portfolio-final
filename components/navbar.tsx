@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { Menu, X, Phone, Mail, FileText, ChevronDown, User, LogOut, Shield } from "lucide-react"
 import { Button } from "./ui/button"
-import { useAuth } from "@/providers/auth-provider"
+import { useAuthSafe } from "@/providers/auth-provider"
 import Image from "next/image"
 
 export function Navbar() {
@@ -12,7 +12,7 @@ export function Navbar() {
   const [isContactOpen, setIsContactOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
 
-  const { user, isAuthenticated, isAdmin, isLoading, logout } = useAuth()
+  const { user, isAuthenticated, isAdmin, isLoading, logout } = useAuthSafe()
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/60">
@@ -30,22 +30,22 @@ export function Navbar() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
-            <Link href="#services" className="text-white hover:text-primary transition-colors">
+            <Link href="/#services" className="text-white hover:text-primary transition-colors">
               About
             </Link>
-            <Link href="#works" className="text-white hover:text-primary transition-colors">
+            <Link href="/#works" className="text-white hover:text-primary transition-colors">
               Services
             </Link>
             <Link href="/pricing" className="text-white hover:text-primary transition-colors">
               Pricing
             </Link>
-            <Link href="#skills" className="text-white hover:text-primary transition-colors">
+            <Link href="/#skills" className="text-white hover:text-primary transition-colors">
               Skills
             </Link>
             <Link href="/faq" className="text-white hover:text-primary transition-colors">
               FAQ
             </Link>
-            <Link href="#testimonials" className="text-white hover:text-primary transition-colors">
+            <Link href="/#testimonials" className="text-white hover:text-primary transition-colors">
               Testimonials
             </Link>
 
@@ -193,14 +193,14 @@ export function Navbar() {
           <div className="md:hidden">
             <div className="flex flex-col space-y-4 px-2 pt-2 pb-4">
               <Link
-                href="#services"
+                href="/#services"
                 className="text-white hover:text-primary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
                 About
               </Link>
               <Link
-                href="#works"
+                href="/#works"
                 className="text-white hover:text-primary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -214,7 +214,7 @@ export function Navbar() {
                 Pricing
               </Link>
               <Link
-                href="#skills"
+                href="/#skills"
                 className="text-white hover:text-primary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
@@ -228,7 +228,7 @@ export function Navbar() {
                 FAQ
               </Link>
               <Link
-                href="#testimonials"
+                href="/#testimonials"
                 className="text-white hover:text-primary transition-colors"
                 onClick={() => setIsOpen(false)}
               >

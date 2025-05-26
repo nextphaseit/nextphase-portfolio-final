@@ -54,12 +54,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Check for existing session
     const savedUser = localStorage.getItem("nextphase_admin_user")
     if (savedUser) {
-      const userData = JSON.parse(savedUser)
-      // Verify user is still authorized
-      const authorizedUser = AUTHORIZED_USERS.find((u) => u.email === userData.email)
-      if (authorizedUser) {
-        setUser(userData)
-      } else {
+      try {
+        const userData = JSON.parse(savedUser)
+        // Verify user is still authorized
+        const authorizedUser = AUTHORIZED_USERS.find((u) => u.email === userData.email)
+        if (authorizedUser) {
+          setUser(userData)
+        } else {
+          localStorage.removeItem("nextphase_admin_user")
+        }
+      } catch (error) {
         localStorage.removeItem("nextphase_admin_user")
       }
     }
@@ -115,6 +119,22 @@ export function useAuth() {
   const context = useContext(AuthContext)
   if (context === undefined) {
     throw new Error("useAuth must be used within an AuthProvider")
+  }
+  return context
+}
+
+// Safe hook that can be used outside of AuthProvider
+export function useAuthSafe() {
+  const context = useContext(AuthContext)
+  if (context === undefined) {
+    return {
+      user: null,
+      isLoading: false,
+      login: async () => false,
+      logout: () => {},
+      isAuthenticated: false,
+      isAdmin: false,
+    }
   }
   return context
 }
