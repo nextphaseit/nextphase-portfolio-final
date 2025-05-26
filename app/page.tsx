@@ -8,9 +8,8 @@ import { Skills } from "@/components/skills"
 import { Testimonials } from "@/components/testimonials"
 import { Navbar } from "@/components/navbar"
 import { Chatbot } from "@/components/chatbot"
-import { ContactForm } from "@/components/contact-form"
 import { AuthProvider } from "@/lib/auth"
-import { Phone, Mail, MapPin } from "lucide-react"
+import { Phone, Mail, MessageCircle, ExternalLink } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
@@ -75,42 +74,54 @@ export default function Home() {
                 <div className="text-center mb-12">
                   <h2 className="text-3xl font-bold mb-4">Let's Get In Touch</h2>
                   <p className="text-gray-400 max-w-2xl mx-auto">
-                    Have a project in mind or want to discuss potential opportunities? I'm just a message away.
+                    Have a project in mind or want to discuss potential opportunities? We're here to help.
                   </p>
                 </div>
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                  <div>
-                    <div className="space-y-6">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
-                          <Phone className="text-primary" size={24} />
+
+                {/* Need More Help Section */}
+                <div className="max-w-4xl mx-auto">
+                  <div className="bg-card rounded-lg p-8 border border-primary/20">
+                    <h2 className="text-2xl font-bold text-primary mb-6 flex items-center gap-2">💬 Need More Help?</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                      <div className="text-center">
+                        <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <MessageCircle className="text-primary" size={24} />
                         </div>
-                        <div>
-                          <h3 className="font-semibold">Phone</h3>
-                          <p className="text-gray-400">+1 984-310-9533</p>
-                        </div>
+                        <h3 className="font-semibold mb-2">Live Chat</h3>
+                        <p className="text-gray-400 text-sm">Available on our website</p>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
+
+                      <div className="text-center">
+                        <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3">
                           <Mail className="text-primary" size={24} />
                         </div>
-                        <div>
-                          <h3 className="font-semibold">Email</h3>
-                          <p className="text-gray-400">support@nextphaseit.org</p>
-                        </div>
+                        <h3 className="font-semibold mb-2">Email</h3>
+                        <a href="mailto:support@nextphaseit.org" className="text-primary text-sm hover:underline">
+                          support@nextphaseit.org
+                        </a>
                       </div>
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
-                          <MapPin className="text-primary" size={24} />
+
+                      <div className="text-center">
+                        <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <Phone className="text-primary" size={24} />
                         </div>
-                        <div>
-                          <h3 className="font-semibold">Address</h3>
-                          <p className="text-gray-400">Clayton, NC</p>
+                        <h3 className="font-semibold mb-2">Phone</h3>
+                        <a href="tel:+19843109533" className="text-primary text-sm hover:underline">
+                          (984) 310-9533
+                        </a>
+                      </div>
+
+                      <div className="text-center">
+                        <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                          <ExternalLink className="text-primary" size={24} />
                         </div>
+                        <h3 className="font-semibold mb-2">Client Portal</h3>
+                        <Link href="/login" className="text-primary text-sm hover:underline">
+                          Login to Portal
+                        </Link>
                       </div>
                     </div>
                   </div>
-                  <ContactForm />
                 </div>
               </div>
             </section>
