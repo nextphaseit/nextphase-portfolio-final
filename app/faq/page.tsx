@@ -238,7 +238,10 @@ export default function FAQPage() {
         <section className="container mx-auto px-4 pb-16">
           <div className="max-w-4xl mx-auto">
             <div className="bg-card rounded-lg p-8 border border-primary/20">
-              <h2 className="text-2xl font-bold text-primary mb-6 flex items-center gap-2">📎 Need More Help?</h2>
+              <h2 className="text-2xl font-bold text-primary mb-6 flex items-center gap-2">
+                <ExternalLink className="text-primary" size={24} />
+                Need More Help?
+              </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="text-center">
                   <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3">

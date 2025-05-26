@@ -73,7 +73,10 @@ function LoginContent() {
 
           {/* Access Notice */}
           <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-6">
-            <h3 className="text-primary font-semibold mb-2">🔒 Authorized Personnel Only</h3>
+            <h3 className="text-primary font-semibold mb-2">
+              <Shield className="inline mr-2" size={16} />
+              Authorized Personnel Only
+            </h3>
             <p className="text-sm text-gray-300 mb-2">This portal is restricted to NextPhase IT staff members.</p>
             <div className="text-xs text-gray-400 space-y-1">
               <p>

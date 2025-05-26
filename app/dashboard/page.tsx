@@ -109,7 +109,7 @@ function DashboardContent() {
             <div>
               <h1 className="text-3xl font-bold mb-2">
                 Welcome, {user?.given_name || user?.name}!
-                <span className="text-primary ml-2">{user?.role === "admin" ? "👑 Admin" : "👤 Staff"}</span>
+                <span className="text-primary ml-2">{user?.role === "admin" ? "Admin" : "Staff"}</span>
               </h1>
               <p className="text-gray-400">NextPhase IT Operations Portal - {user?.department}</p>
             </div>
@@ -248,15 +248,15 @@ function DashboardContent() {
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-700">
                   <span className="text-gray-400">Microsoft 365 Status</span>
-                  <span className="text-green-400 font-semibold">✅ Operational</span>
+                  <span className="text-green-400 font-semibold">Operational</span>
                 </div>
                 <div className="flex justify-between items-center py-2 border-b border-gray-700">
                   <span className="text-gray-400">SharePoint Sites</span>
-                  <span className="text-green-400 font-semibold">✅ Online</span>
+                  <span className="text-green-400 font-semibold">Online</span>
                 </div>
                 <div className="flex justify-between items-center py-2">
                   <span className="text-gray-400">Teams Integration</span>
-                  <span className="text-green-400 font-semibold">✅ Connected</span>
+                  <span className="text-green-400 font-semibold">Connected</span>
                 </div>
               </div>
             </CardWrapper>
