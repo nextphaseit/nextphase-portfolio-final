@@ -6,5 +6,8 @@ interface CardWrapperProps {
 }
 
 export function CardWrapper({ children, className = "" }: CardWrapperProps) {
-  return <div className={`bg-card rounded-lg p-6 border border-primary/20 ${className}`}>{children}</div>
+  const baseClasses = "bg-card rounded-lg p-6 border border-primary/20"
+  const combinedClasses = `${baseClasses} ${className}`.trim()
+
+  return <div className={combinedClasses}>{children}</div>
 }

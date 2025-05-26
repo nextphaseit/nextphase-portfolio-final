@@ -63,13 +63,13 @@ export function Navbar() {
                   className="flex items-center gap-2 bg-primary hover:bg-primary/90"
                 >
                   <Image
-                    src={user.picture || "/placeholder.svg?height=24&width=24&text=DC"}
+                    src="/placeholder.svg?height=24&width=24&text=DC"
                     alt="Profile"
                     width={24}
                     height={24}
                     className="rounded-full"
                   />
-                  {user.given_name || user.name}
+                  User Name
                   {isAdmin && <Shield size={14} className="text-yellow-400" />}
                   <ChevronDown size={16} />
                 </Button>
@@ -78,11 +78,11 @@ export function Navbar() {
                   <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-3 z-50">
                     <div className="px-4 py-2 border-b border-gray-100">
                       <h3 className="font-semibold text-gray-800 flex items-center gap-2">
-                        {user.name}
+                        User Name
                         {isAdmin && <Shield size={16} className="text-yellow-600" />}
                       </h3>
-                      <p className="text-sm text-gray-500">{user.email}</p>
-                      <p className="text-xs text-gray-400">{user.department}</p>
+                      <p className="text-sm text-gray-500">user@nextphaseit.org</p>
+                      <p className="text-xs text-gray-400">Department</p>
                     </div>
 
                     <div className="py-2">
@@ -241,51 +241,13 @@ export function Navbar() {
                 Testimonials
               </Link>
 
-              {/* Mobile User Menu */}
-              {user ? (
-                <div className="space-y-3 pt-4 border-t border-gray-700">
-                  <div className="flex items-center gap-3 text-white py-2">
-                    <Image
-                      src={user.picture || "/placeholder.svg?height=32&width=32&text=DC"}
-                      alt="Profile"
-                      width={32}
-                      height={32}
-                      className="rounded-full"
-                    />
-                    <div>
-                      <div className="font-medium flex items-center gap-2">
-                        {user.name}
-                        {isAdmin && <Shield size={14} className="text-yellow-400" />}
-                      </div>
-                      <div className="text-xs text-gray-400">{user.email}</div>
-                    </div>
-                  </div>
-                  <Link
-                    href="/dashboard"
-                    className="text-white hover:text-primary transition-colors"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Admin Portal
-                  </Link>
-                  <button
-                    onClick={() => {
-                      logout()
-                      setIsOpen(false)
-                    }}
-                    className="text-white hover:text-primary transition-colors text-left"
-                  >
-                    Logout
-                  </button>
-                </div>
-              ) : (
-                <Link
-                  href="/login"
-                  className="text-white hover:text-primary transition-colors"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Staff Login
-                </Link>
-              )}
+              <Link
+                href="/login"
+                className="text-white hover:text-primary transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                Staff Login
+              </Link>
 
               {/* Mobile Contact Options */}
               <div className="space-y-3 pt-4 border-t border-gray-700">
