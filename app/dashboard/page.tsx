@@ -3,13 +3,12 @@
 import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
 import { CardWrapper } from "@/components/ui/card-wrapper"
-import { AuthProvider } from "@/components/auth-provider"
-import { withAuth, useAuthCheck } from "@/lib/auth-utils"
+import { AuthProvider, withAuth, useAuth } from "@/lib/auth"
 import { FileText, MessageSquare, Clock, ExternalLink, Users, BarChart3, Shield, Video, Settings } from "lucide-react"
 import Image from "next/image"
 
 function DashboardContent() {
-  const { user, isAdmin } = useAuthCheck()
+  const { user, isAdmin } = useAuth()
 
   const microsoftApps = [
     {
@@ -73,6 +72,19 @@ function DashboardContent() {
     },
   ]
 
+  const { logout } = useAuth()
+
+  const handleLogout = () => {
+    // Use custom logout for preview, Auth0 logout for production
+    if (typeof window !== "undefined" && window.location.hostname.includes("vusercontent.net")) {
+      // Preview environment - use custom auth
+      logout()
+    } else {
+      // Production environment - use Auth0
+      window.location.href = "/api/auth/logout"
+    }
+  }
+
   return (
     <main className="min-h-screen bg-black text-white relative">
       {/* Background Logo */}
@@ -116,8 +128,8 @@ function DashboardContent() {
                   <div className="text-gray-400">{user?.email}</div>
                 </div>
               </div>
-              <Button variant="outline" asChild>
-                <a href="/api/auth/logout">Logout</a>
+              <Button variant="outline" onClick={handleLogout}>
+                Logout
               </Button>
             </div>
           </div>

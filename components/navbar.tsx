@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { Menu, X, Phone, Mail, FileText, ChevronDown, User, LogOut, Shield } from "lucide-react"
 import { Button } from "./ui/button"
-import { useAuthCheck } from "@/lib/auth-utils"
+import { useAuth } from "@/lib/auth"
 import Image from "next/image"
 
 export function Navbar() {
@@ -12,7 +12,7 @@ export function Navbar() {
   const [isContactOpen, setIsContactOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
 
-  const { user, isAuthenticated, isAdmin, isLoading } = useAuthCheck()
+  const { user, isAuthenticated, isAdmin, isLoading, logout } = useAuth()
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/60">
@@ -89,22 +89,32 @@ export function Navbar() {
                         <span>Admin Portal</span>
                       </Link>
 
-                      <a
-                        href="/api/auth/logout"
+                      <button
+                        onClick={() => {
+                          setIsUserMenuOpen(false)
+                          // Use custom logout for preview, Auth0 logout for production
+                          if (typeof window !== "undefined" && window.location.hostname.includes("vusercontent.net")) {
+                            // Preview environment - use custom auth
+                            // const { logout } = useAuth()
+                            logout()
+                          } else {
+                            // Production environment - use Auth0
+                            window.location.href = "/api/auth/logout"
+                          }
+                        }}
                         className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-red-50 transition-colors w-full text-left"
-                        onClick={() => setIsUserMenuOpen(false)}
                       >
                         <LogOut size={18} className="text-red-600" />
                         <span>Logout</span>
-                      </a>
+                      </button>
                     </div>
                   </div>
                 )}
               </div>
             ) : (
-              <a href="/api/auth/login" className="text-white hover:text-primary transition-colors">
+              <Link href="/login" className="text-white hover:text-primary transition-colors">
                 {isLoading ? "Loading..." : "Staff Login"}
-              </a>
+              </Link>
             )}
 
             {/* Contact Dropdown */}
@@ -259,22 +269,32 @@ export function Navbar() {
                   >
                     Admin Portal
                   </Link>
-                  <a
-                    href="/api/auth/logout"
+                  <button
+                    onClick={() => {
+                      setIsOpen(false)
+                      // Use custom logout for preview, Auth0 logout for production
+                      if (typeof window !== "undefined" && window.location.hostname.includes("vusercontent.net")) {
+                        // Preview environment - use custom auth
+                        // const { logout } = useAuth()
+                        logout()
+                      } else {
+                        // Production environment - use Auth0
+                        window.location.href = "/api/auth/logout"
+                      }
+                    }}
                     className="text-white hover:text-primary transition-colors text-left"
-                    onClick={() => setIsOpen(false)}
                   >
                     Logout
-                  </a>
+                  </button>
                 </div>
               ) : (
-                <a
-                  href="/api/auth/login"
+                <Link
+                  href="/login"
                   className="text-white hover:text-primary transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
                   Staff Login
-                </a>
+                </Link>
               )}
 
               {/* Mobile Contact Options */}
