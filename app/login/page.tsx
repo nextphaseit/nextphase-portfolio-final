@@ -3,9 +3,9 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Eye, EyeOff, Mail, Lock, ArrowLeft, Shield } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, ArrowLeft, Shield, AlertCircle } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { AuthProvider, useAuth } from "@/providers/auth-provider"
@@ -21,12 +21,37 @@ function LoginContent() {
 
   const { login, loginWithMicrosoft, isLoading, isAuthenticated } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
 
   useEffect(() => {
     if (isAuthenticated) {
       router.push("/dashboard")
     }
-  }, [isAuthenticated, router])
+
+    // Check for OAuth errors
+    const oauthError = searchParams.get("error")
+    if (oauthError) {
+      switch (oauthError) {
+        case "oauth_failed":
+          setError("Microsoft authentication failed. Please try again.")
+          break
+        case "unauthorized_domain":
+          setError("Access denied. Only NextPhase IT staff members can access this portal.")
+          break
+        case "token_failed":
+          setError("Authentication token error. Please try again.")
+          break
+        case "profile_failed":
+          setError("Unable to retrieve profile information. Please try again.")
+          break
+        case "callback_failed":
+          setError("Authentication callback failed. Please try again.")
+          break
+        default:
+          setError("Authentication error occurred. Please try again.")
+      }
+    }
+  }, [isAuthenticated, router, searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -124,7 +149,10 @@ function LoginContent() {
           {/* Error Message */}
           {error && (
             <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6">
-              <p className="text-red-400 text-sm">{error}</p>
+              <div className="flex items-center gap-2">
+                <AlertCircle className="text-red-400" size={16} />
+                <p className="text-red-400 text-sm">{error}</p>
+              </div>
             </div>
           )}
 

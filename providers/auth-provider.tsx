@@ -59,19 +59,46 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
+    // Check for Microsoft OAuth callback data
+    const checkOAuthCallback = () => {
+      if (typeof window !== "undefined") {
+        const tempUserCookie = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("nextphase_temp_user="))
+          ?.split("=")[1]
+
+        if (tempUserCookie) {
+          try {
+            const userData = JSON.parse(decodeURIComponent(tempUserCookie))
+            setUser(userData)
+            localStorage.setItem("nextphase_admin_user", JSON.stringify(userData))
+            // Clear the temporary cookie
+            document.cookie = "nextphase_temp_user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+            setIsLoading(false)
+            return true
+          } catch (error) {
+            console.error("Error parsing OAuth callback data:", error)
+          }
+        }
+      }
+      return false
+    }
+
     // Check for existing session
-    const savedUser = localStorage.getItem("nextphase_admin_user")
-    if (savedUser) {
-      try {
-        const userData = JSON.parse(savedUser)
-        // Verify user is still authorized (for local auth) or valid (for Exchange auth)
-        if (userData.authMethod === "exchange" || AUTHORIZED_USERS.find((u) => u.email === userData.email)) {
-          setUser(userData)
-        } else {
+    if (!checkOAuthCallback()) {
+      const savedUser = localStorage.getItem("nextphase_admin_user")
+      if (savedUser) {
+        try {
+          const userData = JSON.parse(savedUser)
+          // Verify user is still authorized (for local auth) or valid (for Exchange auth)
+          if (userData.authMethod === "exchange" || AUTHORIZED_USERS.find((u) => u.email === userData.email)) {
+            setUser(userData)
+          } else {
+            localStorage.removeItem("nextphase_admin_user")
+          }
+        } catch (error) {
           localStorage.removeItem("nextphase_admin_user")
         }
-      } catch (error) {
-        localStorage.removeItem("nextphase_admin_user")
       }
     }
     setIsLoading(false)
@@ -153,17 +180,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return false
   }
 
-  // Microsoft OAuth login (alternative method)
+  // Microsoft OAuth login
   const loginWithMicrosoft = async (): Promise<boolean> => {
     setIsLoading(true)
 
     try {
       // Redirect to Microsoft OAuth
       const clientId = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID
+      if (!clientId) {
+        console.error("Microsoft Client ID not configured")
+        setIsLoading(false)
+        return false
+      }
+
       const redirectUri = encodeURIComponent(`${window.location.origin}/api/auth/microsoft/callback`)
       const scope = encodeURIComponent("openid profile email User.Read")
+      const state = encodeURIComponent(Math.random().toString(36).substring(7))
 
-      const authUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=${scope}&response_mode=query`
+      const authUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=${scope}&response_mode=query&state=${state}`
 
       window.location.href = authUrl
       return true
@@ -177,6 +211,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setUser(null)
     localStorage.removeItem("nextphase_admin_user")
+    // Clear any temporary cookies
+    if (typeof window !== "undefined") {
+      document.cookie = "nextphase_temp_user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+    }
   }
 
   return (
