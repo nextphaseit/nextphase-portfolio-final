@@ -11,9 +11,6 @@ interface TicketData {
   source: "portal" | "chatbot"
 }
 
-// Initialize Resend
-const resend = new Resend(process.env.RESEND_API_KEY)
-
 // Generate ticket number
 function generateTicketNumber(): string {
   const timestamp = Date.now().toString().slice(-6)
@@ -193,29 +190,54 @@ function generateInternalNotificationEmail(ticketData: TicketData & { ticketNumb
 
 export async function createSupportTicket(ticketData: TicketData) {
   try {
+    // Check if Resend API key is available
+    if (!process.env.RESEND_API_KEY) {
+      console.error("RESEND_API_KEY environment variable is not set")
+      return {
+        success: false,
+        message:
+          "Email service is not configured. Please contact us directly at support@nextphaseit.org or call +1 984-310-9533.",
+      }
+    }
+
+    // Initialize Resend with API key
+    const resend = new Resend(process.env.RESEND_API_KEY)
+
     // Generate ticket number
     const ticketNumber = generateTicketNumber()
     const ticketWithNumber = { ...ticketData, ticketNumber }
 
     // Send confirmation email to client (if email provided)
     if (ticketData.clientEmail) {
-      await resend.emails.send({
-        from: "NextPhase IT Support <support@nextphaseit.org>",
-        to: [ticketData.clientEmail],
-        subject: `Support Ticket Created - #${ticketNumber}`,
-        html: generateClientConfirmationEmail(ticketWithNumber),
-        replyTo: "support@nextphaseit.org",
-      })
+      try {
+        await resend.emails.send({
+          from: "NextPhase IT Support <support@nextphaseit.org>",
+          to: [ticketData.clientEmail],
+          subject: `Support Ticket Created - #${ticketNumber}`,
+          html: generateClientConfirmationEmail(ticketWithNumber),
+          replyTo: "support@nextphaseit.org",
+        })
+        console.log(`Confirmation email sent to: ${ticketData.clientEmail}`)
+      } catch (emailError) {
+        console.error("Failed to send client confirmation email:", emailError)
+        // Continue with internal notification even if client email fails
+      }
     }
 
     // Send internal notification to support team
-    await resend.emails.send({
-      from: "NextPhase IT System <noreply@nextphaseit.org>",
-      to: ["support@nextphaseit.org"],
-      subject: `New Support Ticket #${ticketNumber} - ${ticketData.subject} [${ticketData.priority.toUpperCase()}]`,
-      html: generateInternalNotificationEmail(ticketWithNumber),
-      replyTo: ticketData.clientEmail || "support@nextphaseit.org",
-    })
+    try {
+      await resend.emails.send({
+        from: "NextPhase IT System <noreply@nextphaseit.org>",
+        to: ["support@nextphaseit.org"],
+        subject: `New Support Ticket #${ticketNumber} - ${ticketData.subject} [${ticketData.priority.toUpperCase()}]`,
+        html: generateInternalNotificationEmail(ticketWithNumber),
+        replyTo: ticketData.clientEmail || "support@nextphaseit.org",
+      })
+      console.log("Internal notification sent to support@nextphaseit.org")
+    } catch (emailError) {
+      console.error("Failed to send internal notification:", emailError)
+      // Still return success if ticket was created, even if email failed
+    }
 
     // Log ticket creation
     console.log("Support ticket created:", {
