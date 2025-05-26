@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { Menu, X, Phone, Mail, FileText, ChevronDown, User, LogOut, Shield } from "lucide-react"
+import { Menu, X, Phone, Mail, FileText, ChevronDown, User, LogOut, Shield, Users } from "lucide-react"
 import { Button } from "./ui/button"
 import { useAuthSafe } from "@/providers/auth-provider"
 import Image from "next/image"
@@ -47,6 +47,9 @@ export function Navbar() {
             </Link>
             <Link href="/#testimonials" className="text-white hover:text-primary transition-colors">
               Testimonials
+            </Link>
+            <Link href="/portal" className="text-white hover:text-primary transition-colors">
+              Client Portal
             </Link>
 
             {/* User Menu or Login */}
@@ -155,15 +158,29 @@ export function Navbar() {
                       </div>
                     </a>
 
-                    <a
-                      href="https://forms.cloud.microsoft/r/5Ad9WuMA3G"
-                      target="_blank"
-                      rel="noopener noreferrer"
+                    <Link
+                      href="/portal"
                       className="flex items-center gap-4 px-4 py-3 text-gray-700 hover:bg-purple-50 transition-colors group"
                       onClick={() => setIsContactOpen(false)}
                     >
                       <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center group-hover:bg-purple-200 transition-colors">
-                        <FileText size={18} className="text-purple-600" />
+                        <Users size={18} className="text-purple-600" />
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-800">Client Portal</div>
+                        <div className="text-sm text-gray-500">Access your account</div>
+                      </div>
+                    </Link>
+
+                    <a
+                      href="https://forms.cloud.microsoft/r/5Ad9WuMA3G"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-4 px-4 py-3 text-gray-700 hover:bg-orange-50 transition-colors group"
+                      onClick={() => setIsContactOpen(false)}
+                    >
+                      <div className="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center group-hover:bg-orange-200 transition-colors">
+                        <FileText size={18} className="text-orange-600" />
                       </div>
                       <div>
                         <div className="font-medium text-gray-800">Start a Project</div>
@@ -233,6 +250,13 @@ export function Navbar() {
                 onClick={() => setIsOpen(false)}
               >
                 Testimonials
+              </Link>
+              <Link
+                href="/portal"
+                className="text-white hover:text-primary transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                Client Portal
               </Link>
 
               {/* Mobile User Menu */}
@@ -312,6 +336,20 @@ export function Navbar() {
                     <div className="text-xs text-gray-400">support@nextphaseit.org</div>
                   </div>
                 </a>
+
+                <Link
+                  href="/portal"
+                  className="flex items-center gap-3 text-white hover:text-primary transition-colors py-2"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                    <Users size={16} />
+                  </div>
+                  <div>
+                    <div className="font-medium">Client Portal</div>
+                    <div className="text-xs text-gray-400">Access account</div>
+                  </div>
+                </Link>
 
                 <a
                   href="https://forms.cloud.microsoft/r/5Ad9WuMA3G"
