@@ -2,6 +2,7 @@
 
 import type React from "react"
 import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
+import { PKCEHelper } from "@/lib/pkce"
 
 interface User {
   id: string
@@ -74,6 +75,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             localStorage.setItem("nextphase_admin_user", JSON.stringify(userData))
             // Clear the temporary cookie
             document.cookie = "nextphase_temp_user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
+            // Clear PKCE data after successful login
+            PKCEHelper.clearPKCEData()
             setIsLoading(false)
             return true
           } catch (error) {
@@ -180,7 +183,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return false
   }
 
-  // Microsoft OAuth login with proper domain handling
+  // Microsoft OAuth login with PKCE support
   const loginWithMicrosoft = async (): Promise<boolean> => {
     setIsLoading(true)
 
@@ -193,7 +196,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false
       }
 
-      // Get the current origin and ensure consistent domain usage
+      // Generate PKCE parameters
+      const codeVerifier = PKCEHelper.generateCodeVerifier()
+      const codeChallenge = await PKCEHelper.generateCodeChallenge(codeVerifier)
+      const state = Math.random().toString(36).substring(7)
+
+      // Store PKCE data for the callback
+      PKCEHelper.storePKCEData(codeVerifier, state)
+
+      // Get the current origin and normalize it
       const currentOrigin = window.location.origin
 
       // Normalize the domain - use the exact domain that's configured in Azure
@@ -205,19 +216,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const redirectUri = encodeURIComponent(`${normalizedOrigin}/api/auth/microsoft/callback`)
       const scope = encodeURIComponent("openid profile email User.Read")
-      const state = encodeURIComponent(Math.random().toString(36).substring(7))
 
-      console.log("OAuth Config:", {
+      console.log("OAuth Config with PKCE:", {
         clientId,
         redirectUri: `${normalizedOrigin}/api/auth/microsoft/callback`,
         currentOrigin,
         normalizedOrigin,
+        codeChallenge: codeChallenge.substring(0, 10) + "...", // Log partial for security
+        state,
       })
 
-      const authUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=${scope}&response_mode=query&state=${state}&prompt=select_account`
+      // Build OAuth URL with PKCE parameters
+      const authUrl = new URL("https://login.microsoftonline.com/common/oauth2/v2.0/authorize")
+      authUrl.searchParams.set("client_id", clientId)
+      authUrl.searchParams.set("response_type", "code")
+      authUrl.searchParams.set("redirect_uri", `${normalizedOrigin}/api/auth/microsoft/callback`)
+      authUrl.searchParams.set("scope", "openid profile email User.Read")
+      authUrl.searchParams.set("response_mode", "query")
+      authUrl.searchParams.set("state", state)
+      authUrl.searchParams.set("code_challenge", codeChallenge)
+      authUrl.searchParams.set("code_challenge_method", "S256")
+      authUrl.searchParams.set("prompt", "select_account")
 
-      console.log("Redirecting to:", authUrl)
-      window.location.href = authUrl
+      console.log("Redirecting to:", authUrl.toString())
+      window.location.href = authUrl.toString()
       return true
     } catch (error) {
       console.error("Microsoft OAuth error:", error)
@@ -229,6 +251,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     setUser(null)
     localStorage.removeItem("nextphase_admin_user")
+    PKCEHelper.clearPKCEData()
     // Clear any temporary cookies
     if (typeof window !== "undefined") {
       document.cookie = "nextphase_temp_user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"

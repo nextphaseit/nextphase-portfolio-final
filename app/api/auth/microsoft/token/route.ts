@@ -1,19 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-export async function GET(request: NextRequest) {
+export async function POST(request: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url)
-    const code = searchParams.get("code")
-    const state = searchParams.get("state")
-    const error = searchParams.get("error")
+    const { code, codeVerifier, state } = await request.json()
 
-    if (error) {
-      console.error("Microsoft OAuth error:", error)
-      return NextResponse.redirect(new URL("/login?error=oauth_failed", request.url))
-    }
-
-    if (!code) {
-      return NextResponse.redirect(new URL("/login?error=no_code", request.url))
+    if (!code || !codeVerifier) {
+      return NextResponse.json({ error: "Missing required parameters" }, { status: 400 })
     }
 
     // Get the current origin and normalize it
@@ -25,10 +17,6 @@ export async function GET(request: NextRequest) {
       normalizedOrigin = "https://www.nextphaseit.org"
     }
 
-    // For PKCE, we need to get the code_verifier from the client
-    // Since this is a server-side route, we'll need to handle PKCE differently
-    // We'll create a temporary endpoint to handle the PKCE exchange
-
     // Exchange code for access token with PKCE
     const tokenResponse = await fetch("https://login.microsoftonline.com/common/oauth2/v2.0/token", {
       method: "POST",
@@ -37,10 +25,10 @@ export async function GET(request: NextRequest) {
       },
       body: new URLSearchParams({
         client_id: process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID!,
-        client_secret: process.env.AUTH0_CLIENT_SECRET!, // Using existing secret
         code: code,
         grant_type: "authorization_code",
         redirect_uri: `${normalizedOrigin}/api/auth/microsoft/callback`,
+        code_verifier: codeVerifier,
         scope: "openid profile email User.Read",
       }),
     })
@@ -48,7 +36,7 @@ export async function GET(request: NextRequest) {
     if (!tokenResponse.ok) {
       const errorText = await tokenResponse.text()
       console.error("Token exchange failed:", errorText)
-      return NextResponse.redirect(new URL("/login?error=token_failed", request.url))
+      return NextResponse.json({ error: "Token exchange failed" }, { status: 400 })
     }
 
     const tokenData = await tokenResponse.json()
@@ -62,14 +50,14 @@ export async function GET(request: NextRequest) {
 
     if (!profileResponse.ok) {
       console.error("Profile fetch failed:", await profileResponse.text())
-      return NextResponse.redirect(new URL("/login?error=profile_failed", request.url))
+      return NextResponse.json({ error: "Profile fetch failed" }, { status: 400 })
     }
 
     const profile = await profileResponse.json()
 
     // Validate user is from NextPhase IT domain
     if (!profile.mail?.endsWith("@nextphaseit.org") && !profile.userPrincipalName?.endsWith("@nextphaseit.org")) {
-      return NextResponse.redirect(new URL("/login?error=unauthorized_domain", request.url))
+      return NextResponse.json({ error: "Unauthorized domain" }, { status: 403 })
     }
 
     // Determine role based on email
@@ -90,20 +78,9 @@ export async function GET(request: NextRequest) {
       authMethod: "exchange",
     }
 
-    // Create a response that will set the user data and redirect
-    const response = NextResponse.redirect(new URL("/dashboard", request.url))
-
-    // Set a temporary cookie with user data (in production, use proper session management)
-    response.cookies.set("nextphase_temp_user", JSON.stringify(userData), {
-      httpOnly: false, // Allow client-side access for this demo
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60, // 1 minute - just for the redirect
-    })
-
-    return response
+    return NextResponse.json({ user: userData })
   } catch (error) {
-    console.error("Microsoft OAuth callback error:", error)
-    return NextResponse.redirect(new URL("/login?error=callback_failed", request.url))
+    console.error("Microsoft OAuth token exchange error:", error)
+    return NextResponse.json({ error: "Authentication failed" }, { status: 500 })
   }
 }
