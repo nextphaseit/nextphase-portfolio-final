@@ -21,6 +21,7 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { createSupportTicket } from "@/app/actions/ticket"
 
 interface TicketProps {
   id: string
@@ -134,6 +135,11 @@ function ProjectCard({ project }: { project: ProjectProps }) {
 function ClientPortalContent() {
   const [activeTab, setActiveTab] = useState<"overview" | "tickets" | "projects" | "resources">("overview")
   const [showNewTicket, setShowNewTicket] = useState(false)
+
+  const [isSubmittingTicket, setIsSubmittingTicket] = useState(false)
+  const [ticketResult, setTicketResult] = useState<{ success: boolean; message: string; ticketNumber?: string } | null>(
+    null,
+  )
 
   // Sample data - in production, this would come from your backend
   const tickets: TicketProps[] = [
@@ -421,37 +427,130 @@ function ClientPortalContent() {
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
             <div className="bg-card rounded-lg p-6 w-full max-w-md border border-primary/20">
               <h3 className="text-xl font-bold mb-4">Submit New Ticket</h3>
-              <form className="space-y-4">
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault()
+                  setIsSubmittingTicket(true)
+                  setTicketResult(null)
+
+                  const formData = new FormData(e.currentTarget)
+                  const result = await createSupportTicket({
+                    subject: formData.get("subject") as string,
+                    priority: formData.get("priority") as "low" | "medium" | "high" | "urgent",
+                    description: formData.get("description") as string,
+                    clientName: formData.get("clientName") as string,
+                    clientEmail: formData.get("clientEmail") as string,
+                    source: "portal",
+                  })
+
+                  setTicketResult(result)
+                  setIsSubmittingTicket(false)
+
+                  if (result.success) {
+                    // Reset form
+                    e.currentTarget.reset()
+                    // Close modal after 3 seconds
+                    setTimeout(() => {
+                      setShowNewTicket(false)
+                      setTicketResult(null)
+                    }, 3000)
+                  }
+                }}
+                className="space-y-4"
+              >
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Your Name</label>
+                    <input
+                      name="clientName"
+                      type="text"
+                      required
+                      className="w-full bg-black border border-primary/20 rounded-lg p-3 text-white placeholder-gray-400 focus:outline-none focus:border-primary"
+                      placeholder="Full name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-2">Email</label>
+                    <input
+                      name="clientEmail"
+                      type="email"
+                      required
+                      className="w-full bg-black border border-primary/20 rounded-lg p-3 text-white placeholder-gray-400 focus:outline-none focus:border-primary"
+                      placeholder="your@email.com"
+                    />
+                  </div>
+                </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Subject</label>
+                  <label className="block text-sm font-medium mb-2">
+                    Subject <span className="text-red-500">*</span>
+                  </label>
                   <input
+                    name="subject"
                     type="text"
+                    required
                     className="w-full bg-black border border-primary/20 rounded-lg p-3 text-white placeholder-gray-400 focus:outline-none focus:border-primary"
                     placeholder="Brief description of the issue"
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-2">Priority</label>
-                  <select className="w-full bg-black border border-primary/20 rounded-lg p-3 text-white focus:outline-none focus:border-primary">
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                    <option value="urgent">Urgent</option>
+                  <select
+                    name="priority"
+                    className="w-full bg-black border border-primary/20 rounded-lg p-3 text-white focus:outline-none focus:border-primary"
+                  >
+                    <option value="low">🟢 Low - General question</option>
+                    <option value="medium">🟡 Medium - Standard issue</option>
+                    <option value="high">🟠 High - Important issue</option>
+                    <option value="urgent">🔴 Urgent - Business critical</option>
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2">Description</label>
+                  <label className="block text-sm font-medium mb-2">
+                    Description <span className="text-red-500">*</span>
+                  </label>
                   <textarea
+                    name="description"
                     rows={4}
+                    required
                     className="w-full bg-black border border-primary/20 rounded-lg p-3 text-white placeholder-gray-400 focus:outline-none focus:border-primary resize-vertical"
                     placeholder="Detailed description of the issue..."
                   />
                 </div>
+
+                {/* Result Message */}
+                {ticketResult && (
+                  <div
+                    className={`p-4 rounded-lg border ${
+                      ticketResult.success
+                        ? "bg-green-500/10 border-green-500/20 text-green-400"
+                        : "bg-red-500/10 border-red-500/20 text-red-400"
+                    }`}
+                  >
+                    <p className="text-sm font-medium">{ticketResult.message}</p>
+                    {ticketResult.success && ticketResult.ticketNumber && (
+                      <p className="text-xs mt-1 opacity-80">Ticket #{ticketResult.ticketNumber}</p>
+                    )}
+                  </div>
+                )}
+
                 <div className="flex gap-3 pt-4">
-                  <Button type="submit" className="flex-1 bg-primary hover:bg-primary/90">
-                    Submit Ticket
+                  <Button type="submit" disabled={isSubmittingTicket} className="flex-1 bg-primary hover:bg-primary/90">
+                    {isSubmittingTicket ? (
+                      <div className="flex items-center gap-2">
+                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Creating Ticket...
+                      </div>
+                    ) : (
+                      "Submit Ticket"
+                    )}
                   </Button>
-                  <Button type="button" variant="outline" onClick={() => setShowNewTicket(false)} className="flex-1">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setShowNewTicket(false)}
+                    className="flex-1"
+                    disabled={isSubmittingTicket}
+                  >
                     Cancel
                   </Button>
                 </div>

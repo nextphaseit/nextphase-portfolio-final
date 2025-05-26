@@ -118,9 +118,9 @@ export default function Home() {
                         <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3">
                           <ExternalLink className="text-primary" size={24} />
                         </div>
-                        <h3 className="font-semibold mb-2">Client Portal</h3>
-                        <Link href="/login" className="text-primary text-sm hover:underline">
-                          Login to Portal
+                        <h3 className="font-semibold mb-2">NextPhase IT Help Desk</h3>
+                        <Link href="/portal" className="text-primary text-sm hover:underline">
+                          Access Help Desk
                         </Link>
                       </div>
                     </div>
