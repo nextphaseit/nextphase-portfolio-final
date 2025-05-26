@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
         client_secret: process.env.AUTH0_CLIENT_SECRET!, // Using existing secret
         code: code,
         grant_type: "authorization_code",
-        redirect_uri: `${request.nextUrl.origin}/api/auth/microsoft/callback`,
+        redirect_uri: `${new URL(request.url).origin}/api/auth/microsoft/callback`,
         scope: "openid profile email User.Read",
       }),
     })
