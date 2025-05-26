@@ -1,6 +1,6 @@
 "use server"
 
-import nodemailer from "nodemailer"
+import { Resend } from "resend"
 
 interface TicketData {
   subject: string
@@ -11,24 +11,14 @@ interface TicketData {
   source: "portal" | "chatbot"
 }
 
+// Initialize Resend
+const resend = new Resend(process.env.RESEND_API_KEY)
+
 // Generate ticket number
 function generateTicketNumber(): string {
   const timestamp = Date.now().toString().slice(-6)
   const random = Math.random().toString(36).substring(2, 5).toUpperCase()
   return `TK-${timestamp}${random}`
-}
-
-// Create email transporter
-function createTransporter() {
-  return nodemailer.createTransport({
-    host: "smtp-mail.outlook.com",
-    port: 587,
-    secure: false,
-    auth: {
-      user: process.env.EXCHANGE_EMAIL,
-      pass: process.env.EXCHANGE_PASSWORD,
-    },
-  })
 }
 
 // Generate email templates
@@ -207,24 +197,21 @@ export async function createSupportTicket(ticketData: TicketData) {
     const ticketNumber = generateTicketNumber()
     const ticketWithNumber = { ...ticketData, ticketNumber }
 
-    // Create email transporter
-    const transporter = createTransporter()
-
     // Send confirmation email to client (if email provided)
     if (ticketData.clientEmail) {
-      await transporter.sendMail({
-        from: `"NextPhase IT Support" <${process.env.EXCHANGE_EMAIL}>`,
-        to: ticketData.clientEmail,
+      await resend.emails.send({
+        from: "NextPhase IT Support <support@nextphaseit.org>",
+        to: [ticketData.clientEmail],
         subject: `Support Ticket Created - #${ticketNumber}`,
         html: generateClientConfirmationEmail(ticketWithNumber),
         replyTo: "support@nextphaseit.org",
       })
     }
 
-    // Send internal notification
-    await transporter.sendMail({
-      from: `"NextPhase IT System" <${process.env.EXCHANGE_EMAIL}>`,
-      to: "support@nextphaseit.org",
+    // Send internal notification to support team
+    await resend.emails.send({
+      from: "NextPhase IT System <noreply@nextphaseit.org>",
+      to: ["support@nextphaseit.org"],
       subject: `New Support Ticket #${ticketNumber} - ${ticketData.subject} [${ticketData.priority.toUpperCase()}]`,
       html: generateInternalNotificationEmail(ticketWithNumber),
       replyTo: ticketData.clientEmail || "support@nextphaseit.org",
