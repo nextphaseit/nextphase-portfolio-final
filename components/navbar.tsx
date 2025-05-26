@@ -4,7 +4,6 @@ import Link from "next/link"
 import { useState } from "react"
 import { Menu, X, Phone, Mail, FileText, ChevronDown, User, LogOut, Shield } from "lucide-react"
 import { Button } from "./ui/button"
-import { useAuth } from "@/lib/auth"
 import Image from "next/image"
 
 export function Navbar() {
@@ -12,15 +11,14 @@ export function Navbar() {
   const [isContactOpen, setIsContactOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
 
-  // Try to get auth context, but don't fail if not available
-  let auth = { user: null, isLoading: false, logout: () => {}, isAdmin: false }
-  try {
-    auth = useAuth()
-  } catch {
-    console.warn("useAuth hook unavailable, likely running in a non-client component")
-  }
+  // Simple auth state without hooks to avoid errors
+  const [user, setUser] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
 
-  const { user, isLoading, logout, isAdmin } = auth
+  const logout = () => {
+    setUser(null)
+  }
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/60">
