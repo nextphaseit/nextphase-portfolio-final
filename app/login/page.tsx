@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Eye, EyeOff, Mail, Lock, ArrowLeft, Shield } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { AuthProvider, useAuth } from "@/lib/auth"
+import { AuthProvider, useAuth } from "@/providers/auth-provider"
 
 function LoginContent() {
   const [showPassword, setShowPassword] = useState(false)
