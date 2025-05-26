@@ -20,7 +20,7 @@ function generateTicketNumber(): string {
 
 // Create email transporter
 function createTransporter() {
-  return nodemailer.createTransporter({
+  return nodemailer.createTransport({
     host: "smtp-mail.outlook.com",
     port: 587,
     secure: false,
@@ -162,8 +162,12 @@ function generateInternalNotificationEmail(ticketData: TicketData & { ticketNumb
               <td style="padding: 8px 0; color: #111827;">${ticketData.subject}</td>
             </tr>
             <tr>
-              <td style="padding: 8px 0; font-weight: bold; color: #374151;">Client:</td>
-              <td style="padding: 8px 0; color: #111827;">${ticketData.clientName || "Anonymous"} ${ticketData.clientEmail ? `(${ticketData.clientEmail})` : ""}</td>
+              <td style="padding: 8px 0; font-weight: bold; color: #374151;">Client Name:</td>
+              <td style="padding: 8px 0; color: #111827;">${ticketData.clientName || "Anonymous"}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px 0; font-weight: bold; color: #374151;">Client Email:</td>
+              <td style="padding: 8px 0; color: #111827;"><a href="mailto:${ticketData.clientEmail || "support@nextphaseit.org"}" style="color: #1E5AA8; text-decoration: none;">${ticketData.clientEmail || "Not provided"}</a></td>
             </tr>
             <tr>
               <td style="padding: 8px 0; font-weight: bold; color: #374151;">Source:</td>
@@ -176,11 +180,11 @@ function generateInternalNotificationEmail(ticketData: TicketData & { ticketNumb
           </table>
 
           <div style="text-align: center; margin: 20px 0;">
-            <a href="https://nextphaseit.sharepoint.com/sites/SupportTickets" style="background-color: #1E5AA8; color: white; padding: 10px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-right: 10px;">
-              View in SharePoint
+            <a href="mailto:${ticketData.clientEmail || "support@nextphaseit.org"}?subject=Re: Support Ticket #${ticketData.ticketNumber} - ${ticketData.subject}&body=Hello ${ticketData.clientName || "there"},%0D%0A%0D%0AThank you for contacting NextPhase IT support. We have received your ticket and are working on it.%0D%0A%0D%0ATicket #: ${ticketData.ticketNumber}%0D%0ASubject: ${ticketData.subject}%0D%0A%0D%0ABest regards,%0D%0ANextPhase IT Support Team" style="background-color: #059669; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-right: 10px; display: inline-block;">
+              📧 Reply to Client
             </a>
-            <a href="mailto:${ticketData.clientEmail || "support@nextphaseit.org"}" style="background-color: #059669; color: white; padding: 10px 25px; text-decoration: none; border-radius: 5px; font-weight: bold;">
-              Reply to Client
+            <a href="https://nextphaseit.sharepoint.com/sites/SupportTickets" style="background-color: #1E5AA8; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+              📋 View in SharePoint
             </a>
           </div>
         </div>
@@ -221,8 +225,7 @@ export async function createSupportTicket(ticketData: TicketData) {
     await transporter.sendMail({
       from: `"NextPhase IT System" <${process.env.EXCHANGE_EMAIL}>`,
       to: "support@nextphaseit.org",
-      cc: "adrian.knight@nextphaseit.org",
-      subject: `🎫 New Support Ticket #${ticketNumber} - ${ticketData.priority.toUpperCase()} Priority`,
+      subject: `New Support Ticket #${ticketNumber} - ${ticketData.subject} [${ticketData.priority.toUpperCase()}]`,
       html: generateInternalNotificationEmail(ticketWithNumber),
       replyTo: ticketData.clientEmail || "support@nextphaseit.org",
     })
