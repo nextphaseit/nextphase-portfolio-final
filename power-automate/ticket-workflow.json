@@ -1,0 +1,163 @@
+{
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "$connections": {
+        "defaultValue": {},
+        "type": "Object"
+      }
+    },
+    "triggers": {
+      "When_an_HTTP_request_is_received": {
+        "type": "Request",
+        "kind": "Http",
+        "inputs": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "ticketNumber": {
+                "type": "string"
+              },
+              "subject": {
+                "type": "string"
+              },
+              "priority": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "clientName": {
+                "type": "string"
+              },
+              "clientEmail": {
+                "type": "string"
+              },
+              "source": {
+                "type": "string"
+              },
+              "created": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "actions": {
+      "Create_item_in_SharePoint": {
+        "runAfter": {},
+        "type": "ApiConnection",
+        "inputs": {
+          "host": {
+            "connection": {
+              "name": "@parameters('$connections')['sharepointonline']['connectionId']"
+            }
+          },
+          "method": "post",
+          "path": "/datasets/@{encodeURIComponent('https://nextphaseit.sharepoint.com/sites/SupportTickets')}/tables/@{encodeURIComponent('Support Tickets')}/items",
+          "body": {
+            "Title": "@triggerBody()?['subject']",
+            "TicketNumber": "@triggerBody()?['ticketNumber']",
+            "Priority": "@triggerBody()?['priority']",
+            "Status": "Open",
+            "Description": "@triggerBody()?['description']",
+            "ClientName": "@triggerBody()?['clientName']",
+            "ClientEmail": "@triggerBody()?['clientEmail']",
+            "Source": "@triggerBody()?['source']",
+            "Created": "@triggerBody()?['created']",
+            "LastUpdated": "@utcNow()",
+            "AssignedTo": ""
+          }
+        }
+      },
+      "Send_Teams_notification": {
+        "runAfter": {
+          "Create_item_in_SharePoint": ["Succeeded"]
+        },
+        "type": "ApiConnection",
+        "inputs": {
+          "host": {
+            "connection": {
+              "name": "@parameters('$connections')['teams']['connectionId']"
+            }
+          },
+          "method": "post",
+          "path": "/v1.0/teams/@{encodeURIComponent('your-team-id')}/channels/@{encodeURIComponent('support-tickets')}/messages",
+          "body": {
+            "body": {
+              "contentType": "html",
+              "content": "<h3>🎫 New Support Ticket</h3><p><strong>Ticket #:</strong> @{triggerBody()?['ticketNumber']}</p><p><strong>Subject:</strong> @{triggerBody()?['subject']}</p><p><strong>Priority:</strong> @{triggerBody()?['priority']}</p><p><strong>Client:</strong> @{triggerBody()?['clientName']} (@{triggerBody()?['clientEmail']})</p><p><strong>Source:</strong> @{triggerBody()?['source']}</p><p><strong>Description:</strong> @{triggerBody()?['description']}</p><p><a href=\"https://nextphaseit.sharepoint.com/sites/SupportTickets\">View in SharePoint</a> | <a href=\"https://nextphaseit.org/admin\">Admin Portal</a></p>"
+            }
+          }
+        }
+      },
+      "Send_email_to_support_team": {
+        "runAfter": {
+          "Send_Teams_notification": ["Succeeded"]
+        },
+        "type": "ApiConnection",
+        "inputs": {
+          "host": {
+            "connection": {
+              "name": "@parameters('$connections')['office365']['connectionId']"
+            }
+          },
+          "method": "post",
+          "path": "/v2/Mail",
+          "body": {
+            "To": "support@nextphaseit.org",
+            "Subject": "New Support Ticket #@{triggerBody()?['ticketNumber']} - @{triggerBody()?['subject']} [@{triggerBody()?['priority']}]",
+            "Body": "<html><body><h3>New Support Ticket Received</h3><table border='1' style='border-collapse: collapse; width: 100%;'><tr><td><strong>Ticket Number</strong></td><td>@{triggerBody()?['ticketNumber']}</td></tr><tr><td><strong>Subject</strong></td><td>@{triggerBody()?['subject']}</td></tr><tr><td><strong>Priority</strong></td><td>@{triggerBody()?['priority']}</td></tr><tr><td><strong>Client Name</strong></td><td>@{triggerBody()?['clientName']}</td></tr><tr><td><strong>Client Email</strong></td><td><a href='mailto:@{triggerBody()?['clientEmail']}'>@{triggerBody()?['clientEmail']}</a></td></tr><tr><td><strong>Source</strong></td><td>@{triggerBody()?['source']}</td></tr><tr><td><strong>Created</strong></td><td>@{triggerBody()?['created']}</td></tr></table><h4>Description:</h4><p>@{triggerBody()?['description']}</p><hr><p><a href='https://nextphaseit.sharepoint.com/sites/SupportTickets'>View in SharePoint</a> | <a href='https://nextphaseit.org/admin'>Admin Portal</a> | <a href='mailto:@{triggerBody()?['clientEmail']}?subject=Re: Support Ticket #@{triggerBody()?['ticketNumber']} - @{triggerBody()?['subject']}'>Reply to Client</a></p></body></html>",
+            "Importance": "@if(equals(triggerBody()?['priority'], 'urgent'), 'High', if(equals(triggerBody()?['priority'], 'high'), 'High', 'Normal'))"
+          }
+        }
+      },
+      "Condition_for_urgent_tickets": {
+        "runAfter": {
+          "Send_email_to_support_team": ["Succeeded"]
+        },
+        "type": "If",
+        "expression": {
+          "equals": ["@triggerBody()?['priority']", "urgent"]
+        },
+        "actions": {
+          "Send_SMS_for_urgent": {
+            "type": "ApiConnection",
+            "inputs": {
+              "host": {
+                "connection": {
+                  "name": "@parameters('$connections')['twilio']['connectionId']"
+                }
+              },
+              "method": "post",
+              "path": "/Messages.json",
+              "body": {
+                "body": "🚨 URGENT Support Ticket #@{triggerBody()?['ticketNumber']}: @{triggerBody()?['subject']} from @{triggerBody()?['clientName']}. Check admin portal immediately.",
+                "from": "+19843109533",
+                "to": "+1234567890"
+              }
+            }
+          }
+        }
+      },
+      "Response": {
+        "runAfter": {
+          "Condition_for_urgent_tickets": ["Succeeded", "Failed"]
+        },
+        "type": "Response",
+        "kind": "Http",
+        "inputs": {
+          "statusCode": 200,
+          "body": {
+            "success": true,
+            "message": "Ticket processed successfully",
+            "ticketNumber": "@triggerBody()?['ticketNumber']",
+            "sharepointItemId": "@body('Create_item_in_SharePoint')?['ID']"
+          }
+        }
+      }
+    }
+  }
+}

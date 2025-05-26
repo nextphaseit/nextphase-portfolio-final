@@ -170,8 +170,8 @@ function generateInternalNotificationEmail(ticketData: TicketData & { ticketNumb
             <a href="mailto:${ticketData.clientEmail || "support@nextphaseit.org"}?subject=Re: Support Ticket #${ticketData.ticketNumber} - ${ticketData.subject}&body=Hello ${ticketData.clientName || "there"},%0D%0A%0D%0AThank you for contacting NextPhase IT support. We have received your ticket and are working on it.%0D%0A%0D%0ATicket #: ${ticketData.ticketNumber}%0D%0ASubject: ${ticketData.subject}%0D%0A%0D%0ABest regards,%0D%0ANextPhase IT Support Team" style="background-color: #059669; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-right: 10px; display: inline-block;">
               📧 Reply to Client
             </a>
-            <a href="https://nextphaseit.sharepoint.com/sites/SupportTickets" style="background-color: #1E5AA8; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
-              📋 View in SharePoint
+            <a href="https://nextphaseit.org/admin" style="background-color: #1E5AA8; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+              📋 View in Admin Portal
             </a>
           </div>
         </div>
@@ -186,6 +186,44 @@ function generateInternalNotificationEmail(ticketData: TicketData & { ticketNumb
     </body>
     </html>
   `
+}
+
+// Trigger Power Automate workflow
+async function triggerPowerAutomate(ticketData: TicketData & { ticketNumber: string }) {
+  try {
+    // Replace with your actual Power Automate webhook URL
+    const webhookUrl = process.env.POWER_AUTOMATE_WEBHOOK_URL
+
+    if (!webhookUrl) {
+      console.log("Power Automate webhook URL not configured")
+      return
+    }
+
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        ticketNumber: ticketData.ticketNumber,
+        subject: ticketData.subject,
+        priority: ticketData.priority,
+        description: ticketData.description,
+        clientName: ticketData.clientName || "Anonymous",
+        clientEmail: ticketData.clientEmail || "support@nextphaseit.org",
+        source: ticketData.source,
+        created: new Date().toISOString(),
+      }),
+    })
+
+    if (response.ok) {
+      console.log("Power Automate workflow triggered successfully")
+    } else {
+      console.error("Failed to trigger Power Automate workflow:", response.statusText)
+    }
+  } catch (error) {
+    console.error("Error triggering Power Automate workflow:", error)
+  }
 }
 
 export async function createSupportTicket(ticketData: TicketData) {
@@ -238,6 +276,9 @@ export async function createSupportTicket(ticketData: TicketData) {
       console.error("Failed to send internal notification:", emailError)
       // Still return success if ticket was created, even if email failed
     }
+
+    // Trigger Power Automate workflow for SharePoint integration
+    await triggerPowerAutomate(ticketWithNumber)
 
     // Log ticket creation
     console.log("Support ticket created:", {
