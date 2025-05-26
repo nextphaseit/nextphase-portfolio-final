@@ -1,40 +1,53 @@
 "use client"
 
-import type React from "react"
-
-import { useState } from "react"
+import { useUser } from "@auth0/nextjs-auth0/client"
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Eye, EyeOff, Mail, Lock, ArrowLeft, Chrome, Github, ComputerIcon as Microsoft } from "lucide-react"
+import { ArrowLeft, Chrome, Github, ComputerIcon as Microsoft, Loader2 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 
 export default function LoginPage() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    rememberMe: false,
-  })
+  const { user, error, isLoading } = useUser()
+  const router = useRouter()
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+  useEffect(() => {
+    if (user) {
+      // Redirect to dashboard if user is already logged in
+      router.push("/dashboard")
+    }
+  }, [user, router])
 
-    // Simulate login process
-    await new Promise((resolve) => setTimeout(resolve, 2000))
-
-    console.log("Login attempt:", formData)
-    setIsLoading(false)
-
-    // Here you would typically handle the actual authentication
-    alert("Login functionality would be implemented here")
+  const handleAuth0Login = () => {
+    window.location.href = "/api/auth/login"
   }
 
-  const handleSocialLogin = (provider: string) => {
-    console.log(`Login with ${provider}`)
-    // Here you would implement social authentication
-    alert(`${provider} login would be implemented here`)
+  const handleSocialLogin = (connection: string) => {
+    window.location.href = `/api/auth/login?connection=${connection}`
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+          <p className="text-gray-400">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center max-w-md">
+          <div className="text-red-500 mb-4">Authentication Error</div>
+          <p className="text-gray-400 mb-6">{error.message}</p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -61,39 +74,16 @@ export default function LoginPage() {
               className="h-16 w-auto mx-auto mb-4"
             />
             <h1 className="text-2xl font-bold text-white mb-2">Welcome Back</h1>
-            <p className="text-gray-400">Sign in to your NextPhase IT account</p>
+            <p className="text-gray-400">Sign in to your NextPhase IT client portal</p>
           </div>
 
-          {/* Social Login Options */}
-          <div className="space-y-3 mb-6">
+          {/* Auth0 Universal Login */}
+          <div className="space-y-4 mb-6">
             <Button
-              type="button"
-              variant="outline"
-              className="w-full bg-white/5 border-white/20 hover:bg-white/10 text-white"
-              onClick={() => handleSocialLogin("Microsoft")}
+              onClick={handleAuth0Login}
+              className="w-full bg-primary hover:bg-primary/90 text-white py-3 text-base font-medium"
             >
-              <Microsoft size={20} className="mr-3" />
-              Continue with Microsoft
-            </Button>
-
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full bg-white/5 border-white/20 hover:bg-white/10 text-white"
-              onClick={() => handleSocialLogin("Google")}
-            >
-              <Chrome size={20} className="mr-3" />
-              Continue with Google
-            </Button>
-
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full bg-white/5 border-white/20 hover:bg-white/10 text-white"
-              onClick={() => handleSocialLogin("GitHub")}
-            >
-              <Github size={20} className="mr-3" />
-              Continue with GitHub
+              Sign In to Client Portal
             </Button>
           </div>
 
@@ -103,102 +93,51 @@ export default function LoginPage() {
               <div className="w-full border-t border-gray-600"></div>
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-black text-gray-400">Or continue with email</span>
+              <span className="px-4 bg-black text-gray-400">Or continue with</span>
             </div>
           </div>
 
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Field */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-                Email Address
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="email"
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full pl-10 pr-4 py-3 bg-card border border-primary/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                  placeholder="Enter your email"
-                />
-              </div>
-            </div>
-
-            {/* Password Field */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  required
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full pl-10 pr-12 py-3 bg-card border border-primary/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                  placeholder="Enter your password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-primary transition-colors"
-                >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
-                </button>
-              </div>
-            </div>
-
-            {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  type="checkbox"
-                  checked={formData.rememberMe}
-                  onChange={(e) => setFormData({ ...formData, rememberMe: e.target.checked })}
-                  className="h-4 w-4 text-primary bg-card border-primary/20 rounded focus:ring-primary focus:ring-2"
-                />
-                <label htmlFor="remember-me" className="ml-2 text-sm text-gray-300">
-                  Remember me
-                </label>
-              </div>
-              <Link href="/forgot-password" className="text-sm text-primary hover:text-primary/80 transition-colors">
-                Forgot password?
-              </Link>
-            </div>
-
-            {/* Submit Button */}
+          {/* Social Login Options */}
+          <div className="space-y-3 mb-6">
             <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-primary hover:bg-primary/90 text-white py-3 text-base font-medium"
+              type="button"
+              variant="outline"
+              className="w-full bg-white/5 border-white/20 hover:bg-white/10 text-white"
+              onClick={() => handleSocialLogin("windowslive")}
             >
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Signing in...
-                </div>
-              ) : (
-                "Sign In"
-              )}
+              <Microsoft size={20} className="mr-3" />
+              Continue with Microsoft
             </Button>
-          </form>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full bg-white/5 border-white/20 hover:bg-white/10 text-white"
+              onClick={() => handleSocialLogin("google-oauth2")}
+            >
+              <Chrome size={20} className="mr-3" />
+              Continue with Google
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="w-full bg-white/5 border-white/20 hover:bg-white/10 text-white"
+              onClick={() => handleSocialLogin("github")}
+            >
+              <Github size={20} className="mr-3" />
+              Continue with GitHub
+            </Button>
+          </div>
 
           {/* Sign Up Link */}
           <div className="mt-6 text-center">
             <p className="text-gray-400">
               Don't have an account?{" "}
-              <Link href="/signup" className="text-primary hover:text-primary/80 font-medium transition-colors">
+              <Link
+                href="/api/auth/login?screen_hint=signup"
+                className="text-primary hover:text-primary/80 font-medium transition-colors"
+              >
                 Sign up here
               </Link>
             </p>

@@ -2,13 +2,16 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { Menu, X, Phone, Mail, FileText, ChevronDown } from "lucide-react"
+import { useUser } from "@auth0/nextjs-auth0/client"
+import { Menu, X, Phone, Mail, FileText, ChevronDown, User, LogOut } from "lucide-react"
 import { Button } from "./ui/button"
 import Image from "next/image"
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [isContactOpen, setIsContactOpen] = useState(false)
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const { user, isLoading } = useUser()
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/60">
@@ -44,9 +47,59 @@ export function Navbar() {
             <Link href="#testimonials" className="text-white hover:text-primary transition-colors">
               Testimonials
             </Link>
-            <Link href="/login" className="text-white hover:text-primary transition-colors">
-              Login
-            </Link>
+
+            {/* User Menu or Login */}
+            {user ? (
+              <div className="relative">
+                <Button
+                  onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                  className="flex items-center gap-2 bg-primary hover:bg-primary/90"
+                >
+                  <Image
+                    src={user.picture || "/placeholder.svg?height=24&width=24"}
+                    alt="Profile"
+                    width={24}
+                    height={24}
+                    className="rounded-full"
+                  />
+                  {user.given_name || user.name}
+                  <ChevronDown size={16} />
+                </Button>
+
+                {isUserMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-3 z-50">
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <h3 className="font-semibold text-gray-800">{user.name}</h3>
+                      <p className="text-sm text-gray-500">{user.email}</p>
+                    </div>
+
+                    <div className="py-2">
+                      <Link
+                        href="/dashboard"
+                        className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-blue-50 transition-colors"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        <User size={18} className="text-blue-600" />
+                        <span>Dashboard</span>
+                      </Link>
+
+                      <a
+                        href="/api/auth/logout"
+                        className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-red-50 transition-colors"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        <LogOut size={18} className="text-red-600" />
+                        <span>Logout</span>
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link href="/login" className="text-white hover:text-primary transition-colors">
+                {isLoading ? "Loading..." : "Login"}
+              </Link>
+            )}
 
             {/* Contact Dropdown */}
             <div className="relative">
@@ -173,13 +226,47 @@ export function Navbar() {
               >
                 Testimonials
               </Link>
-              <Link
-                href="/login"
-                className="text-white hover:text-primary transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                Login
-              </Link>
+
+              {/* Mobile User Menu */}
+              {user ? (
+                <div className="space-y-3 pt-4 border-t border-gray-700">
+                  <div className="flex items-center gap-3 text-white py-2">
+                    <Image
+                      src={user.picture || "/placeholder.svg?height=32&width=32"}
+                      alt="Profile"
+                      width={32}
+                      height={32}
+                      className="rounded-full"
+                    />
+                    <div>
+                      <div className="font-medium">{user.name}</div>
+                      <div className="text-xs text-gray-400">{user.email}</div>
+                    </div>
+                  </div>
+                  <Link
+                    href="/dashboard"
+                    className="text-white hover:text-primary transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Dashboard
+                  </Link>
+                  <a
+                    href="/api/auth/logout"
+                    className="text-white hover:text-primary transition-colors"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Logout
+                  </a>
+                </div>
+              ) : (
+                <Link
+                  href="/login"
+                  className="text-white hover:text-primary transition-colors"
+                  onClick={() => setIsOpen(false)}
+                >
+                  Login
+                </Link>
+              )}
 
               {/* Mobile Contact Options */}
               <div className="space-y-3 pt-4 border-t border-gray-700">
