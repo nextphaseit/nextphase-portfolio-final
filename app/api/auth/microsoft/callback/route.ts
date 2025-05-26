@@ -15,6 +15,15 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(new URL("/login?error=no_code", request.url))
     }
 
+    // Get the current origin and normalize it
+    const currentOrigin = new URL(request.url).origin
+    let normalizedOrigin = currentOrigin
+
+    // Ensure we use the same domain format as configured in Azure
+    if (currentOrigin.includes("nextphaseit.org")) {
+      normalizedOrigin = "https://www.nextphaseit.org"
+    }
+
     // Exchange code for access token
     const tokenResponse = await fetch("https://login.microsoftonline.com/common/oauth2/v2.0/token", {
       method: "POST",
@@ -26,13 +35,14 @@ export async function GET(request: NextRequest) {
         client_secret: process.env.AUTH0_CLIENT_SECRET!, // Using existing secret
         code: code,
         grant_type: "authorization_code",
-        redirect_uri: `${new URL(request.url).origin}/api/auth/microsoft/callback`,
+        redirect_uri: `${normalizedOrigin}/api/auth/microsoft/callback`,
         scope: "openid profile email User.Read",
       }),
     })
 
     if (!tokenResponse.ok) {
-      console.error("Token exchange failed:", await tokenResponse.text())
+      const errorText = await tokenResponse.text()
+      console.error("Token exchange failed:", errorText)
       return NextResponse.redirect(new URL("/login?error=token_failed", request.url))
     }
 

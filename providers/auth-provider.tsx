@@ -180,7 +180,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return false
   }
 
-  // Microsoft OAuth login
+  // Microsoft OAuth login with proper domain handling
   const loginWithMicrosoft = async (): Promise<boolean> => {
     setIsLoading(true)
 
@@ -193,20 +193,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return false
       }
 
-      // Use the current origin for redirect URI
+      // Get the current origin and ensure consistent domain usage
       const currentOrigin = window.location.origin
-      const redirectUri = encodeURIComponent(`${currentOrigin}/api/auth/microsoft/callback`)
+
+      // Normalize the domain - use the exact domain that's configured in Azure
+      let normalizedOrigin = currentOrigin
+      if (currentOrigin.includes("nextphaseit.org")) {
+        // Use the www version to match Azure configuration
+        normalizedOrigin = "https://www.nextphaseit.org"
+      }
+
+      const redirectUri = encodeURIComponent(`${normalizedOrigin}/api/auth/microsoft/callback`)
       const scope = encodeURIComponent("openid profile email User.Read")
       const state = encodeURIComponent(Math.random().toString(36).substring(7))
 
       console.log("OAuth Config:", {
         clientId,
-        redirectUri: `${currentOrigin}/api/auth/microsoft/callback`,
-        origin: currentOrigin,
+        redirectUri: `${normalizedOrigin}/api/auth/microsoft/callback`,
+        currentOrigin,
+        normalizedOrigin,
       })
 
       const authUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirectUri}&scope=${scope}&response_mode=query&state=${state}&prompt=select_account`
 
+      console.log("Redirecting to:", authUrl)
       window.location.href = authUrl
       return true
     } catch (error) {
@@ -214,26 +224,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setIsLoading(false)
       return false
     }
-  }
-
-  // Temporary direct Microsoft login for testing
-  const loginWithMicrosoftDirect = async (): Promise<boolean> => {
-    // For testing purposes, simulate Microsoft login
-    const testUser = {
-      id: "microsoft-test",
-      name: "Adrian Knight",
-      email: "adrian.knight@nextphaseit.org",
-      given_name: "Adrian",
-      role: "admin" as const,
-      department: "IT Operations",
-      picture: "/placeholder.svg?height=40&width=40&text=AK",
-      authMethod: "exchange" as const,
-    }
-
-    setUser(testUser)
-    localStorage.setItem("nextphase_admin_user", JSON.stringify(testUser))
-    setIsLoading(false)
-    return true
   }
 
   const logout = () => {
