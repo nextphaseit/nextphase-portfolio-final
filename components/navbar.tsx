@@ -44,6 +44,9 @@ export function Navbar() {
             <Link href="#testimonials" className="text-white hover:text-primary transition-colors">
               Testimonials
             </Link>
+            <Link href="/login" className="text-white hover:text-primary transition-colors">
+              Login
+            </Link>
 
             {/* Contact Dropdown */}
             <div className="relative">
@@ -169,6 +172,13 @@ export function Navbar() {
                 onClick={() => setIsOpen(false)}
               >
                 Testimonials
+              </Link>
+              <Link
+                href="/login"
+                className="text-white hover:text-primary transition-colors"
+                onClick={() => setIsOpen(false)}
+              >
+                Login
               </Link>
 
               {/* Mobile Contact Options */}

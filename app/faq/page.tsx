@@ -273,8 +273,9 @@ export default function FAQPage() {
                     <ExternalLink className="text-primary" size={24} />
                   </div>
                   <h3 className="font-semibold mb-2">Client Portal</h3>
-                  <p className="text-gray-400 text-sm">login.nextphaseit.org</p>
-                  <p className="text-xs text-gray-500 mt-1">(Coming Soon)</p>
+                  <Link href="/login" className="text-primary text-sm hover:underline">
+                    Login to Portal
+                  </Link>
                 </div>
               </div>
             </div>

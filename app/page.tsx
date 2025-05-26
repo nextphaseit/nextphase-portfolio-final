@@ -161,6 +161,11 @@ export default function Home() {
                       Contact
                     </Link>
                   </li>
+                  <li>
+                    <Link href="/login" className="hover:text-primary transition-colors">
+                      Login
+                    </Link>
+                  </li>
                 </ul>
               </div>
               <div>
