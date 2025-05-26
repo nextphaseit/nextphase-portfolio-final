@@ -77,15 +77,7 @@ function LoginContent() {
               <Shield className="inline mr-2" size={16} />
               Authorized Personnel Only
             </h3>
-            <p className="text-sm text-gray-300 mb-2">This portal is restricted to NextPhase IT staff members.</p>
-            <div className="text-xs text-gray-400 space-y-1">
-              <p>
-                <strong>Admin:</strong> adrian.knight@nextphaseit.org / admin123
-              </p>
-              <p>
-                <strong>Staff:</strong> staff@nextphaseit.org / staff123
-              </p>
-            </div>
+            <p className="text-sm text-gray-300">This portal is restricted to NextPhase IT staff members.</p>
           </div>
 
           {/* Error Message */}
