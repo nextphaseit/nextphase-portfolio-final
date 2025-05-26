@@ -19,10 +19,10 @@ export function PDFForm() {
         <div className="bg-blue-50 p-4 rounded-lg mb-6">
           <h2 className="text-lg font-semibold text-blue-800 mb-2">Contact Information</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-700">
-            <div>📧 adrian.knight@nextphaseit.org</div>
-            <div>📞 +1 984-310-9533</div>
-            <div>📍 Clayton, NC</div>
-            <div>🌐 NextPhase IT Solutions</div>
+            <div>Email: adrian.knight@nextphaseit.org</div>
+            <div>Phone: +1 984-310-9533</div>
+            <div>Location: Clayton, NC</div>
+            <div>Website: NextPhase IT Solutions</div>
           </div>
         </div>
       </div>
