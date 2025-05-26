@@ -3,6 +3,7 @@ import { handleAuth, handleLogin, handleLogout, handleCallback } from "@auth0/ne
 export const GET = handleAuth({
   login: handleLogin({
     authorizationParams: {
+      audience: process.env.AUTH0_AUDIENCE,
       scope: "openid profile email",
     },
   }),
