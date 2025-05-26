@@ -1,7 +1,4 @@
 "use client"
-
-import type React from "react"
-
 import { useState, useEffect, useRef } from "react"
 import { MessageCircle, X, Bot, User, Send, ThumbsUp, ThumbsDown } from "lucide-react"
 import { Button } from "./ui/button"
@@ -34,46 +31,13 @@ const talk2SupportResponses = [
   { id: 20, message: "Thank you for using Talk2Support. Have a great day!" },
 ]
 
-interface Message {
-  id: string
-  text: string
-  isBot: boolean
-  timestamp: Date
-  options?: ChatOption[]
-  isTicketForm?: boolean
-  isEscalated?: boolean
-  showFeedback?: boolean
-}
-
-interface ChatOption {
-  text: string
-  action: string
-  value?: string
-}
-
-interface TicketFormData {
-  subject: string
-  priority: "low" | "medium" | "high" | "urgent"
-  description: string
-  clientName: string
-  clientEmail: string
-}
-
-interface ChatSession {
-  isEscalated: boolean
-  hasActiveTicket: boolean
-  ticketNumber?: string
-  supportLevel: "basic" | "escalated" | "technician"
-  sessionId: string
-}
-
 export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false)
-  const [messages, setMessages] = useState<Message[]>([])
+  const [messages, setMessages] = useState([])
   const [isTyping, setIsTyping] = useState(false)
   const [showTicketForm, setShowTicketForm] = useState(false)
   const [showFeedback, setShowFeedback] = useState(false)
-  const [ticketForm, setTicketForm] = useState<TicketFormData>({
+  const [ticketForm, setTicketForm] = useState({
     subject: "",
     priority: "medium",
     description: "",
@@ -81,13 +45,13 @@ export function Chatbot() {
     clientEmail: "",
   })
   const [isSubmittingTicket, setIsSubmittingTicket] = useState(false)
-  const [chatSession, setChatSession] = useState<ChatSession>({
+  const [chatSession, setChatSession] = useState({
     isEscalated: false,
     hasActiveTicket: false,
     supportLevel: "basic",
     sessionId: Math.random().toString(36).substring(7),
   })
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesEndRef = useRef(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -116,10 +80,10 @@ export function Chatbot() {
     }
   }, [isOpen])
 
-  const addBotMessage = (text: string, options?: ChatOption[], isEscalated = false, showFeedback = false) => {
+  const addBotMessage = (text, options, isEscalated = false, showFeedback = false) => {
     setIsTyping(true)
     setTimeout(() => {
-      const newMessage: Message = {
+      const newMessage = {
         id: Date.now().toString(),
         text,
         isBot: true,
@@ -133,8 +97,8 @@ export function Chatbot() {
     }, 1000)
   }
 
-  const addUserMessage = (text: string) => {
-    const newMessage: Message = {
+  const addUserMessage = (text) => {
+    const newMessage = {
       id: Date.now().toString(),
       text,
       isBot: false,
@@ -162,7 +126,7 @@ export function Chatbot() {
     )
   }
 
-  const handleTicketSubmit = async (e: React.FormEvent) => {
+  const handleTicketSubmit = async (e) => {
     e.preventDefault()
     setIsSubmittingTicket(true)
 
@@ -230,7 +194,7 @@ export function Chatbot() {
     }
   }
 
-  const handleFeedback = (rating: "positive" | "negative") => {
+  const handleFeedback = (rating) => {
     const feedbackMessage =
       rating === "positive"
         ? "Thank you for the positive feedback! We're glad we could help."
@@ -245,7 +209,7 @@ export function Chatbot() {
     setShowFeedback(false)
   }
 
-  const handleOptionClick = (option: ChatOption) => {
+  const handleOptionClick = (option) => {
     addUserMessage(option.text)
 
     switch (option.action) {
@@ -799,7 +763,7 @@ export function Chatbot() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
                 <select
                   value={ticketForm.priority}
-                  onChange={(e) => setTicketForm({ ...ticketForm, priority: e.target.value as any })}
+                  onChange={(e) => setTicketForm({ ...ticketForm, priority: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg p-2 text-sm text-gray-800 focus:outline-none focus:border-primary"
                 >
                   <option value="low">🟢 Low - General question</option>
