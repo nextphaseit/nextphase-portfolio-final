@@ -13,13 +13,13 @@ import { AuthProvider, useAuth } from "@/providers/auth-provider"
 function LoginContent() {
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
-    email: "adrian.knight@nextphaseit.org",
-    password: "admin123",
+    email: "",
+    password: "",
     rememberMe: false,
   })
   const [error, setError] = useState("")
 
-  const { login, isLoading, isAuthenticated } = useAuth()
+  const { login, loginWithMicrosoft, isLoading, isAuthenticated } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
@@ -38,6 +38,14 @@ function LoginContent() {
       router.push("/dashboard")
     } else {
       setError("Invalid credentials or unauthorized access. Contact IT administrator.")
+    }
+  }
+
+  const handleMicrosoftLogin = async () => {
+    setError("")
+    const success = await loginWithMicrosoft()
+    if (!success) {
+      setError("Microsoft authentication failed. Please try again.")
     }
   }
 
@@ -78,6 +86,39 @@ function LoginContent() {
               Authorized Personnel Only
             </h3>
             <p className="text-sm text-gray-300">This portal is restricted to NextPhase IT staff members.</p>
+          </div>
+
+          {/* Microsoft Login Button */}
+          <div className="mb-6">
+            <Button
+              onClick={handleMicrosoftLogin}
+              disabled={isLoading}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-base font-medium mb-4"
+            >
+              {isLoading ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Signing in...
+                </div>
+              ) : (
+                <>
+                  <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zM24 11.4H12.6V0H24v11.4z" />
+                  </svg>
+                  Sign in with Microsoft
+                </>
+              )}
+            </Button>
+
+            {/* Divider */}
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-600"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-black text-gray-400">Or sign in with email</span>
+              </div>
+            </div>
           </div>
 
           {/* Error Message */}
