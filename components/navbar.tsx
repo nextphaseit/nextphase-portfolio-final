@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { Menu, X, Phone, Mail, FileText, ChevronDown, User, LogOut } from "lucide-react"
+import { Menu, X, Phone, Mail, FileText, ChevronDown, User, LogOut, Shield } from "lucide-react"
 import { Button } from "./ui/button"
 import { useAuth } from "@/lib/auth"
 import Image from "next/image"
@@ -13,10 +13,14 @@ export function Navbar() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
 
   // Try to get auth context, but don't fail if not available
-  const auth = useAuth()
-  const user = auth.user
-  const isLoading = auth.isLoading
-  const logout = auth.logout
+  let auth = { user: null, isLoading: false, logout: () => {}, isAdmin: false }
+  try {
+    auth = useAuth()
+  } catch {
+    console.warn("useAuth hook unavailable, likely running in a non-client component")
+  }
+
+  const { user, isLoading, logout, isAdmin } = auth
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/60">
@@ -68,14 +72,19 @@ export function Navbar() {
                     className="rounded-full"
                   />
                   {user.given_name || user.name}
+                  {isAdmin && <Shield size={14} className="text-yellow-400" />}
                   <ChevronDown size={16} />
                 </Button>
 
                 {isUserMenuOpen && (
                   <div className="absolute right-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-100 py-3 z-50">
                     <div className="px-4 py-2 border-b border-gray-100">
-                      <h3 className="font-semibold text-gray-800">{user.name}</h3>
+                      <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+                        {user.name}
+                        {isAdmin && <Shield size={16} className="text-yellow-600" />}
+                      </h3>
                       <p className="text-sm text-gray-500">{user.email}</p>
+                      <p className="text-xs text-gray-400">{user.department}</p>
                     </div>
 
                     <div className="py-2">
@@ -85,7 +94,7 @@ export function Navbar() {
                         onClick={() => setIsUserMenuOpen(false)}
                       >
                         <User size={18} className="text-blue-600" />
-                        <span>Dashboard</span>
+                        <span>Admin Portal</span>
                       </Link>
 
                       <button
@@ -104,7 +113,7 @@ export function Navbar() {
               </div>
             ) : (
               <Link href="/login" className="text-white hover:text-primary transition-colors">
-                {isLoading ? "Loading..." : "Login"}
+                {isLoading ? "Loading..." : "Staff Login"}
               </Link>
             )}
 
@@ -246,7 +255,10 @@ export function Navbar() {
                       className="rounded-full"
                     />
                     <div>
-                      <div className="font-medium">{user.name}</div>
+                      <div className="font-medium flex items-center gap-2">
+                        {user.name}
+                        {isAdmin && <Shield size={14} className="text-yellow-400" />}
+                      </div>
                       <div className="text-xs text-gray-400">{user.email}</div>
                     </div>
                   </div>
@@ -255,7 +267,7 @@ export function Navbar() {
                     className="text-white hover:text-primary transition-colors"
                     onClick={() => setIsOpen(false)}
                   >
-                    Dashboard
+                    Admin Portal
                   </Link>
                   <button
                     onClick={() => {
@@ -273,7 +285,7 @@ export function Navbar() {
                   className="text-white hover:text-primary transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
-                  Login
+                  Staff Login
                 </Link>
               )}
 

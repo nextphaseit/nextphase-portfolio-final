@@ -5,7 +5,7 @@ import type React from "react"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Eye, EyeOff, Mail, Lock, ArrowLeft, Chrome, Github, ComputerIcon as Microsoft } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, ArrowLeft, Shield } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { AuthProvider, useAuth } from "@/lib/auth"
@@ -13,8 +13,8 @@ import { AuthProvider, useAuth } from "@/lib/auth"
 function LoginContent() {
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
-    email: "demo@nextphaseit.org",
-    password: "demo123",
+    email: "adrian.knight@nextphaseit.org",
+    password: "admin123",
     rememberMe: false,
   })
   const [error, setError] = useState("")
@@ -37,13 +37,8 @@ function LoginContent() {
     if (success) {
       router.push("/dashboard")
     } else {
-      setError("Invalid credentials. Try demo@nextphaseit.org / demo123")
+      setError("Invalid credentials or unauthorized access. Contact IT administrator.")
     }
-  }
-
-  const handleSocialLogin = (provider: string) => {
-    // In production, this would redirect to Auth0
-    alert(`${provider} login would redirect to Auth0 in production`)
   }
 
   return (
@@ -69,16 +64,25 @@ function LoginContent() {
               height={60}
               className="h-16 w-auto mx-auto mb-4"
             />
-            <h1 className="text-2xl font-bold text-white mb-2">Welcome Back</h1>
-            <p className="text-gray-400">Sign in to your NextPhase IT client portal</p>
+            <div className="flex items-center justify-center gap-2 mb-2">
+              <Shield className="text-primary" size={24} />
+              <h1 className="text-2xl font-bold text-white">Admin Portal</h1>
+            </div>
+            <p className="text-gray-400">NextPhase IT Staff Access Only</p>
           </div>
 
-          {/* Demo Credentials Notice */}
+          {/* Access Notice */}
           <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-6">
-            <h3 className="text-primary font-semibold mb-2">Demo Credentials</h3>
-            <p className="text-sm text-gray-300 mb-2">For preview purposes, use:</p>
-            <p className="text-sm font-mono">Email: demo@nextphaseit.org</p>
-            <p className="text-sm font-mono">Password: demo123</p>
+            <h3 className="text-primary font-semibold mb-2">🔒 Authorized Personnel Only</h3>
+            <p className="text-sm text-gray-300 mb-2">This portal is restricted to NextPhase IT staff members.</p>
+            <div className="text-xs text-gray-400 space-y-1">
+              <p>
+                <strong>Admin:</strong> adrian.knight@nextphaseit.org / admin123
+              </p>
+              <p>
+                <strong>Staff:</strong> staff@nextphaseit.org / staff123
+              </p>
+            </div>
           </div>
 
           {/* Error Message */}
@@ -93,7 +97,7 @@ function LoginContent() {
             {/* Email Field */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-                Email Address
+                NextPhase IT Email
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -106,7 +110,7 @@ function LoginContent() {
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="w-full pl-10 pr-4 py-3 bg-card border border-primary/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                  placeholder="Enter your email"
+                  placeholder="your.name@nextphaseit.org"
                 />
               </div>
             </div>
@@ -139,7 +143,7 @@ function LoginContent() {
               </div>
             </div>
 
-            {/* Remember Me & Forgot Password */}
+            {/* Remember Me */}
             <div className="flex items-center justify-between">
               <div className="flex items-center">
                 <input
@@ -150,12 +154,15 @@ function LoginContent() {
                   className="h-4 w-4 text-primary bg-card border-primary/20 rounded focus:ring-primary focus:ring-2"
                 />
                 <label htmlFor="remember-me" className="ml-2 text-sm text-gray-300">
-                  Remember me
+                  Keep me signed in
                 </label>
               </div>
-              <Link href="/forgot-password" className="text-sm text-primary hover:text-primary/80 transition-colors">
-                Forgot password?
-              </Link>
+              <a
+                href="mailto:adrian.knight@nextphaseit.org"
+                className="text-sm text-primary hover:text-primary/80 transition-colors"
+              >
+                Need access?
+              </a>
             </div>
 
             {/* Submit Button */}
@@ -170,70 +177,23 @@ function LoginContent() {
                   Signing in...
                 </div>
               ) : (
-                "Sign In"
+                <>
+                  <Shield size={16} className="mr-2" />
+                  Access Admin Portal
+                </>
               )}
             </Button>
           </form>
 
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-600"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-black text-gray-400">Or continue with</span>
-            </div>
-          </div>
-
-          {/* Social Login Options */}
-          <div className="space-y-3 mb-6">
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full bg-white/5 border-white/20 hover:bg-white/10 text-white"
-              onClick={() => handleSocialLogin("Microsoft")}
-            >
-              <Microsoft size={20} className="mr-3" />
-              Continue with Microsoft
-            </Button>
-
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full bg-white/5 border-white/20 hover:bg-white/10 text-white"
-              onClick={() => handleSocialLogin("Google")}
-            >
-              <Chrome size={20} className="mr-3" />
-              Continue with Google
-            </Button>
-
-            <Button
-              type="button"
-              variant="outline"
-              className="w-full bg-white/5 border-white/20 hover:bg-white/10 text-white"
-              onClick={() => handleSocialLogin("GitHub")}
-            >
-              <Github size={20} className="mr-3" />
-              Continue with GitHub
-            </Button>
-          </div>
-
-          {/* Sign Up Link */}
-          <div className="mt-6 text-center">
-            <p className="text-gray-400">
-              Don't have an account?{" "}
-              <Link href="/signup" className="text-primary hover:text-primary/80 font-medium transition-colors">
-                Sign up here
-              </Link>
-            </p>
-          </div>
-
           {/* Support Link */}
           <div className="mt-8 text-center">
             <p className="text-xs text-gray-500">
-              Need help?{" "}
-              <a href="mailto:support@nextphaseit.org" className="text-primary hover:text-primary/80 transition-colors">
-                Contact Support
+              Technical issues?{" "}
+              <a
+                href="mailto:adrian.knight@nextphaseit.org"
+                className="text-primary hover:text-primary/80 transition-colors"
+              >
+                Contact Adrian Knight
               </a>
             </p>
           </div>
@@ -260,27 +220,27 @@ function LoginContent() {
             />
           </div>
 
-          <h2 className="text-3xl font-bold mb-4">Your Technology Partner</h2>
+          <h2 className="text-3xl font-bold mb-4">Internal Operations Portal</h2>
           <p className="text-lg opacity-90 mb-8">
-            Access your NextPhase IT client portal to manage services, view projects, and get support.
+            Manage client support tickets, projects, and administrative tasks for NextPhase IT operations.
           </p>
 
           <div className="space-y-4 text-left">
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-white rounded-full"></div>
-              <span>Secure client portal access</span>
+              <span>Support ticket management</span>
             </div>
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-white rounded-full"></div>
-              <span>Project status and updates</span>
+              <span>Client project tracking</span>
             </div>
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-white rounded-full"></div>
-              <span>Direct support communication</span>
+              <span>Microsoft 365 integration</span>
             </div>
             <div className="flex items-center gap-3">
               <div className="w-2 h-2 bg-white rounded-full"></div>
-              <span>Service management tools</span>
+              <span>Administrative controls</span>
             </div>
           </div>
         </div>

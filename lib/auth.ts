@@ -10,6 +10,8 @@ interface User {
   email: string
   picture?: string
   given_name?: string
+  role: "admin" | "staff"
+  department?: string
 }
 
 interface AuthContextType {
@@ -18,9 +20,32 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<boolean>
   logout: () => void
   isAuthenticated: boolean
+  isAdmin: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
+
+// Authorized NextPhase IT staff members
+const AUTHORIZED_USERS = [
+  {
+    id: "admin-adrian",
+    name: "Adrian Knight",
+    email: "adrian.knight@nextphaseit.org",
+    given_name: "Adrian",
+    role: "admin" as const,
+    department: "IT Operations",
+    picture: "/placeholder.svg?height=40&width=40&text=AK",
+  },
+  {
+    id: "staff-demo",
+    name: "Demo Staff",
+    email: "staff@nextphaseit.org",
+    given_name: "Demo",
+    role: "staff" as const,
+    department: "Technical Support",
+    picture: "/placeholder.svg?height=40&width=40&text=DS",
+  },
+]
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
@@ -28,9 +53,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     // Check for existing session
-    const savedUser = localStorage.getItem("nextphase_user")
+    const savedUser = localStorage.getItem("nextphase_admin_user")
     if (savedUser) {
-      setUser(JSON.parse(savedUser))
+      const userData = JSON.parse(savedUser)
+      // Verify user is still authorized
+      const authorizedUser = AUTHORIZED_USERS.find((u) => u.email === userData.email)
+      if (authorizedUser) {
+        setUser(userData)
+      } else {
+        localStorage.removeItem("nextphase_admin_user")
+      }
     }
     setIsLoading(false)
   }, [])
@@ -41,18 +73,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1000))
 
-    // Demo credentials for preview
-    if (email === "demo@nextphaseit.org" && password === "demo123") {
-      const demoUser: User = {
-        id: "demo-user",
-        name: "Demo Client",
-        email: "demo@nextphaseit.org",
-        given_name: "Demo",
-        picture: "/placeholder.svg?height=40&width=40&text=DC",
-      }
+    // Check if user is authorized NextPhase IT staff
+    const authorizedUser = AUTHORIZED_USERS.find((u) => u.email === email)
 
-      setUser(demoUser)
-      localStorage.setItem("nextphase_user", JSON.stringify(demoUser))
+    if (
+      authorizedUser &&
+      ((email === "adrian.knight@nextphaseit.org" && password === "admin123") ||
+        (email === "staff@nextphaseit.org" && password === "staff123"))
+    ) {
+      setUser(authorizedUser)
+      localStorage.setItem("nextphase_admin_user", JSON.stringify(authorizedUser))
       setIsLoading(false)
       return true
     }
@@ -63,7 +93,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setUser(null)
-    localStorage.removeItem("nextphase_user")
+    localStorage.removeItem("nextphase_admin_user")
   }
 
   return (
@@ -74,6 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         login,
         logout,
         isAuthenticated: !!user,
+        isAdmin: user?.role === "admin",
       }}
     >
       {children}
@@ -108,6 +139,45 @@ export function withAuth<T extends object>(Component: React.ComponentType<T>) {
     if (!isAuthenticated) {
       window.location.href = "/login"
       return null
+    }
+
+    return <Component {...props} />
+  }
+}
+
+// Higher-order component for admin-only routes
+export function withAdminAuth<T extends object>(Component: React.ComponentType<T>) {
+  return function AdminAuthenticatedComponent(props: T) {
+    const { isAuthenticated, isAdmin, isLoading } = useAuth()
+
+    if (isLoading) {
+      return (
+        <div className="min-h-screen bg-black text-white flex items-center justify-center">
+          <div className="text-center">
+            <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-gray-400">Loading...</p>
+          </div>
+        </div>
+      )
+    }
+
+    if (!isAuthenticated) {
+      window.location.href = "/login"
+      return null
+    }
+
+    if (!isAdmin) {
+      return (
+        <div className="min-h-screen bg-black text-white flex items-center justify-center">
+          <div className="text-center max-w-md">
+            <div className="text-red-500 mb-4">Access Denied</div>
+            <p className="text-gray-400 mb-6">You don't have permission to access this page.</p>
+            <button onClick={() => (window.location.href = "/dashboard")} className="text-primary hover:underline">
+              Return to Dashboard
+            </button>
+          </div>
+        </div>
+      )
     }
 
     return <Component {...props} />
