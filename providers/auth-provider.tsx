@@ -60,48 +60,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-    // Check for Microsoft OAuth callback data
-    const checkOAuthCallback = () => {
-      if (typeof window !== "undefined") {
-        const tempUserCookie = document.cookie
-          .split("; ")
-          .find((row) => row.startsWith("nextphase_temp_user="))
-          ?.split("=")[1]
-
-        if (tempUserCookie) {
-          try {
-            const userData = JSON.parse(decodeURIComponent(tempUserCookie))
-            setUser(userData)
-            localStorage.setItem("nextphase_admin_user", JSON.stringify(userData))
-            // Clear the temporary cookie
-            document.cookie = "nextphase_temp_user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
-            // Clear PKCE data after successful login
-            PKCEHelper.clearPKCEData()
-            setIsLoading(false)
-            return true
-          } catch (error) {
-            console.error("Error parsing OAuth callback data:", error)
-          }
-        }
-      }
-      return false
-    }
-
     // Check for existing session
-    if (!checkOAuthCallback()) {
-      const savedUser = localStorage.getItem("nextphase_admin_user")
-      if (savedUser) {
-        try {
-          const userData = JSON.parse(savedUser)
-          // Verify user is still authorized (for local auth) or valid (for Exchange auth)
-          if (userData.authMethod === "exchange" || AUTHORIZED_USERS.find((u) => u.email === userData.email)) {
-            setUser(userData)
-          } else {
-            localStorage.removeItem("nextphase_admin_user")
-          }
-        } catch (error) {
+    const savedUser = localStorage.getItem("nextphase_admin_user")
+    if (savedUser) {
+      try {
+        const userData = JSON.parse(savedUser)
+        // Verify user is still authorized (for local auth) or valid (for Exchange auth)
+        if (userData.authMethod === "exchange" || AUTHORIZED_USERS.find((u) => u.email === userData.email)) {
+          setUser(userData)
+        } else {
           localStorage.removeItem("nextphase_admin_user")
         }
+      } catch (error) {
+        localStorage.removeItem("nextphase_admin_user")
       }
     }
     setIsLoading(false)
@@ -214,9 +185,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         normalizedOrigin = "https://www.nextphaseit.org"
       }
 
-      const redirectUri = encodeURIComponent(`${normalizedOrigin}/api/auth/microsoft/callback`)
-      const scope = encodeURIComponent("openid profile email User.Read")
-
       console.log("OAuth Config with PKCE:", {
         clientId,
         redirectUri: `${normalizedOrigin}/api/auth/microsoft/callback`,
@@ -238,7 +206,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       authUrl.searchParams.set("code_challenge_method", "S256")
       authUrl.searchParams.set("prompt", "select_account")
 
-      console.log("Redirecting to:", authUrl.toString())
+      console.log("Redirecting to Microsoft OAuth...")
       window.location.href = authUrl.toString()
       return true
     } catch (error) {
