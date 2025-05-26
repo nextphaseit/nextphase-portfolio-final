@@ -2,16 +2,21 @@
 
 import Link from "next/link"
 import { useState } from "react"
-import { useUser } from "@auth0/nextjs-auth0/client"
 import { Menu, X, Phone, Mail, FileText, ChevronDown, User, LogOut } from "lucide-react"
 import { Button } from "./ui/button"
+import { useAuth } from "@/lib/auth"
 import Image from "next/image"
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [isContactOpen, setIsContactOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
-  const { user, isLoading } = useUser()
+
+  // Try to get auth context, but don't fail if not available
+  const auth = useAuth()
+  const user = auth.user
+  const isLoading = auth.isLoading
+  const logout = auth.logout
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur supports-[backdrop-filter]:bg-black/60">
@@ -56,7 +61,7 @@ export function Navbar() {
                   className="flex items-center gap-2 bg-primary hover:bg-primary/90"
                 >
                   <Image
-                    src={user.picture || "/placeholder.svg?height=24&width=24"}
+                    src={user.picture || "/placeholder.svg?height=24&width=24&text=DC"}
                     alt="Profile"
                     width={24}
                     height={24}
@@ -83,14 +88,16 @@ export function Navbar() {
                         <span>Dashboard</span>
                       </Link>
 
-                      <a
-                        href="/api/auth/logout"
-                        className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-red-50 transition-colors"
-                        onClick={() => setIsUserMenuOpen(false)}
+                      <button
+                        onClick={() => {
+                          logout()
+                          setIsUserMenuOpen(false)
+                        }}
+                        className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-red-50 transition-colors w-full text-left"
                       >
                         <LogOut size={18} className="text-red-600" />
                         <span>Logout</span>
-                      </a>
+                      </button>
                     </div>
                   </div>
                 )}
@@ -232,7 +239,7 @@ export function Navbar() {
                 <div className="space-y-3 pt-4 border-t border-gray-700">
                   <div className="flex items-center gap-3 text-white py-2">
                     <Image
-                      src={user.picture || "/placeholder.svg?height=32&width=32"}
+                      src={user.picture || "/placeholder.svg?height=32&width=32&text=DC"}
                       alt="Profile"
                       width={32}
                       height={32}
@@ -250,13 +257,15 @@ export function Navbar() {
                   >
                     Dashboard
                   </Link>
-                  <a
-                    href="/api/auth/logout"
-                    className="text-white hover:text-primary transition-colors"
-                    onClick={() => setIsOpen(false)}
+                  <button
+                    onClick={() => {
+                      logout()
+                      setIsOpen(false)
+                    }}
+                    className="text-white hover:text-primary transition-colors text-left"
                   >
                     Logout
-                  </a>
+                  </button>
                 </div>
               ) : (
                 <Link

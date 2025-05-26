@@ -1,25 +1,14 @@
 "use client"
 
-import { useUser, withPageAuthRequired } from "@auth0/nextjs-auth0/client"
 import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
 import { CardWrapper } from "@/components/ui/card-wrapper"
+import { AuthProvider, useAuth, withAuth } from "@/lib/auth"
 import { User, Mail, Calendar, Settings, LogOut, FileText, MessageSquare, Clock } from "lucide-react"
 import Image from "next/image"
 
 function DashboardContent() {
-  const { user, isLoading } = useUser()
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading dashboard...</p>
-        </div>
-      </div>
-    )
-  }
+  const { user, logout } = useAuth()
 
   return (
     <main className="min-h-screen bg-black text-white relative">
@@ -50,7 +39,7 @@ function DashboardContent() {
             <div className="flex items-center gap-4 mt-4 md:mt-0">
               <div className="flex items-center gap-3">
                 <Image
-                  src={user?.picture || "/placeholder.svg?height=40&width=40"}
+                  src={user?.picture || "/placeholder.svg?height=40&width=40&text=DC"}
                   alt="Profile"
                   width={40}
                   height={40}
@@ -61,11 +50,9 @@ function DashboardContent() {
                   <div className="text-gray-400">{user?.email}</div>
                 </div>
               </div>
-              <Button variant="outline" asChild>
-                <a href="/api/auth/logout">
-                  <LogOut size={16} className="mr-2" />
-                  Logout
-                </a>
+              <Button variant="outline" onClick={logout}>
+                <LogOut size={16} className="mr-2" />
+                Logout
               </Button>
             </div>
           </div>
@@ -160,7 +147,7 @@ function DashboardContent() {
                 </div>
                 <div className="flex justify-between items-center py-2">
                   <span className="text-gray-400">Member Since</span>
-                  <span>{user?.updated_at ? new Date(user.updated_at).toLocaleDateString() : "Today"}</span>
+                  <span>Today</span>
                 </div>
               </div>
             </CardWrapper>
@@ -192,4 +179,12 @@ function DashboardContent() {
   )
 }
 
-export default withPageAuthRequired(DashboardContent)
+const ProtectedDashboard = withAuth(DashboardContent)
+
+export default function DashboardPage() {
+  return (
+    <AuthProvider>
+      <ProtectedDashboard />
+    </AuthProvider>
+  )
+}
