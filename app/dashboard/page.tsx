@@ -3,12 +3,12 @@
 import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
 import { CardWrapper } from "@/components/ui/card-wrapper"
-import { AuthProvider, withAuth, useAuth } from "@/lib/auth"
+import { AuthProvider, withAuth, useAuth } from "@/providers/auth-provider"
 import { FileText, MessageSquare, Clock, ExternalLink, Users, BarChart3, Shield, Video, Settings } from "lucide-react"
 import Image from "next/image"
 
 function DashboardContent() {
-  const { user, isAdmin } = useAuth()
+  const { user, isAdmin, logout } = useAuth()
 
   const microsoftApps = [
     {
@@ -72,19 +72,6 @@ function DashboardContent() {
     },
   ]
 
-  const { logout } = useAuth()
-
-  const handleLogout = () => {
-    // Use custom logout for preview, Auth0 logout for production
-    if (typeof window !== "undefined" && window.location.hostname.includes("vusercontent.net")) {
-      // Preview environment - use custom auth
-      logout()
-    } else {
-      // Production environment - use Auth0
-      window.location.href = "/api/auth/logout"
-    }
-  }
-
   return (
     <main className="min-h-screen bg-black text-white relative">
       {/* Background Logo */}
@@ -128,7 +115,7 @@ function DashboardContent() {
                   <div className="text-gray-400">{user?.email}</div>
                 </div>
               </div>
-              <Button variant="outline" onClick={handleLogout}>
+              <Button variant="outline" onClick={logout}>
                 Logout
               </Button>
             </div>

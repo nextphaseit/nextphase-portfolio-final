@@ -4,7 +4,7 @@ import Link from "next/link"
 import { useState } from "react"
 import { Menu, X, Phone, Mail, FileText, ChevronDown, User, LogOut, Shield } from "lucide-react"
 import { Button } from "./ui/button"
-import { useAuth } from "@/lib/auth"
+import { useAuth } from "@/providers/auth-provider"
 import Image from "next/image"
 
 export function Navbar() {
@@ -92,15 +92,7 @@ export function Navbar() {
                       <button
                         onClick={() => {
                           setIsUserMenuOpen(false)
-                          // Use custom logout for preview, Auth0 logout for production
-                          if (typeof window !== "undefined" && window.location.hostname.includes("vusercontent.net")) {
-                            // Preview environment - use custom auth
-                            // const { logout } = useAuth()
-                            logout()
-                          } else {
-                            // Production environment - use Auth0
-                            window.location.href = "/api/auth/logout"
-                          }
+                          logout()
                         }}
                         className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-red-50 transition-colors w-full text-left"
                       >
@@ -272,15 +264,7 @@ export function Navbar() {
                   <button
                     onClick={() => {
                       setIsOpen(false)
-                      // Use custom logout for preview, Auth0 logout for production
-                      if (typeof window !== "undefined" && window.location.hostname.includes("vusercontent.net")) {
-                        // Preview environment - use custom auth
-                        // const { logout } = useAuth()
-                        logout()
-                      } else {
-                        // Production environment - use Auth0
-                        window.location.href = "/api/auth/logout"
-                      }
+                      logout()
                     }}
                     className="text-white hover:text-primary transition-colors text-left"
                   >
