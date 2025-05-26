@@ -3,9 +3,10 @@
 import type React from "react"
 
 import { useState, useEffect, useRef } from "react"
-import { MessageCircle, X, Bot, User, Send } from "lucide-react"
+import { MessageCircle, X, Bot, User, Send, ThumbsUp, ThumbsDown } from "lucide-react"
 import { Button } from "./ui/button"
 import { createSupportTicket } from "@/app/actions/ticket"
+import chatbotResponses from "@/data/chatbot-responses.json"
 
 interface Message {
   id: string
@@ -14,6 +15,8 @@ interface Message {
   timestamp: Date
   options?: ChatOption[]
   isTicketForm?: boolean
+  isEscalated?: boolean
+  showFeedback?: boolean
 }
 
 interface ChatOption {
@@ -30,11 +33,20 @@ interface TicketFormData {
   clientEmail: string
 }
 
+interface ChatSession {
+  isEscalated: boolean
+  hasActiveTicket: boolean
+  ticketNumber?: string
+  supportLevel: "basic" | "escalated" | "technician"
+  sessionId: string
+}
+
 export function Chatbot() {
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [isTyping, setIsTyping] = useState(false)
   const [showTicketForm, setShowTicketForm] = useState(false)
+  const [showFeedback, setShowFeedback] = useState(false)
   const [ticketForm, setTicketForm] = useState<TicketFormData>({
     subject: "",
     priority: "medium",
@@ -43,7 +55,16 @@ export function Chatbot() {
     clientEmail: "",
   })
   const [isSubmittingTicket, setIsSubmittingTicket] = useState(false)
+  const [chatSession, setChatSession] = useState<ChatSession>({
+    isEscalated: false,
+    hasActiveTicket: false,
+    supportLevel: "basic",
+    sessionId: Math.random().toString(36).substring(7),
+  })
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  // Get Talk2Support responses
+  const talk2SupportResponses = chatbotResponses.Talk2SupportChatbot.responses
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -55,9 +76,13 @@ export function Chatbot() {
 
   useEffect(() => {
     if (isOpen && messages.length === 0) {
-      // Initial greeting
+      // Use Talk2Support welcome message
       setTimeout(() => {
-        addBotMessage("👋 Hi! I'm the NextPhase IT assistant. How can I help you today?", [
+        const welcomeMessage =
+          talk2SupportResponses.find((r) => r.id === 1)?.message ||
+          "👋 Hi! I'm the NextPhase IT assistant. How can I help you today?"
+
+        addBotMessage(welcomeMessage, [
           { text: "💼 What services do you offer?", action: "services" },
           { text: "💰 What are your prices?", action: "pricing" },
           { text: "🎫 Create support ticket", action: "create_ticket" },
@@ -68,7 +93,7 @@ export function Chatbot() {
     }
   }, [isOpen])
 
-  const addBotMessage = (text: string, options?: ChatOption[]) => {
+  const addBotMessage = (text: string, options?: ChatOption[], isEscalated = false, showFeedback = false) => {
     setIsTyping(true)
     setTimeout(() => {
       const newMessage: Message = {
@@ -77,6 +102,8 @@ export function Chatbot() {
         isBot: true,
         timestamp: new Date(),
         options,
+        isEscalated,
+        showFeedback,
       }
       setMessages((prev) => [...prev, newMessage])
       setIsTyping(false)
@@ -91,6 +118,25 @@ export function Chatbot() {
       timestamp: new Date(),
     }
     setMessages((prev) => [...prev, newMessage])
+  }
+
+  const escalateToTechnician = () => {
+    setChatSession((prev) => ({ ...prev, isEscalated: true, supportLevel: "technician" }))
+
+    const escalationMessage =
+      talk2SupportResponses.find((r) => r.id === 10)?.message ||
+      "A technician has been assigned to your case. You'll receive an update via email soon."
+
+    addBotMessage(
+      escalationMessage,
+      [
+        { text: "📝 Provide more details", action: "create_ticket" },
+        { text: "📞 Call for urgent help", action: "call_now" },
+        { text: "📧 Send email instead", action: "email_now" },
+        { text: "📋 Check help desk", action: "help_desk" },
+      ],
+      true,
+    )
   }
 
   const handleTicketSubmit = async (e: React.FormEvent) => {
@@ -117,12 +163,24 @@ export function Chatbot() {
       })
 
       if (result.success) {
+        setChatSession((prev) => ({
+          ...prev,
+          hasActiveTicket: true,
+          ticketNumber: result.ticketNumber,
+        }))
+
+        // Use Talk2Support confirmation message
+        const confirmationMessage =
+          talk2SupportResponses.find((r) => r.id === 5)?.message ||
+          "Got it! I've submitted your request to our team. You'll receive an update shortly."
+
         addBotMessage(
-          `✅ ${result.message}\n\nYour ticket details:\n• Ticket #: ${result.ticketNumber}\n• Priority: ${ticketForm.priority.toUpperCase()}\n• Subject: ${ticketForm.subject}\n\nOur team will review your request and respond within 2-4 business hours.`,
+          `✅ ${confirmationMessage}\n\nYour ticket details:\n• Ticket #: ${result.ticketNumber}\n• Priority: ${ticketForm.priority.toUpperCase()}\n• Subject: ${ticketForm.subject}\n\nOur team will review your request and respond within 2-4 business hours.`,
           [
             { text: "📋 View Help Desk Portal", action: "help_desk" },
+            { text: "🔧 Escalate to technician", action: "escalate" },
             { text: "📞 Call for urgent issues", action: "call_now" },
-            { text: "🔙 Back to main menu", action: "main_menu" },
+            { text: "💬 Continue chatting", action: "continue_chat" },
           ],
         )
       } else {
@@ -133,8 +191,11 @@ export function Chatbot() {
         ])
       }
     } catch (error) {
+      const errorMessage =
+        talk2SupportResponses.find((r) => r.id === 14)?.message || "We understand how important this is. We're on it."
+
       addBotMessage(
-        "❌ Sorry, there was an error creating your ticket. Please contact us directly at support@nextphaseit.org or call +1 984-310-9533.",
+        `❌ ${errorMessage} Please contact us directly at support@nextphaseit.org or call +1 984-310-9533.`,
         [
           { text: "📞 Call us", action: "call_now" },
           { text: "📧 Send email", action: "email_now" },
@@ -146,20 +207,36 @@ export function Chatbot() {
     }
   }
 
+  const handleFeedback = (rating: "positive" | "negative") => {
+    const feedbackMessage =
+      rating === "positive"
+        ? "Thank you for the positive feedback! We're glad we could help."
+        : "Thank you for your feedback. We'll use this to improve our service."
+
+    addBotMessage(feedbackMessage, [
+      { text: "🔙 Back to main menu", action: "main_menu" },
+      { text: "📞 Speak with someone", action: "call_now" },
+      { text: "📧 Send additional feedback", action: "email_now" },
+    ])
+
+    setShowFeedback(false)
+  }
+
   const handleOptionClick = (option: ChatOption) => {
     addUserMessage(option.text)
 
     switch (option.action) {
       case "create_ticket":
-        addBotMessage(
-          "🎫 I'll help you create a support ticket. Please provide the following information so our technical team can assist you effectively:",
-          [
-            { text: "📝 Fill out ticket form", action: "show_ticket_form" },
-            { text: "📞 Call instead", action: "call_now" },
-            { text: "📧 Email support", action: "email_now" },
-            { text: "🔙 Back to main menu", action: "main_menu" },
-          ],
-        )
+        const ticketMessage =
+          talk2SupportResponses.find((r) => r.id === 4)?.message ||
+          "Can you please describe the issue you're experiencing? We'll create a support ticket for you."
+
+        addBotMessage(`🎫 ${ticketMessage}`, [
+          { text: "📝 Fill out ticket form", action: "show_ticket_form" },
+          { text: "📞 Call instead", action: "call_now" },
+          { text: "📧 Email support", action: "email_now" },
+          { text: "🔙 Back to main menu", action: "main_menu" },
+        ])
         break
 
       case "show_ticket_form":
@@ -167,6 +244,145 @@ export function Chatbot() {
         addBotMessage(
           "📋 Please fill out the support ticket form below. I'll make sure it gets to our technical team right away!",
         )
+        break
+
+      case "escalate":
+        const escalateMessage =
+          talk2SupportResponses.find((r) => r.id === 6)?.message ||
+          "Would you like me to escalate this issue to a technician right away?"
+
+        addBotMessage(escalateMessage, [
+          { text: "✅ Yes, escalate now", action: "escalate_confirm" },
+          { text: "📝 Provide more details first", action: "create_ticket" },
+          { text: "🔧 Try troubleshooting", action: "troubleshoot" },
+          { text: "📞 Call instead", action: "call_now" },
+        ])
+        break
+
+      case "escalate_confirm":
+        escalateToTechnician()
+        break
+
+      case "troubleshoot":
+        const troubleshootMessage =
+          talk2SupportResponses.find((r) => r.id === 12)?.message ||
+          "Before we escalate, would you like to try a few troubleshooting steps together?"
+
+        addBotMessage(troubleshootMessage, [
+          { text: "🔧 Email issues", action: "troubleshoot_email" },
+          { text: "🌐 Website problems", action: "troubleshoot_website" },
+          { text: "☁️ Microsoft 365 issues", action: "troubleshoot_m365" },
+          { text: "🔒 Security concerns", action: "troubleshoot_security" },
+          { text: "🎫 Create ticket instead", action: "create_ticket" },
+        ])
+        break
+
+      case "troubleshoot_email":
+        const emailGuideMessage =
+          talk2SupportResponses.find((r) => r.id === 13)?.message ||
+          "Here's a quick guide that might resolve your issue. Want to give it a try?"
+
+        addBotMessage(
+          `📧 ${emailGuideMessage}\n\n1. Check your internet connection\n2. Verify email settings (SMTP: smtp-mail.outlook.com, Port: 587)\n3. Clear email app cache\n4. Try accessing email via web browser\n\nDid this help resolve your issue?`,
+          [
+            { text: "✅ Yes, it's working now", action: "issue_resolved" },
+            { text: "❌ Still having issues", action: "escalate" },
+            { text: "📝 Need more help", action: "create_ticket" },
+          ],
+        )
+        break
+
+      case "troubleshoot_website":
+        addBotMessage(
+          "🌐 Let's troubleshoot your website issue:\n\n1. Clear browser cache and cookies\n2. Try a different browser\n3. Check if the issue occurs on mobile\n4. Disable browser extensions temporarily\n\nDid this resolve the problem?",
+          [
+            { text: "✅ Yes, it's working now", action: "issue_resolved" },
+            { text: "❌ Still having issues", action: "escalate" },
+            { text: "📝 Need more help", action: "create_ticket" },
+          ],
+        )
+        break
+
+      case "troubleshoot_m365":
+        addBotMessage(
+          "☁️ Microsoft 365 troubleshooting steps:\n\n1. Sign out and sign back in\n2. Check service status at status.office365.com\n3. Clear browser cache\n4. Try incognito/private browsing mode\n\nDid this help?",
+          [
+            { text: "✅ Yes, it's working now", action: "issue_resolved" },
+            { text: "❌ Still having issues", action: "escalate" },
+            { text: "📝 Need more help", action: "create_ticket" },
+          ],
+        )
+        break
+
+      case "troubleshoot_security":
+        addBotMessage(
+          "🔒 Security issue guidance:\n\n1. Change passwords immediately\n2. Enable two-factor authentication\n3. Run antivirus scan\n4. Check recent login activity\n\n⚠️ For security issues, we recommend immediate escalation.",
+          [
+            { text: "🚨 Escalate immediately", action: "escalate_confirm" },
+            { text: "📞 Call security hotline", action: "call_now" },
+            { text: "📝 Create urgent ticket", action: "create_ticket" },
+          ],
+        )
+        break
+
+      case "issue_resolved":
+        const resolvedMessage =
+          talk2SupportResponses.find((r) => r.id === 15)?.message ||
+          "Thanks for your patience—your request has been resolved. Let us know if you need anything else!"
+
+        addBotMessage(
+          resolvedMessage,
+          [
+            { text: "⭐ Rate your experience", action: "show_feedback" },
+            { text: "📋 Access help desk", action: "help_desk" },
+            { text: "💬 Ask another question", action: "main_menu" },
+          ],
+          false,
+          false,
+        )
+        break
+
+      case "show_feedback":
+        const feedbackMessage =
+          talk2SupportResponses.find((r) => r.id === 17)?.message ||
+          "We'd love to hear your feedback. Would you mind rating your support experience?"
+
+        setShowFeedback(true)
+        addBotMessage(feedbackMessage, [], false, true)
+        break
+
+      case "continue_chat":
+        const continueMessage =
+          talk2SupportResponses.find((r) => r.id === 16)?.message ||
+          "Is there anything else I can assist you with today?"
+
+        addBotMessage(continueMessage, [
+          { text: "💼 Ask about services", action: "services" },
+          { text: "💰 Check pricing", action: "pricing" },
+          { text: "🎫 Create another ticket", action: "create_ticket" },
+          { text: "📞 Speak with someone", action: "call_now" },
+          { text: "👋 End chat", action: "end_chat" },
+        ])
+        break
+
+      case "end_chat":
+        const endMessage =
+          talk2SupportResponses.find((r) => r.id === 20)?.message ||
+          "Thank you for using Talk2Support. Have a great day!"
+
+        const chatSaveMessage =
+          talk2SupportResponses.find((r) => r.id === 19)?.message ||
+          "This chat will be saved for your reference. You'll also receive a copy via email."
+
+        addBotMessage(`${endMessage}\n\n${chatSaveMessage}`, [
+          { text: "📋 Access help desk", action: "help_desk" },
+          { text: "📞 Call if needed", action: "call_now" },
+          { text: "🔄 Start new chat", action: "reset_chat" },
+        ])
+        break
+
+      case "reset_chat":
+        resetChat()
         break
 
       case "help_desk":
@@ -281,7 +497,11 @@ export function Chatbot() {
         break
 
       case "main_menu":
-        addBotMessage("👋 How can I help you today?", [
+        const mainMenuMessage =
+          talk2SupportResponses.find((r) => r.id === 2)?.message ||
+          "You're chatting with NextPhase IT. Let us know what issue you're facing!"
+
+        addBotMessage(mainMenuMessage, [
           { text: "💼 What services do you offer?", action: "services" },
           { text: "💰 What are your prices?", action: "pricing" },
           { text: "🎫 Create support ticket", action: "create_ticket" },
@@ -291,7 +511,11 @@ export function Chatbot() {
         break
 
       default:
-        addBotMessage("I'd be happy to help you with that! For detailed information, please contact our team:", [
+        const defaultMessage =
+          talk2SupportResponses.find((r) => r.id === 8)?.message ||
+          "Your request is being reviewed. We appreciate your patience!"
+
+        addBotMessage(`${defaultMessage} For detailed information, please contact our team:`, [
           { text: "🎫 Create support ticket", action: "create_ticket" },
           { text: "📞 Call us", action: "call_now" },
           { text: "📧 Send email", action: "email_now" },
@@ -304,8 +528,20 @@ export function Chatbot() {
   const resetChat = () => {
     setMessages([])
     setShowTicketForm(false)
+    setShowFeedback(false)
+    setChatSession({
+      isEscalated: false,
+      hasActiveTicket: false,
+      supportLevel: "basic",
+      sessionId: Math.random().toString(36).substring(7),
+    })
+
     setTimeout(() => {
-      addBotMessage("👋 Hi! I'm the NextPhase IT assistant. How can I help you today?", [
+      const welcomeMessage =
+        talk2SupportResponses.find((r) => r.id === 1)?.message ||
+        "👋 Hi! I'm the NextPhase IT assistant. How can I help you today?"
+
+      addBotMessage(welcomeMessage, [
         { text: "💼 What services do you offer?", action: "services" },
         { text: "💰 What are your prices?", action: "pricing" },
         { text: "🎫 Create support ticket", action: "create_ticket" },
@@ -333,15 +569,26 @@ export function Chatbot() {
     <div className="fixed bottom-6 right-6 z-50">
       <div className="bg-white rounded-lg shadow-2xl border border-gray-200 w-80 h-96 flex flex-col">
         {/* Header */}
-        <div className="bg-primary text-white p-4 rounded-t-lg flex items-center justify-between">
+        <div
+          className={`text-white p-4 rounded-t-lg flex items-center justify-between ${
+            chatSession.isEscalated ? "bg-orange-600" : "bg-primary"
+          }`}
+        >
           <div className="flex items-center gap-2">
             <Bot size={20} className="text-white" />
             <div>
-              <h3 className="font-semibold text-white">NextPhase IT Assistant</h3>
-              <p className="text-xs opacity-90 text-white">Online now</p>
+              <h3 className="font-semibold text-white">
+                {chatSession.isEscalated ? "NextPhase IT - Technician" : "NextPhase IT Assistant"}
+              </h3>
+              <p className="text-xs opacity-90 text-white">
+                {chatSession.isEscalated ? "Escalated Support" : "Online now"}
+              </p>
             </div>
           </div>
           <div className="flex gap-2">
+            {chatSession.hasActiveTicket && (
+              <div className="text-xs bg-white/20 px-2 py-1 rounded text-white">#{chatSession.ticketNumber}</div>
+            )}
             <Button variant="ghost" size="sm" onClick={resetChat} className="text-white hover:bg-white/20 p-1 h-auto">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
@@ -368,11 +615,38 @@ export function Chatbot() {
               <div className={`max-w-[80%] ${message.isBot ? "order-2" : "order-1"}`}>
                 <div
                   className={`p-3 rounded-lg ${
-                    message.isBot ? "bg-white text-gray-800 border border-gray-200 shadow-sm" : "bg-primary text-white"
+                    message.isBot
+                      ? message.isEscalated
+                        ? "bg-orange-50 text-orange-900 border border-orange-200 shadow-sm"
+                        : "bg-white text-gray-800 border border-gray-200 shadow-sm"
+                      : "bg-primary text-white"
                   }`}
                 >
                   <p className="text-sm whitespace-pre-line font-medium">{message.text}</p>
                 </div>
+
+                {/* Feedback buttons */}
+                {message.showFeedback && showFeedback && (
+                  <div className="mt-2 flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => handleFeedback("positive")}
+                      className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1"
+                    >
+                      <ThumbsUp size={12} className="mr-1" />
+                      Good
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => handleFeedback("negative")}
+                      className="bg-red-500 hover:bg-red-600 text-white text-xs px-3 py-1"
+                    >
+                      <ThumbsDown size={12} className="mr-1" />
+                      Poor
+                    </Button>
+                  </div>
+                )}
+
                 {message.options && (
                   <div className="mt-2 space-y-1">
                     {message.options.map((option, index) => (
@@ -381,7 +655,11 @@ export function Chatbot() {
                         variant="outline"
                         size="sm"
                         onClick={() => handleOptionClick(option)}
-                        className="w-full text-left justify-start text-xs h-auto py-2 px-3 border-primary/30 hover:bg-primary/10 hover:border-primary/50 text-gray-700 font-medium bg-white"
+                        className={`w-full text-left justify-start text-xs h-auto py-2 px-3 font-medium bg-white ${
+                          message.isEscalated
+                            ? "border-orange-300 hover:bg-orange-50 hover:border-orange-500 text-orange-700"
+                            : "border-primary/30 hover:bg-primary/10 hover:border-primary/50 text-gray-700"
+                        }`}
                       >
                         {option.text}
                       </Button>
@@ -391,7 +669,11 @@ export function Chatbot() {
               </div>
               {message.isBot && (
                 <div className="order-1 mr-2">
-                  <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                      message.isEscalated ? "bg-orange-600" : "bg-primary"
+                    }`}
+                  >
                     <Bot size={12} className="text-white" />
                   </div>
                 </div>
@@ -409,7 +691,11 @@ export function Chatbot() {
           {isTyping && (
             <div className="flex justify-start">
               <div className="mr-2">
-                <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                <div
+                  className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                    chatSession.isEscalated ? "bg-orange-600" : "bg-primary"
+                  }`}
+                >
                   <Bot size={12} className="text-white" />
                 </div>
               </div>
