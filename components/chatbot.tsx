@@ -6,7 +6,33 @@ import { useState, useEffect, useRef } from "react"
 import { MessageCircle, X, Bot, User, Send, ThumbsUp, ThumbsDown } from "lucide-react"
 import { Button } from "./ui/button"
 import { createSupportTicket } from "@/app/actions/ticket"
-import chatbotResponses from "@/data/chatbot-responses.json"
+
+// Talk2Support chatbot responses data
+const talk2SupportResponses = [
+  { id: 1, message: "Hi there! Welcome to Talk2Support. How can we assist you today?" },
+  { id: 2, message: "You're chatting with NextPhase IT. Let us know what issue you're facing!" },
+  { id: 3, message: "Thanks for reaching out! A support specialist will join shortly." },
+  { id: 4, message: "Can you please describe the issue you're experiencing? We'll create a support ticket for you." },
+  { id: 5, message: "Got it! I've submitted your request to our team. You'll receive an update shortly." },
+  { id: 6, message: "Would you like me to escalate this issue to a technician right away?" },
+  { id: 7, message: "Please provide any relevant screenshots or error messages to help us assist you better." },
+  { id: 8, message: "Your request is being reviewed. We appreciate your patience!" },
+  { id: 9, message: "Still with us! Our support team is checking into this now." },
+  { id: 10, message: "A technician has been assigned to your case. You'll receive an update via email soon." },
+  { id: 11, message: "Based on your message, this article might help: [Link to KB article]" },
+  { id: 12, message: "Before we escalate, would you like to try a few troubleshooting steps together?" },
+  { id: 13, message: "Here's a quick guide that might resolve your issue. Want to give it a try?" },
+  { id: 14, message: "We understand how important this is. We're on it." },
+  {
+    id: 15,
+    message: "Thanks for your patience—your request has been resolved. Let us know if you need anything else!",
+  },
+  { id: 16, message: "Is there anything else I can assist you with today?" },
+  { id: 17, message: "We'd love to hear your feedback. Would you mind rating your support experience?" },
+  { id: 18, message: "You can always return to Talk2Support anytime for help." },
+  { id: 19, message: "This chat will be saved for your reference. You'll also receive a copy via email." },
+  { id: 20, message: "Thank you for using Talk2Support. Have a great day!" },
+]
 
 interface Message {
   id: string
@@ -62,9 +88,6 @@ export function Chatbot() {
     sessionId: Math.random().toString(36).substring(7),
   })
   const messagesEndRef = useRef<HTMLDivElement>(null)
-
-  // Get Talk2Support responses
-  const talk2SupportResponses = chatbotResponses.Talk2SupportChatbot.responses
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
