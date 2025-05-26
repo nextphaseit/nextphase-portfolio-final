@@ -3,24 +3,13 @@
 import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
 import { CardWrapper } from "@/components/ui/card-wrapper"
-import { AuthProvider, useAuth, withAuth } from "@/lib/auth"
-import {
-  User,
-  Settings,
-  LogOut,
-  FileText,
-  MessageSquare,
-  Clock,
-  ExternalLink,
-  Users,
-  BarChart3,
-  Shield,
-  Video,
-} from "lucide-react"
+import { AuthProvider } from "@/components/auth-provider"
+import { withAuth, useAuthCheck } from "@/lib/auth-utils"
+import { FileText, MessageSquare, Clock, ExternalLink, Users, BarChart3, Shield, Video, Settings } from "lucide-react"
 import Image from "next/image"
 
 function DashboardContent() {
-  const { user, logout, isAdmin } = useAuth()
+  const { user, isAdmin } = useAuthCheck()
 
   const microsoftApps = [
     {
@@ -40,7 +29,7 @@ function DashboardContent() {
     {
       name: "Microsoft Forms - Client Intake",
       description: "Review new client submissions and intake forms",
-      icon: <User className="w-8 h-8 text-purple-600" />,
+      icon: <Users className="w-8 h-8 text-purple-600" />,
       url: "https://forms.office.com/r/5Ad9WuMA3G",
       color: "bg-purple-50 hover:bg-purple-100 border-purple-200",
     },
@@ -109,9 +98,9 @@ function DashboardContent() {
             <div>
               <h1 className="text-3xl font-bold mb-2">
                 Welcome, {user?.given_name || user?.name}!
-                <span className="text-primary ml-2">{user?.role === "admin" ? "Admin" : "Staff"}</span>
+                <span className="text-primary ml-2">{isAdmin ? "Admin" : "Staff"}</span>
               </h1>
-              <p className="text-gray-400">NextPhase IT Operations Portal - {user?.department}</p>
+              <p className="text-gray-400">NextPhase IT Operations Portal</p>
             </div>
             <div className="flex items-center gap-4 mt-4 md:mt-0">
               <div className="flex items-center gap-3">
@@ -127,9 +116,8 @@ function DashboardContent() {
                   <div className="text-gray-400">{user?.email}</div>
                 </div>
               </div>
-              <Button variant="outline" onClick={logout}>
-                <LogOut size={16} className="mr-2" />
-                Logout
+              <Button variant="outline" asChild>
+                <a href="/api/auth/logout">Logout</a>
               </Button>
             </div>
           </div>

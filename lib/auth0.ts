@@ -7,7 +7,7 @@ export default initAuth0({
   baseURL: process.env.AUTH0_BASE_URL!,
   secret: process.env.AUTH0_SECRET!,
   routes: {
-    login: "/login",
+    login: "/api/auth/login",
     logout: "/api/auth/logout",
     callback: "/api/auth/callback",
     postLogoutRedirect: "/",
@@ -15,5 +15,8 @@ export default initAuth0({
   session: {
     rollingDuration: 60 * 60 * 24, // 24 hours
     absoluteDuration: 60 * 60 * 24 * 7, // 7 days
+  },
+  authorizationParams: {
+    scope: "openid profile email",
   },
 })
