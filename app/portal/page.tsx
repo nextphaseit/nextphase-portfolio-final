@@ -48,6 +48,52 @@ interface TicketResponse {
   isStaff: boolean
 }
 
+// OneDrive Integration Functions
+const handleOneDriveDownload = async (resource: any) => {
+  try {
+    // Track download
+    await fetch("/api/track-download", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        resourceId: resource.id,
+        resourceTitle: resource.title,
+        downloadType: "onedrive",
+      }),
+    }).catch(() => {}) // Silent fail for tracking
+
+    // Open OneDrive share link in new tab
+    window.open(resource.shareUrl, "_blank")
+  } catch (error) {
+    console.error("Download error:", error)
+    // Fallback to direct share link
+    window.open(resource.shareUrl, "_blank")
+  }
+}
+
+const handleOneDrivePreview = (resource: any) => {
+  // Open preview in new tab
+  window.open(resource.previewUrl || resource.shareUrl, "_blank")
+}
+
+const getFileIcon = (fileType: string) => {
+  switch (fileType.toUpperCase()) {
+    case "PDF":
+      return "📄"
+    case "DOCX":
+    case "DOC":
+      return "📝"
+    case "XLSX":
+    case "XLS":
+      return "📊"
+    case "PPTX":
+    case "PPT":
+      return "📊"
+    default:
+      return "📁"
+  }
+}
+
 function TicketCard({ ticket, onViewDetails }: { ticket: TicketProps; onViewDetails: (ticket: TicketProps) => void }) {
   const statusColors = {
     open: "bg-blue-500/20 text-blue-400 border-blue-500/30",
@@ -335,6 +381,98 @@ function AlertCard({ alert }: { alert: any }) {
   )
 }
 
+// OneDrive Resources Configuration
+const oneDriveResources = [
+  {
+    id: "1",
+    title: "Microsoft 365 User Guide",
+    type: "PDF",
+    size: "2.3 MB",
+    updated: "Jan 10, 2024",
+    description: "Complete guide for using Microsoft 365 applications",
+    category: "guides",
+    oneDriveId: "01ABCDEFGHIJKLMNOPQRSTUVWXYZ",
+    shareUrl: "https://1drv.ms/b/s!your-share-link-here",
+    downloadUrl: "https://api.onedrive.com/v1.0/shares/your-encoded-url/root/content",
+    previewUrl: "https://onedrive.live.com/embed?resid=your-resource-id&authkey=your-auth-key",
+    thumbnailUrl: "https://api.onedrive.com/v1.0/shares/your-encoded-url/root/thumbnails/0/medium/content",
+  },
+  {
+    id: "2",
+    title: "Email Setup Instructions",
+    type: "PDF",
+    size: "1.1 MB",
+    updated: "Jan 8, 2024",
+    description: "Step-by-step email configuration for all devices",
+    category: "guides",
+    oneDriveId: "01BCDEFGHIJKLMNOPQRSTUVWXYZ",
+    shareUrl: "https://1drv.ms/b/s!your-share-link-here-2",
+    downloadUrl: "https://api.onedrive.com/v1.0/shares/your-encoded-url-2/root/content",
+    previewUrl: "https://onedrive.live.com/embed?resid=your-resource-id-2&authkey=your-auth-key-2",
+  },
+  {
+    id: "3",
+    title: "Security Best Practices",
+    type: "PDF",
+    size: "1.8 MB",
+    updated: "Jan 5, 2024",
+    description: "Essential security practices for small businesses",
+    category: "policies",
+    oneDriveId: "01CDEFGHIJKLMNOPQRSTUVWXYZ",
+    shareUrl: "https://1drv.ms/b/s!your-share-link-here-3",
+    downloadUrl: "https://api.onedrive.com/v1.0/shares/your-encoded-url-3/root/content",
+    previewUrl: "https://onedrive.live.com/embed?resid=your-resource-id-3&authkey=your-auth-key-3",
+  },
+  {
+    id: "4",
+    title: "Network Troubleshooting Guide",
+    type: "PDF",
+    size: "3.2 MB",
+    updated: "Jan 3, 2024",
+    description: "Common network issues and solutions",
+    category: "troubleshooting",
+    oneDriveId: "01DEFGHIJKLMNOPQRSTUVWXYZ",
+    shareUrl: "https://1drv.ms/b/s!your-share-link-here-4",
+    downloadUrl: "https://api.onedrive.com/v1.0/shares/your-encoded-url-4/root/content",
+    previewUrl: "https://onedrive.live.com/embed?resid=your-resource-id-4&authkey=your-auth-key-4",
+  },
+  {
+    id: "5",
+    title: "Backup & Recovery Procedures",
+    type: "DOCX",
+    size: "2.7 MB",
+    updated: "Dec 28, 2023",
+    description: "Data backup and disaster recovery procedures",
+    category: "policies",
+    oneDriveId: "01EFGHIJKLMNOPQRSTUVWXYZ",
+    shareUrl: "https://1drv.ms/w/s!your-share-link-here-5",
+    downloadUrl: "https://api.onedrive.com/v1.0/shares/your-encoded-url-5/root/content",
+    previewUrl: "https://onedrive.live.com/embed?resid=your-resource-id-5&authkey=your-auth-key-5",
+  },
+  {
+    id: "6",
+    title: "IT Request Form Template",
+    type: "XLSX",
+    size: "156 KB",
+    updated: "Dec 20, 2023",
+    description: "Template for submitting IT service requests",
+    category: "templates",
+    oneDriveId: "01FGHIJKLMNOPQRSTUVWXYZ",
+    shareUrl: "https://1drv.ms/x/s!your-share-link-here-6",
+    downloadUrl: "https://api.onedrive.com/v1.0/shares/your-encoded-url-6/root/content",
+    previewUrl: "https://onedrive.live.com/embed?resid=your-resource-id-6&authkey=your-auth-key-6",
+  },
+]
+
+// Resource categories for filtering
+const resourceCategories = {
+  all: "All Resources",
+  guides: "User Guides",
+  policies: "Policies & Procedures",
+  templates: "Templates & Forms",
+  troubleshooting: "Troubleshooting",
+}
+
 function ClientPortalContent() {
   const [activeTab, setActiveTab] = useState<"overview" | "tickets" | "resources">("overview")
   const [showNewTicket, setShowNewTicket] = useState(false)
@@ -347,6 +485,9 @@ function ClientPortalContent() {
   const [ticketResult, setTicketResult] = useState<{ success: boolean; message: string; ticketNumber?: string } | null>(
     null,
   )
+
+  const [resourceFilter, setResourceFilter] = useState<string>("all")
+  const [resourceSearch, setResourceSearch] = useState("")
 
   // Sample data - in production, this would come from your backend
   const tickets: TicketProps[] = [
@@ -506,29 +647,17 @@ function ClientPortalContent() {
     },
   ]
 
-  const resources = [
-    {
-      title: "Microsoft 365 User Guide",
-      type: "PDF",
-      size: "2.3 MB",
-      updated: "Jan 10, 2024",
-      description: "Complete guide for using Microsoft 365 applications",
-    },
-    {
-      title: "Email Setup Instructions",
-      type: "PDF",
-      size: "1.1 MB",
-      updated: "Jan 8, 2024",
-      description: "Step-by-step email configuration for all devices",
-    },
-    {
-      title: "Security Best Practices",
-      type: "PDF",
-      size: "1.8 MB",
-      updated: "Jan 5, 2024",
-      description: "Essential security practices for small businesses",
-    },
-  ]
+  // Filter resources based on search and category
+  const filteredResources = oneDriveResources.filter((resource) => {
+    if (resourceFilter !== "all" && resource.category !== resourceFilter) return false
+    if (
+      resourceSearch &&
+      !resource.title.toLowerCase().includes(resourceSearch.toLowerCase()) &&
+      !resource.description.toLowerCase().includes(resourceSearch.toLowerCase())
+    )
+      return false
+    return true
+  })
 
   // Filter and sort tickets
   const filteredTickets = tickets
@@ -759,36 +888,128 @@ function ClientPortalContent() {
           {/* Resources Tab */}
           {activeTab === "resources" && (
             <div>
-              <h2 className="text-2xl font-bold mb-6">Resources & Documentation</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {resources.map((resource, index) => (
-                  <CardWrapper key={index} className="hover:border-primary/40 transition-colors">
-                    <div className="flex items-start gap-3">
-                      <div className="w-10 h-10 bg-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                        <FileText className="text-primary" size={20} />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold mb-1">{resource.title}</h3>
-                        <p className="text-gray-400 text-sm mb-2">{resource.description}</p>
-                        <div className="flex items-center justify-between text-xs text-gray-500">
-                          <span>
-                            {resource.type} • {resource.size}
-                          </span>
-                          <span>Updated {resource.updated}</span>
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                <h2 className="text-2xl font-bold">Resources & Documentation</h2>
+                <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                  {/* Search */}
+                  <div className="relative">
+                    <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      placeholder="Search resources..."
+                      value={resourceSearch}
+                      onChange={(e) => setResourceSearch(e.target.value)}
+                      className="pl-10 pr-4 py-2 bg-black border border-primary/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary w-full sm:w-64"
+                    />
+                  </div>
+
+                  {/* Category Filter */}
+                  <select
+                    value={resourceFilter}
+                    onChange={(e) => setResourceFilter(e.target.value)}
+                    className="px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
+                  >
+                    {Object.entries(resourceCategories).map(([key, label]) => (
+                      <option key={key} value={key}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Resources Grid */}
+              {filteredResources.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredResources.map((resource) => (
+                    <CardWrapper key={resource.id} className="hover:border-primary/40 transition-colors">
+                      <div className="flex items-start gap-3">
+                        <div className="w-12 h-12 bg-primary/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <span className="text-2xl">{getFileIcon(resource.type)}</span>
+                        </div>
+                        <div className="flex-1">
+                          <div className="flex items-start justify-between mb-2">
+                            <h3 className="font-semibold">{resource.title}</h3>
+                            <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">{resource.type}</span>
+                          </div>
+                          <p className="text-gray-400 text-sm mb-3">{resource.description}</p>
+                          <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                            <span>{resource.size}</span>
+                            <span>Updated {resource.updated}</span>
+                          </div>
                         </div>
                       </div>
+
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleOneDriveDownload(resource)}
+                          className="flex-1 bg-primary hover:bg-primary/90"
+                        >
+                          <Download size={14} className="mr-2" />
+                          Download
+                        </Button>
+                        <Button size="sm" variant="outline" onClick={() => handleOneDrivePreview(resource)}>
+                          <ExternalLink size={14} className="mr-1" />
+                          Preview
+                        </Button>
+                      </div>
+
+                      {/* OneDrive Integration Badge */}
+                      <div className="mt-3 pt-3 border-t border-gray-700">
+                        <div className="flex items-center gap-2 text-xs text-gray-400">
+                          <div className="w-4 h-4 bg-blue-500 rounded-sm flex items-center justify-center">
+                            <span className="text-white text-xs font-bold">O</span>
+                          </div>
+                          <span>Hosted on OneDrive</span>
+                        </div>
+                      </div>
+                    </CardWrapper>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <FileText size={64} className="mx-auto mb-4 text-gray-600" />
+                  <h3 className="text-xl font-semibold mb-2">No resources found</h3>
+                  <p className="text-gray-400 mb-6">
+                    {resourceSearch || resourceFilter !== "all"
+                      ? "Try adjusting your search or filter criteria."
+                      : "Resources are being updated. Please check back soon."}
+                  </p>
+                  <Button
+                    onClick={() => {
+                      setResourceSearch("")
+                      setResourceFilter("all")
+                    }}
+                    variant="outline"
+                  >
+                    Clear Filters
+                  </Button>
+                </div>
+              )}
+
+              {/* OneDrive Integration Info */}
+              <div className="mt-8">
+                <CardWrapper className="bg-blue-500/10 border-blue-500/20">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <span className="text-white text-sm font-bold">O</span>
                     </div>
-                    <div className="mt-4 flex gap-2">
-                      <Button size="sm" variant="outline" className="flex-1">
-                        <Download size={14} className="mr-2" />
-                        Download
-                      </Button>
-                      <Button size="sm" variant="ghost">
-                        <ExternalLink size={14} />
-                      </Button>
+                    <div>
+                      <h3 className="font-semibold text-blue-400 mb-2">OneDrive Integration</h3>
+                      <p className="text-gray-400 text-sm mb-3">
+                        All resources are securely hosted on Microsoft OneDrive. You can download files directly or
+                        preview them in your browser.
+                      </p>
+                      <div className="flex flex-wrap gap-4 text-xs text-gray-500">
+                        <span>✓ Secure cloud storage</span>
+                        <span>✓ Always up-to-date</span>
+                        <span>✓ Mobile accessible</span>
+                        <span>✓ Version controlled</span>
+                      </div>
                     </div>
-                  </CardWrapper>
-                ))}
+                  </div>
+                </CardWrapper>
               </div>
             </div>
           )}
