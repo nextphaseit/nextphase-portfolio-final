@@ -12,52 +12,46 @@
   "support": [
     "I can help you create a support ticket. What issue are you experiencing?",
     "Let me assist you with technical support. Can you describe the problem you're facing?",
-    "I'm here to help resolve your IT issues. What seems to be the problem?"
+    "I'm here to help resolve your IT issues. What specific problem can I help you with today?"
   ],
   "pricing": [
     "Our pricing varies based on your specific needs. Would you like me to connect you with our sales team for a custom quote?",
-    "We offer flexible pricing plans for businesses of all sizes. I can schedule a consultation to discuss your requirements.",
-    "For detailed pricing information, I recommend speaking with our team. Would you like me to arrange a call?"
+    "We offer flexible pricing plans for businesses of all sizes. I can arrange a consultation to discuss your requirements.",
+    "For detailed pricing information, I recommend speaking with our team. Would you like me to schedule a call?"
   ],
   "contact": [
-    "You can reach us at (555) 123-4567 or email us at info@nextphaseit.com",
-    "Our office hours are Monday-Friday 8AM-6PM EST. You can call us at (555) 123-4567.",
-    "Feel free to contact us anytime! Phone: (555) 123-4567, Email: info@nextphaseit.com"
+    "You can reach us at (555) 123-4567 or email support@nextphaseit.com",
+    "Our office hours are Monday-Friday 8AM-6PM EST. You can call us at (555) 123-4567",
+    "For immediate assistance, call (555) 123-4567 or use our online support portal."
   ],
-  "ticket_creation": {
-    "prompt": "I'll help you create a support ticket. Please provide the following information:",
-    "fields": [
-      "Brief description of the issue",
-      "Priority level (Low, Medium, High, Urgent)",
-      "When did this issue start?",
-      "Any error messages you're seeing?"
-    ],
-    "confirmation": "Thank you! I've created support ticket #{ticketId} for you. You'll receive a confirmation email shortly with the ticket details."
-  },
+  "hours": [
+    "We're open Monday through Friday, 8:00 AM to 6:00 PM EST.",
+    "Our business hours are 8AM-6PM, Monday-Friday. We also offer 24/7 emergency support for critical issues.",
+    "Standard support hours are 8AM-6PM EST, weekdays. Emergency support is available 24/7."
+  ],
+  "emergency": [
+    "For emergency IT support, please call our 24/7 hotline at (555) 123-4567 ext. 911",
+    "If you have a critical IT emergency, call (555) 123-4567 ext. 911 for immediate assistance.",
+    "Emergency support is available 24/7 at (555) 123-4567 ext. 911"
+  ],
+  "ticket_creation": [
+    "I can help you create a support ticket. Please describe your issue and I'll get you connected with our technical team.",
+    "Let me create a support ticket for you. What problem are you experiencing?",
+    "I'll help you submit a support ticket. Can you provide details about the issue you're facing?"
+  ],
+  "ticket_status": [
+    "I can help you check your ticket status. Do you have your ticket number?",
+    "To check your ticket status, please provide your ticket number or the email address used to create the ticket.",
+    "I can look up your support ticket. What's your ticket number or registered email?"
+  ],
   "fallback": [
     "I'm not sure I understand. Could you please rephrase your question?",
-    "I'd be happy to help! Could you provide more details about what you're looking for?",
-    "Let me connect you with a human agent who can better assist you with that request."
+    "I didn't quite catch that. Can you try asking in a different way?",
+    "I'm here to help with IT support questions. Could you be more specific about what you need?"
   ],
-  "keywords": {
-    "hello": "greetings",
-    "hi": "greetings",
-    "hey": "greetings",
-    "services": "services",
-    "what do you do": "services",
-    "help": "support",
-    "support": "support",
-    "ticket": "support",
-    "issue": "support",
-    "problem": "support",
-    "pricing": "pricing",
-    "cost": "pricing",
-    "price": "pricing",
-    "contact": "contact",
-    "phone": "contact",
-    "email": "contact",
-    "create ticket": "ticket_creation",
-    "new ticket": "ticket_creation",
-    "report issue": "ticket_creation"
-  }
+  "goodbye": [
+    "Thank you for contacting NextPhase IT! Have a great day!",
+    "Thanks for reaching out. Don't hesitate to contact us if you need further assistance!",
+    "Goodbye! Remember, we're here 24/7 for any IT emergencies."
+  ]
 }
