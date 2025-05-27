@@ -9,7 +9,6 @@ import { CardWrapper } from "@/components/ui/card-wrapper"
 import { AuthProvider } from "@/providers/auth-provider"
 import {
   Ticket,
-  FolderOpen,
   FileText,
   Clock,
   CheckCircle,
@@ -47,16 +46,6 @@ interface TicketResponse {
   author: string
   timestamp: string
   isStaff: boolean
-}
-
-interface ProjectProps {
-  id: string
-  name: string
-  status: "planning" | "in-progress" | "review" | "completed"
-  progress: number
-  dueDate: string
-  description: string
-  services: string[]
 }
 
 function TicketCard({ ticket, onViewDetails }: { ticket: TicketProps; onViewDetails: (ticket: TicketProps) => void }) {
@@ -292,51 +281,62 @@ function TicketDetailsModal({ ticket, onClose }: { ticket: TicketProps | null; o
   )
 }
 
-function ProjectCard({ project }: { project: ProjectProps }) {
+function AlertCard({ alert }: { alert: any }) {
   const statusColors = {
-    planning: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-    "in-progress": "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    review: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-    completed: "bg-green-500/20 text-green-400 border-green-500/30",
+    scheduled: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+    active: "bg-red-500/20 text-red-400 border-red-500/30",
+    resolved: "bg-green-500/20 text-green-400 border-green-500/30",
+  }
+
+  const severityColors = {
+    low: "text-green-400",
+    medium: "text-yellow-400",
+    high: "text-red-400",
+  }
+
+  const typeIcons = {
+    outage: <AlertCircle size={20} />,
+    alert: <Clock size={20} />,
+    resolved: <CheckCircle size={20} />,
   }
 
   return (
     <CardWrapper className="hover:border-primary/40 transition-colors">
       <div className="flex items-start justify-between mb-3">
         <div className="flex items-center gap-2">
-          <FolderOpen className="text-primary" size={20} />
-          <h3 className="font-semibold">{project.name}</h3>
+          <div className="text-primary">{typeIcons[alert.type]}</div>
+          <h3 className="font-semibold">{alert.title}</h3>
         </div>
-        <div className={`px-2 py-1 rounded-full text-xs border ${statusColors[project.status]}`}>
-          {project.status.replace("-", " ")}
-        </div>
+        <div className={`px-2 py-1 rounded-full text-xs border ${statusColors[alert.status]}`}>{alert.status}</div>
       </div>
 
-      <p className="text-gray-400 text-sm mb-3">{project.description}</p>
+      <p className="text-gray-400 text-sm mb-3">{alert.description}</p>
 
-      <div className="mb-3">
-        <div className="flex justify-between text-sm mb-1">
-          <span>Progress</span>
-          <span>{project.progress}%</span>
-        </div>
-        <div className="w-full bg-gray-700 rounded-full h-2">
-          <div
-            className="bg-primary h-2 rounded-full transition-all duration-300"
-            style={{ width: `${project.progress}%` }}
-          ></div>
-        </div>
+      <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+        <span className={severityColors[alert.severity]}>{alert.severity.toUpperCase()} Severity</span>
+        <span>Posted {alert.posted}</span>
       </div>
 
-      <div className="flex items-center justify-between text-xs text-gray-500">
-        <span>Due: {project.dueDate}</span>
-        <span>{project.services.length} services</span>
+      <div className="space-y-2 text-xs">
+        <div className="flex justify-between">
+          <span className="text-gray-400">Start:</span>
+          <span>{alert.startTime}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-400">End:</span>
+          <span>{alert.endTime}</span>
+        </div>
+        <div className="flex justify-between">
+          <span className="text-gray-400">Services:</span>
+          <span>{alert.affectedServices.join(", ")}</span>
+        </div>
       </div>
     </CardWrapper>
   )
 }
 
 function ClientPortalContent() {
-  const [activeTab, setActiveTab] = useState<"overview" | "tickets" | "projects" | "resources">("overview")
+  const [activeTab, setActiveTab] = useState<"overview" | "tickets" | "resources">("overview")
   const [showNewTicket, setShowNewTicket] = useState(false)
   const [selectedTicket, setSelectedTicket] = useState<TicketProps | null>(null)
   const [ticketFilter, setTicketFilter] = useState<"all" | "open" | "in-progress" | "resolved" | "closed">("all")
@@ -466,33 +466,43 @@ function ClientPortalContent() {
     },
   ]
 
-  const projects: ProjectProps[] = [
+  const alerts = [
     {
-      id: "PRJ-001",
-      name: "Website Redesign",
-      status: "in-progress",
-      progress: 75,
-      dueDate: "Feb 15, 2024",
-      description: "Complete website redesign with new branding and improved user experience",
-      services: ["Web Design", "SEO", "Content Migration"],
+      id: "ALERT-001",
+      type: "outage",
+      title: "Email Server Maintenance",
+      status: "scheduled",
+      severity: "medium",
+      description: "Scheduled maintenance on email servers. Brief interruptions may occur.",
+      startTime: "Jan 28, 2024 2:00 AM EST",
+      endTime: "Jan 28, 2024 4:00 AM EST",
+      affectedServices: ["Email", "Calendar"],
+      posted: "2 hours ago",
     },
     {
-      id: "PRJ-002",
-      name: "Microsoft 365 Migration",
-      status: "review",
-      progress: 90,
-      dueDate: "Jan 30, 2024",
-      description: "Migration from G Suite to Microsoft 365 with full data transfer",
-      services: ["Cloud Migration", "Email Setup", "Training"],
+      id: "ALERT-002",
+      type: "alert",
+      title: "Security Update Available",
+      status: "active",
+      severity: "low",
+      description:
+        "New security updates are available for Windows systems. Please install at your earliest convenience.",
+      startTime: "Jan 25, 2024",
+      endTime: "Ongoing",
+      affectedServices: ["Windows Updates"],
+      posted: "3 days ago",
     },
     {
-      id: "PRJ-003",
-      name: "Security Audit",
-      status: "completed",
-      progress: 100,
-      dueDate: "Jan 20, 2024",
-      description: "Comprehensive security audit and compliance assessment",
-      services: ["Security Audit", "Compliance", "Documentation"],
+      id: "ALERT-003",
+      type: "resolved",
+      title: "SharePoint Access Issues",
+      status: "resolved",
+      severity: "high",
+      description: "SharePoint access issues have been resolved. All services are now functioning normally.",
+      startTime: "Jan 24, 2024 10:00 AM EST",
+      endTime: "Jan 24, 2024 11:30 AM EST",
+      affectedServices: ["SharePoint", "OneDrive"],
+      posted: "4 days ago",
     },
   ]
 
@@ -583,7 +593,6 @@ function ClientPortalContent() {
             {[
               { id: "overview", label: "Overview", icon: <User size={16} /> },
               { id: "tickets", label: "Support Tickets", icon: <Ticket size={16} /> },
-              { id: "projects", label: "Projects", icon: <FolderOpen size={16} /> },
               { id: "resources", label: "Resources", icon: <FileText size={16} /> },
             ].map((tab) => (
               <button
@@ -608,29 +617,23 @@ function ClientPortalContent() {
               {/* Quick Stats */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <CardWrapper className="text-center">
-                  <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <CheckCircle className="text-green-400" size={24} />
-                  </div>
-                  <div className="text-2xl font-bold text-green-400 mb-1">99.9%</div>
-                  <div className="text-sm text-gray-400">System Uptime</div>
-                </CardWrapper>
-
-                <CardWrapper className="text-center">
                   <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Ticket className="text-blue-400" size={24} />
                   </div>
                   <div className="text-2xl font-bold text-blue-400 mb-1">
                     {tickets.filter((t) => t.status !== "closed").length}
                   </div>
-                  <div className="text-sm text-gray-400">Your Open Tickets</div>
+                  <div className="text-sm text-gray-400">Open Tickets</div>
                 </CardWrapper>
 
                 <CardWrapper className="text-center">
                   <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <FileText className="text-purple-400" size={24} />
+                    <AlertCircle className="text-purple-400" size={24} />
                   </div>
-                  <div className="text-2xl font-bold text-purple-400 mb-1">12</div>
-                  <div className="text-sm text-gray-400">Available Resources</div>
+                  <div className="text-2xl font-bold text-purple-400 mb-1">
+                    {alerts.filter((a) => a.status === "active").length}
+                  </div>
+                  <div className="text-sm text-gray-400">Active Alerts</div>
                 </CardWrapper>
 
                 <CardWrapper className="text-center">
@@ -640,159 +643,39 @@ function ClientPortalContent() {
                   <div className="text-2xl font-bold text-yellow-400 mb-1">2-4</div>
                   <div className="text-sm text-gray-400">Hours Avg Response</div>
                 </CardWrapper>
+
+                <CardWrapper className="text-center">
+                  <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <CheckCircle className="text-purple-400" size={24} />
+                  </div>
+                  <div className="text-2xl font-bold text-purple-400 mb-1">98%</div>
+                  <div className="text-sm text-gray-400">Satisfaction Rate</div>
+                </CardWrapper>
               </div>
 
-              {/* IT Alerts & System Status */}
+              {/* Recent Activity */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div>
                   <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <AlertCircle className="text-primary" size={24} />
-                    IT Alerts & Announcements
+                    <Ticket className="text-primary" size={24} />
+                    Recent Tickets
                   </h2>
                   <div className="space-y-4">
-                    {[
-                      {
-                        id: 1,
-                        type: "maintenance",
-                        title: "Scheduled Server Maintenance",
-                        message:
-                          "Email servers will be offline for maintenance on Sunday, Jan 28th from 2:00 AM - 4:00 AM EST.",
-                        severity: "medium",
-                        posted: "2 days ago",
-                        status: "scheduled",
-                      },
-                      {
-                        id: 2,
-                        type: "update",
-                        title: "Microsoft 365 Security Update",
-                        message:
-                          "New security features have been enabled for all user accounts. Please review the updated security guidelines.",
-                        severity: "low",
-                        posted: "1 week ago",
-                        status: "completed",
-                      },
-                      {
-                        id: 3,
-                        type: "notice",
-                        title: "New Password Policy",
-                        message:
-                          "Updated password requirements are now in effect. Passwords must be changed within 30 days.",
-                        severity: "medium",
-                        posted: "2 weeks ago",
-                        status: "active",
-                      },
-                    ].map((alert) => {
-                      const severityColors = {
-                        low: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-                        medium: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-                        high: "bg-red-500/20 text-red-400 border-red-500/30",
-                      }
-
-                      const typeIcons = {
-                        maintenance: <Clock size={16} />,
-                        update: <CheckCircle size={16} />,
-                        notice: <AlertCircle size={16} />,
-                      }
-
-                      return (
-                        <CardWrapper key={alert.id} className="hover:border-primary/40 transition-colors">
-                          <div className="flex items-start justify-between mb-3">
-                            <div className="flex items-center gap-2">
-                              <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
-                                {typeIcons[alert.type]}
-                              </div>
-                              <h3 className="font-semibold">{alert.title}</h3>
-                            </div>
-                            <div className={`px-2 py-1 rounded-full text-xs border ${severityColors[alert.severity]}`}>
-                              {alert.severity.toUpperCase()}
-                            </div>
-                          </div>
-                          <p className="text-gray-400 text-sm mb-3">{alert.message}</p>
-                          <div className="flex items-center justify-between text-xs text-gray-500">
-                            <span>Posted {alert.posted}</span>
-                            <span
-                              className={`px-2 py-1 rounded ${
-                                alert.status === "active"
-                                  ? "bg-green-500/20 text-green-400"
-                                  : alert.status === "scheduled"
-                                    ? "bg-yellow-500/20 text-yellow-400"
-                                    : "bg-gray-500/20 text-gray-400"
-                              }`}
-                            >
-                              {alert.status}
-                            </span>
-                          </div>
-                        </CardWrapper>
-                      )
-                    })}
+                    {tickets.slice(0, 3).map((ticket) => (
+                      <TicketCard key={ticket.id} ticket={ticket} onViewDetails={setSelectedTicket} />
+                    ))}
                   </div>
                 </div>
 
                 <div>
                   <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <CheckCircle className="text-primary" size={24} />
-                    System Status & Outages
+                    <AlertCircle className="text-primary" size={24} />
+                    IT Alerts & Outages
                   </h2>
                   <div className="space-y-4">
-                    {/* Current Status */}
-                    <CardWrapper className="bg-green-500/10 border-green-500/20">
-                      <div className="flex items-center gap-3 mb-3">
-                        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                        <h3 className="font-semibold text-green-400">All Systems Operational</h3>
-                      </div>
-                      <p className="text-gray-400 text-sm">
-                        All services are running normally with no reported issues.
-                      </p>
-                      <div className="text-xs text-gray-500 mt-2">Last updated: 5 minutes ago</div>
-                    </CardWrapper>
-
-                    {/* Service Status */}
-                    <CardWrapper>
-                      <h3 className="font-semibold mb-3">Service Status</h3>
-                      <div className="space-y-3">
-                        {[
-                          { service: "Email Services", status: "operational", uptime: "99.9%" },
-                          { service: "SharePoint", status: "operational", uptime: "99.8%" },
-                          { service: "Microsoft 365", status: "operational", uptime: "99.9%" },
-                          { service: "Website", status: "operational", uptime: "100%" },
-                          { service: "VPN Access", status: "operational", uptime: "99.7%" },
-                        ].map((item, index) => (
-                          <div key={index} className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                              <span className="text-sm">{item.service}</span>
-                            </div>
-                            <div className="flex items-center gap-3">
-                              <span className="text-xs text-gray-400">{item.uptime} uptime</span>
-                              <span className="text-xs text-green-400">Operational</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </CardWrapper>
-
-                    {/* Recent Incidents */}
-                    <CardWrapper>
-                      <h3 className="font-semibold mb-3">Recent Incidents</h3>
-                      <div className="space-y-3">
-                        <div className="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg">
-                          <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-sm font-medium">Email Delivery Delays</span>
-                              <span className="text-xs text-gray-400">Resolved</span>
-                            </div>
-                            <p className="text-xs text-gray-400">
-                              Brief delays in email delivery. Issue resolved within 30 minutes.
-                            </p>
-                            <span className="text-xs text-gray-500">Jan 20, 2024 - 2:15 PM EST</span>
-                          </div>
-                        </div>
-                        <div className="text-center py-4 text-gray-500 text-sm">
-                          No other incidents in the last 30 days
-                        </div>
-                      </div>
-                    </CardWrapper>
+                    {alerts.slice(0, 3).map((alert) => (
+                      <AlertCard key={alert.id} alert={alert} />
+                    ))}
                   </div>
                 </div>
               </div>
@@ -869,18 +752,6 @@ function ClientPortalContent() {
                     Create Your First Ticket
                   </Button>
                 </div>
-              )}
-            </div>
-          )}
-
-          {/* Projects Tab */}
-          {activeTab === "projects" && (
-            <div>
-              <h2 className="text-2xl font-bold mb-6">Your Projects</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {projects.map((project) => (
-                  <ProjectCard key={project.id} project={project} />
-                ))}
               </div>
             </div>
           )}
@@ -1111,11 +982,6 @@ function ClientPortalContent() {
                     </button>
                   </li>
                   <li>
-                    <button onClick={() => setActiveTab("projects")} className="hover:text-primary transition-colors">
-                      Projects
-                    </button>
-                  </li>
-                  <li>
                     <button onClick={() => setActiveTab("resources")} className="hover:text-primary transition-colors">
                       Resources
                     </button>
@@ -1158,7 +1024,7 @@ function ClientPortalContent() {
           </div>
         </footer>
       </div>
-    </main>
+  </main>
   )
 }
 
