@@ -177,7 +177,7 @@ export function Navbar() {
                         <div className="font-medium text-gray-800">Client Portal</div>
                         <div className="text-sm text-gray-500">Access your account</div>
                       </div>
-                    </a>
+                    </Link>
 
                     <a
                       href="https://forms.cloud.microsoft/r/5Ad9WuMA3G"
