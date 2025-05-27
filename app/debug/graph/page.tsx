@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { CardWrapper } from "@/components/ui/card-wrapper"
-import { CheckCircle, XCircle, Clock, RefreshCw } from 'lucide-react'
+import { CheckCircle, XCircle, Clock, RefreshCw } from "lucide-react"
 
 export default function GraphDebugPage() {
   const [testResult, setTestResult] = useState<any>(null)
@@ -58,21 +58,21 @@ export default function GraphDebugPage() {
     try {
       // Test just the authentication part
       const response = await fetch("/api/test-graph", {
-        method: "POST"
+        method: "POST",
       })
       const result = await response.json()
-      
+
       setTestResult({
         ...result,
         timestamp: new Date().toISOString(),
-        credentialsTest: true
+        credentialsTest: true,
       })
     } catch (error) {
       setTestResult({
         status: "error",
         message: "Credentials test failed",
         error: error instanceof Error ? error.message : "Unknown error",
-        credentialsTest: true
+        credentialsTest: true,
       })
     } finally {
       setIsLoading(false)
@@ -83,6 +83,14 @@ export default function GraphDebugPage() {
     <div className="min-h-screen bg-background p-6">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold mb-6">Microsoft Graph API Debug</h1>
+
+        <div className="mb-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+          <h2 className="text-lg font-semibold text-blue-400 mb-2">✅ Credentials Updated</h2>
+          <p className="text-gray-300 text-sm">
+            Your Microsoft Graph API credentials have been updated. Use the tests below to verify the connection is
+            working properly.
+          </p>
+        </div>
 
         <div className="grid gap-6">
           {/* Test Buttons */}
