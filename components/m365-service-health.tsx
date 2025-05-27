@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { CardWrapper } from "@/components/ui/card-wrapper"
 import { Button } from "@/components/ui/button"
-import { AlertTriangle, CheckCircle, Clock, AlertCircle, ExternalLink, RefreshCw } from "lucide-react"
+import { AlertTriangle, CheckCircle, Clock, AlertCircle, ExternalLink, RefreshCw, Settings } from "lucide-react"
 
 interface ServiceHealthItem {
   id: string
@@ -29,49 +29,6 @@ interface M365ServiceHealthProps {
   maxItems?: number
   showHeader?: boolean
 }
-
-// Static fallback data for Microsoft 365 service health
-const staticServiceHealth: ServiceHealthItem[] = [
-  {
-    id: "MO123456",
-    title: "Some users may be unable to access Exchange Online",
-    service: "Exchange Online",
-    status: "investigating",
-    description:
-      "We're investigating reports that some users may be unable to access Exchange Online mailboxes. Users may experience delays in email delivery or inability to connect to their mailbox.",
-    startTime: "2024-01-26T14:30:00Z",
-    lastUpdated: "2024-01-26T15:45:00Z",
-    impactedFeatures: ["Email access", "Outlook Web App", "Mobile email"],
-    classification: "incident",
-    severity: "high",
-  },
-  {
-    id: "MO123457",
-    title: "SharePoint Online performance issues",
-    service: "SharePoint Online",
-    status: "service-degradation",
-    description:
-      "Users may experience slow performance when accessing SharePoint Online sites and OneDrive for Business. File uploads and downloads may take longer than expected.",
-    startTime: "2024-01-26T13:15:00Z",
-    lastUpdated: "2024-01-26T15:30:00Z",
-    impactedFeatures: ["Site access", "File operations", "OneDrive sync"],
-    classification: "incident",
-    severity: "medium",
-  },
-  {
-    id: "MO123458",
-    title: "Microsoft Teams - Planned maintenance",
-    service: "Microsoft Teams",
-    status: "advisory",
-    description:
-      "Scheduled maintenance for Microsoft Teams infrastructure. Users may experience brief interruptions in service during the maintenance window.",
-    startTime: "2024-01-27T02:00:00Z",
-    lastUpdated: "2024-01-26T12:00:00Z",
-    impactedFeatures: ["Chat", "Meetings", "File sharing"],
-    classification: "advisory",
-    severity: "low",
-  },
-]
 
 const getStatusConfig = (status: ServiceHealthItem["status"]) => {
   switch (status) {
@@ -150,10 +107,11 @@ const formatTimestamp = (timestamp: string) => {
 }
 
 export function M365ServiceHealth({ className = "", maxItems = 5, showHeader = true }: M365ServiceHealthProps) {
-  const [serviceHealth, setServiceHealth] = useState<ServiceHealthItem[]>(staticServiceHealth)
+  const [serviceHealth, setServiceHealth] = useState<ServiceHealthItem[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date())
   const [error, setError] = useState<string | null>(null)
+  const [isDemo, setIsDemo] = useState(false)
 
   // Fetch service health data
   const fetchServiceHealth = async () => {
@@ -168,15 +126,18 @@ export function M365ServiceHealth({ className = "", maxItems = 5, showHeader = t
         const data = await response.json()
 
         if (data.fallback) {
-          if (data.errorDetails?.includes("invalid_client")) {
+          if (data.permissionError) {
+            setError("Microsoft Graph API permissions need to be configured for real-time data")
+          } else if (data.errorDetails?.includes("invalid_client")) {
             setError("Microsoft Graph API authentication failed - please check credentials")
           } else {
-            setError("Using fallback data - real-time data temporarily unavailable")
+            setError("Using demonstration data - real-time data temporarily unavailable")
           }
         }
 
         setServiceHealth(data.value || [])
-        console.log(`Loaded ${data.value?.length || 0} service health items`)
+        setIsDemo(data.source === "demo-data")
+        console.log(`Loaded ${data.value?.length || 0} service health items (source: ${data.source})`)
       } else {
         throw new Error(`API returned ${response.status}`)
       }
@@ -184,9 +145,8 @@ export function M365ServiceHealth({ className = "", maxItems = 5, showHeader = t
       setLastRefresh(new Date())
     } catch (err) {
       console.error("Error fetching service health:", err)
-      setError("Unable to fetch service health data - using sample data")
-      // Use static data as fallback
-      setServiceHealth(staticServiceHealth)
+      setError("Unable to fetch service health data")
+      setServiceHealth([])
     } finally {
       setIsLoading(false)
     }
@@ -222,6 +182,7 @@ export function M365ServiceHealth({ className = "", maxItems = 5, showHeader = t
           <div className="flex items-center gap-3">
             <h2 className="text-xl font-bold">Microsoft 365 Service Health</h2>
             <div className="flex items-center gap-2 text-sm">
+              {isDemo && <span className="bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full text-xs">Demo Mode</span>}
               {activeIncidents > 0 && (
                 <span className="bg-red-500/20 text-red-400 px-2 py-1 rounded-full text-xs">
                   {activeIncidents} Active Issue{activeIncidents !== 1 ? "s" : ""}
@@ -232,7 +193,7 @@ export function M365ServiceHealth({ className = "", maxItems = 5, showHeader = t
                   {advisories} Advisor{advisories !== 1 ? "ies" : "y"}
                 </span>
               )}
-              {activeIncidents === 0 && advisories === 0 && (
+              {activeIncidents === 0 && advisories === 0 && !isDemo && (
                 <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded-full text-xs">
                   All Services Operational
                 </span>
@@ -251,7 +212,23 @@ export function M365ServiceHealth({ className = "", maxItems = 5, showHeader = t
 
       {error && (
         <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-          <p className="text-yellow-400 text-sm">{error}</p>
+          <div className="flex items-center gap-2">
+            <AlertTriangle size={16} className="text-yellow-400" />
+            <p className="text-yellow-400 text-sm">{error}</p>
+          </div>
+          {error.includes("permissions") && (
+            <div className="mt-2">
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => window.open("/debug/graph", "_blank")}
+                className="text-xs"
+              >
+                <Settings size={12} className="mr-1" />
+                Check API Setup
+              </Button>
+            </div>
+          )}
         </div>
       )}
 
@@ -332,18 +309,16 @@ export function M365ServiceHealth({ className = "", maxItems = 5, showHeader = t
       </div>
 
       {/* View All Link */}
-      {serviceHealth.length > maxItems && (
-        <div className="mt-4 text-center">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => window.open("https://admin.microsoft.com/Adminportal/Home#/servicehealth", "_blank")}
-          >
-            <ExternalLink size={14} className="mr-2" />
-            View All Service Health Issues
-          </Button>
-        </div>
-      )}
+      <div className="mt-4 text-center">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={() => window.open("https://admin.microsoft.com/Adminportal/Home#/servicehealth", "_blank")}
+        >
+          <ExternalLink size={14} className="mr-2" />
+          View Microsoft 365 Admin Center
+        </Button>
+      </div>
     </div>
   )
 }
