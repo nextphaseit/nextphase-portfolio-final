@@ -168,7 +168,11 @@ export function M365ServiceHealth({ className = "", maxItems = 5, showHeader = t
         const data = await response.json()
 
         if (data.fallback) {
-          setError("Using fallback data - real-time data temporarily unavailable")
+          if (data.errorDetails?.includes("invalid_client")) {
+            setError("Microsoft Graph API authentication failed - please check credentials")
+          } else {
+            setError("Using fallback data - real-time data temporarily unavailable")
+          }
         }
 
         setServiceHealth(data.value || [])
@@ -180,7 +184,7 @@ export function M365ServiceHealth({ className = "", maxItems = 5, showHeader = t
       setLastRefresh(new Date())
     } catch (err) {
       console.error("Error fetching service health:", err)
-      setError("Unable to fetch service health data")
+      setError("Unable to fetch service health data - using sample data")
       // Use static data as fallback
       setServiceHealth(staticServiceHealth)
     } finally {

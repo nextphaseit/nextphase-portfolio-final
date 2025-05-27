@@ -1,4 +1,69 @@
-"use client"
+# Microsoft Graph API Credentials Setup
+
+## The Problem
+You're getting an "invalid_client" error, which means the client secret is incorrect. This usually happens when:
+
+1. **Wrong secret value**: You might have copied the Secret ID instead of the Secret Value
+2. **Expired secret**: The client secret may have expired
+3. **Incorrect app registration**: The client ID might not match the app registration
+
+## How to Fix This
+
+### Step 1: Check Your Azure App Registration
+1. Go to [Azure Portal](https://portal.azure.com)
+2. Navigate to **Azure Active Directory** > **App registrations**
+3. Find your app registration (ID: `d7390a49-f343-4660-b731-52a12711281b`)
+
+### Step 2: Create a New Client Secret
+1. In your app registration, go to **Certificates & secrets**
+2. Under **Client secrets**, click **+ New client secret**
+3. Add a description (e.g., "NextPhase IT Portal")
+4. Set expiration (recommend 24 months)
+5. Click **Add**
+6. **IMPORTANT**: Copy the **Value** (not the Secret ID) immediately - you won't be able to see it again!
+
+### Step 3: Update Environment Variables
+Replace your current `MICROSOFT_CLIENT_SECRET` with the new secret **Value**.
+
+### Step 4: Verify Required Permissions
+Make sure your app registration has these API permissions:
+- **Microsoft Graph**:
+  - `ServiceHealth.Read.All` (Application)
+  - `Directory.Read.All` (Application)
+
+### Step 5: Grant Admin Consent
+1. In **API permissions**, click **Grant admin consent for [Your Organization]**
+2. Confirm the consent
+
+### Step 6: Test the Connection
+1. Update your environment variables in Vercel
+2. Visit `/debug/graph` to test the connection
+3. Check the portal at `/portal` to see if service health loads
+
+## Environment Variables Format
+\`\`\`
+MICROSOFT_CLIENT_ID=d7390a49-f343-4660-b731-52a12711281b
+MICROSOFT_CLIENT_SECRET=your-new-secret-value-here
+MICROSOFT_TENANT_ID=your-tenant-id-here
+\`\`\`
+
+## Common Issues
+- **Secret ID vs Secret Value**: Always use the Secret Value, not the ID
+- **Expired secrets**: Client secrets expire and need to be renewed
+- **Missing permissions**: Ensure all required permissions are granted
+- **Admin consent**: Some permissions require admin consent
+
+## Testing
+After updating the credentials:
+1. Check `/debug/graph` for connection test
+2. Monitor Vercel function logs for errors
+3. Verify service health displays in `/portal`
+\`\`\`
+
+Let me also update the debug page to provide better credential testing:
+
+```typescriptreact file="app/debug/graph/page.tsx"
+[v0-no-op-code-block-prefix]"use client"
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"

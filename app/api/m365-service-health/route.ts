@@ -100,31 +100,47 @@ async function getAccessToken(): Promise<string> {
   const tenantId = process.env.MICROSOFT_TENANT_ID
 
   if (!clientId || !clientSecret || !tenantId) {
-    throw new Error("Missing Microsoft Graph API credentials")
+    throw new Error("Missing Microsoft Graph API credentials. Please check environment variables.")
   }
+
+  // Log for debugging (without exposing secrets)
+  console.log("Attempting to get access token...")
+  console.log("Client ID:", clientId?.substring(0, 8) + "...")
+  console.log("Tenant ID:", tenantId?.substring(0, 8) + "...")
+  console.log("Client Secret length:", clientSecret?.length)
 
   const tokenUrl = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`
 
-  const response = await fetch(tokenUrl, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: new URLSearchParams({
-      client_id: clientId,
-      client_secret: clientSecret,
-      scope: "https://graph.microsoft.com/.default",
-      grant_type: "client_credentials",
-    }),
+  const params = new URLSearchParams({
+    client_id: clientId,
+    client_secret: clientSecret,
+    scope: "https://graph.microsoft.com/.default",
+    grant_type: "client_credentials",
   })
 
-  if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`Failed to get access token: ${error}`)
-  }
+  try {
+    const response = await fetch(tokenUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: params,
+    })
 
-  const tokenData: GraphTokenResponse = await response.json()
-  return tokenData.access_token
+    const responseText = await response.text()
+
+    if (!response.ok) {
+      console.error("Token request failed:", response.status, responseText)
+      throw new Error(`Failed to get access token: ${responseText}`)
+    }
+
+    const tokenData: GraphTokenResponse = JSON.parse(responseText)
+    console.log("Successfully obtained access token")
+    return tokenData.access_token
+  } catch (error) {
+    console.error("Error in getAccessToken:", error)
+    throw error
+  }
 }
 
 async function fetchServiceHealth(accessToken: string) {
@@ -185,18 +201,26 @@ export async function GET(request: NextRequest) {
       "@odata.context": "https://graph.microsoft.com/v1.0/$metadata#admin/serviceAnnouncement/issues",
       "@odata.count": activeIssues.length,
       lastFetched: new Date().toISOString(),
+      source: "microsoft-graph-api",
     }
 
     return NextResponse.json(response)
   } catch (error) {
     console.error("Error fetching M365 service health:", error)
 
-    // Return fallback data with error information
+    // Determine if this is an authentication error
+    const isAuthError = error instanceof Error && error.message.includes("invalid_client")
+
+    // Return fallback data with detailed error information
     const response = {
       value: fallbackData,
-      error: "Failed to fetch real-time data",
+      error: isAuthError
+        ? "Authentication failed - please check Microsoft Graph API credentials"
+        : "Failed to fetch real-time data",
       fallback: true,
       lastFetched: new Date().toISOString(),
+      source: "fallback-data",
+      errorDetails: error instanceof Error ? error.message : "Unknown error",
     }
 
     return NextResponse.json(response, { status: 200 }) // Return 200 with fallback data
