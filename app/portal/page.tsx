@@ -608,23 +608,29 @@ function ClientPortalContent() {
               {/* Quick Stats */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <CardWrapper className="text-center">
+                  <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <CheckCircle className="text-green-400" size={24} />
+                  </div>
+                  <div className="text-2xl font-bold text-green-400 mb-1">99.9%</div>
+                  <div className="text-sm text-gray-400">System Uptime</div>
+                </CardWrapper>
+
+                <CardWrapper className="text-center">
                   <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
                     <Ticket className="text-blue-400" size={24} />
                   </div>
                   <div className="text-2xl font-bold text-blue-400 mb-1">
                     {tickets.filter((t) => t.status !== "closed").length}
                   </div>
-                  <div className="text-sm text-gray-400">Open Tickets</div>
+                  <div className="text-sm text-gray-400">Your Open Tickets</div>
                 </CardWrapper>
 
                 <CardWrapper className="text-center">
-                  <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <FolderOpen className="text-green-400" size={24} />
+                  <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                    <FileText className="text-purple-400" size={24} />
                   </div>
-                  <div className="text-2xl font-bold text-green-400 mb-1">
-                    {projects.filter((p) => p.status !== "completed").length}
-                  </div>
-                  <div className="text-sm text-gray-400">Active Projects</div>
+                  <div className="text-2xl font-bold text-purple-400 mb-1">12</div>
+                  <div className="text-sm text-gray-400">Available Resources</div>
                 </CardWrapper>
 
                 <CardWrapper className="text-center">
@@ -634,41 +640,159 @@ function ClientPortalContent() {
                   <div className="text-2xl font-bold text-yellow-400 mb-1">2-4</div>
                   <div className="text-sm text-gray-400">Hours Avg Response</div>
                 </CardWrapper>
-
-                <CardWrapper className="text-center">
-                  <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <CheckCircle className="text-purple-400" size={24} />
-                  </div>
-                  <div className="text-2xl font-bold text-purple-400 mb-1">98%</div>
-                  <div className="text-sm text-gray-400">Satisfaction Rate</div>
-                </CardWrapper>
               </div>
 
-              {/* Recent Activity */}
+              {/* IT Alerts & System Status */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div>
                   <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <Ticket className="text-primary" size={24} />
-                    Recent Tickets
+                    <AlertCircle className="text-primary" size={24} />
+                    IT Alerts & Announcements
                   </h2>
                   <div className="space-y-4">
-                    {tickets.slice(0, 3).map((ticket) => (
-                      <TicketCard key={ticket.id} ticket={ticket} onViewDetails={setSelectedTicket} />
-                    ))}
+                    {[
+                      {
+                        id: 1,
+                        type: "maintenance",
+                        title: "Scheduled Server Maintenance",
+                        message:
+                          "Email servers will be offline for maintenance on Sunday, Jan 28th from 2:00 AM - 4:00 AM EST.",
+                        severity: "medium",
+                        posted: "2 days ago",
+                        status: "scheduled",
+                      },
+                      {
+                        id: 2,
+                        type: "update",
+                        title: "Microsoft 365 Security Update",
+                        message:
+                          "New security features have been enabled for all user accounts. Please review the updated security guidelines.",
+                        severity: "low",
+                        posted: "1 week ago",
+                        status: "completed",
+                      },
+                      {
+                        id: 3,
+                        type: "notice",
+                        title: "New Password Policy",
+                        message:
+                          "Updated password requirements are now in effect. Passwords must be changed within 30 days.",
+                        severity: "medium",
+                        posted: "2 weeks ago",
+                        status: "active",
+                      },
+                    ].map((alert) => {
+                      const severityColors = {
+                        low: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+                        medium: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+                        high: "bg-red-500/20 text-red-400 border-red-500/30",
+                      }
+
+                      const typeIcons = {
+                        maintenance: <Clock size={16} />,
+                        update: <CheckCircle size={16} />,
+                        notice: <AlertCircle size={16} />,
+                      }
+
+                      return (
+                        <CardWrapper key={alert.id} className="hover:border-primary/40 transition-colors">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <div className="w-8 h-8 bg-primary/20 rounded-full flex items-center justify-center">
+                                {typeIcons[alert.type]}
+                              </div>
+                              <h3 className="font-semibold">{alert.title}</h3>
+                            </div>
+                            <div className={`px-2 py-1 rounded-full text-xs border ${severityColors[alert.severity]}`}>
+                              {alert.severity.toUpperCase()}
+                            </div>
+                          </div>
+                          <p className="text-gray-400 text-sm mb-3">{alert.message}</p>
+                          <div className="flex items-center justify-between text-xs text-gray-500">
+                            <span>Posted {alert.posted}</span>
+                            <span
+                              className={`px-2 py-1 rounded ${
+                                alert.status === "active"
+                                  ? "bg-green-500/20 text-green-400"
+                                  : alert.status === "scheduled"
+                                    ? "bg-yellow-500/20 text-yellow-400"
+                                    : "bg-gray-500/20 text-gray-400"
+                              }`}
+                            >
+                              {alert.status}
+                            </span>
+                          </div>
+                        </CardWrapper>
+                      )
+                    })}
                   </div>
                 </div>
 
                 <div>
                   <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                    <FolderOpen className="text-primary" size={24} />
-                    Active Projects
+                    <CheckCircle className="text-primary" size={24} />
+                    System Status & Outages
                   </h2>
                   <div className="space-y-4">
-                    {projects
-                      .filter((p) => p.status !== "completed")
-                      .map((project) => (
-                        <ProjectCard key={project.id} project={project} />
-                      ))}
+                    {/* Current Status */}
+                    <CardWrapper className="bg-green-500/10 border-green-500/20">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                        <h3 className="font-semibold text-green-400">All Systems Operational</h3>
+                      </div>
+                      <p className="text-gray-400 text-sm">
+                        All services are running normally with no reported issues.
+                      </p>
+                      <div className="text-xs text-gray-500 mt-2">Last updated: 5 minutes ago</div>
+                    </CardWrapper>
+
+                    {/* Service Status */}
+                    <CardWrapper>
+                      <h3 className="font-semibold mb-3">Service Status</h3>
+                      <div className="space-y-3">
+                        {[
+                          { service: "Email Services", status: "operational", uptime: "99.9%" },
+                          { service: "SharePoint", status: "operational", uptime: "99.8%" },
+                          { service: "Microsoft 365", status: "operational", uptime: "99.9%" },
+                          { service: "Website", status: "operational", uptime: "100%" },
+                          { service: "VPN Access", status: "operational", uptime: "99.7%" },
+                        ].map((item, index) => (
+                          <div key={index} className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                              <span className="text-sm">{item.service}</span>
+                            </div>
+                            <div className="flex items-center gap-3">
+                              <span className="text-xs text-gray-400">{item.uptime} uptime</span>
+                              <span className="text-xs text-green-400">Operational</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardWrapper>
+
+                    {/* Recent Incidents */}
+                    <CardWrapper>
+                      <h3 className="font-semibold mb-3">Recent Incidents</h3>
+                      <div className="space-y-3">
+                        <div className="flex items-start gap-3 p-3 bg-gray-800/50 rounded-lg">
+                          <div className="w-2 h-2 bg-yellow-500 rounded-full mt-2"></div>
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-sm font-medium">Email Delivery Delays</span>
+                              <span className="text-xs text-gray-400">Resolved</span>
+                            </div>
+                            <p className="text-xs text-gray-400">
+                              Brief delays in email delivery. Issue resolved within 30 minutes.
+                            </p>
+                            <span className="text-xs text-gray-500">Jan 20, 2024 - 2:15 PM EST</span>
+                          </div>
+                        </div>
+                        <div className="text-center py-4 text-gray-500 text-sm">
+                          No other incidents in the last 30 days
+                        </div>
+                      </div>
+                    </CardWrapper>
                   </div>
                 </div>
               </div>
