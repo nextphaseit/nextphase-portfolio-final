@@ -1,86 +1,63 @@
 {
-    "Talk2SupportChatbot": {
-        "responses": [
-            {
-                "id": 1,
-                "message": "Hi there! Welcome to Talk2Support. How can we assist you today?"
-            },
-            {
-                "id": 2,
-                "message": "You're chatting with NextPhase IT. Let us know what issue you're facing!"
-            },
-            {
-                "id": 3,
-                "message": "Thanks for reaching out! A support specialist will join shortly."
-            },
-            {
-                "id": 4,
-                "message": "Can you please describe the issue you're experiencing? We'll create a support ticket for you."
-            },
-            {
-                "id": 5,
-                "message": "Got it! I've submitted your request to our team. You\u2019ll receive an update shortly."
-            },
-            {
-                "id": 6,
-                "message": "Would you like me to escalate this issue to a technician right away?"
-            },
-            {
-                "id": 7,
-                "message": "Please provide any relevant screenshots or error messages to help us assist you better."
-            },
-            {
-                "id": 8,
-                "message": "Your request is being reviewed. We appreciate your patience!"
-            },
-            {
-                "id": 9,
-                "message": "Still with us! Our support team is checking into this now."
-            },
-            {
-                "id": 10,
-                "message": "A technician has been assigned to your case. You\u2019ll receive an update via email soon."
-            },
-            {
-                "id": 11,
-                "message": "Based on your message, this article might help: [Link to KB article]"
-            },
-            {
-                "id": 12,
-                "message": "Before we escalate, would you like to try a few troubleshooting steps together?"
-            },
-            {
-                "id": 13,
-                "message": "Here\u2019s a quick guide that might resolve your issue. Want to give it a try?"
-            },
-            {
-                "id": 14,
-                "message": "We understand how important this is. We\u2019re on it."
-            },
-            {
-                "id": 15,
-                "message": "Thanks for your patience\u2014your request has been resolved. Let us know if you need anything else!"
-            },
-            {
-                "id": 16,
-                "message": "Is there anything else I can assist you with today?"
-            },
-            {
-                "id": 17,
-                "message": "We\u2019d love to hear your feedback. Would you mind rating your support experience?"
-            },
-            {
-                "id": 18,
-                "message": "You can always return to Talk2Support anytime for help."
-            },
-            {
-                "id": 19,
-                "message": "This chat will be saved for your reference. You\u2019ll also receive a copy via email."
-            },
-            {
-                "id": 20,
-                "message": "Thank you for using Talk2Support. Have a great day!"
-            }
-        ]
-    }
+  "greetings": [
+    "Hello! Welcome to NextPhase IT Help Desk. How can I assist you today?",
+    "Hi there! I'm here to help with your IT needs. What can I do for you?",
+    "Welcome to NextPhase IT! How may I help you today?"
+  ],
+  "services": [
+    "We offer comprehensive IT services including network setup, cybersecurity, cloud solutions, and 24/7 support.",
+    "Our services include IT consulting, managed services, cybersecurity solutions, cloud migration, and technical support.",
+    "NextPhase IT provides network infrastructure, security audits, backup solutions, and ongoing IT maintenance."
+  ],
+  "support": [
+    "I can help you create a support ticket. What issue are you experiencing?",
+    "Let me assist you with technical support. Can you describe the problem you're facing?",
+    "I'm here to help resolve your IT issues. What seems to be the problem?"
+  ],
+  "pricing": [
+    "Our pricing varies based on your specific needs. Would you like me to connect you with our sales team for a custom quote?",
+    "We offer flexible pricing plans for businesses of all sizes. I can schedule a consultation to discuss your requirements.",
+    "For detailed pricing information, I recommend speaking with our team. Would you like me to arrange a call?"
+  ],
+  "contact": [
+    "You can reach us at (555) 123-4567 or email us at info@nextphaseit.com",
+    "Our office hours are Monday-Friday 8AM-6PM EST. You can call us at (555) 123-4567.",
+    "Feel free to contact us anytime! Phone: (555) 123-4567, Email: info@nextphaseit.com"
+  ],
+  "ticket_creation": {
+    "prompt": "I'll help you create a support ticket. Please provide the following information:",
+    "fields": [
+      "Brief description of the issue",
+      "Priority level (Low, Medium, High, Urgent)",
+      "When did this issue start?",
+      "Any error messages you're seeing?"
+    ],
+    "confirmation": "Thank you! I've created support ticket #{ticketId} for you. You'll receive a confirmation email shortly with the ticket details."
+  },
+  "fallback": [
+    "I'm not sure I understand. Could you please rephrase your question?",
+    "I'd be happy to help! Could you provide more details about what you're looking for?",
+    "Let me connect you with a human agent who can better assist you with that request."
+  ],
+  "keywords": {
+    "hello": "greetings",
+    "hi": "greetings",
+    "hey": "greetings",
+    "services": "services",
+    "what do you do": "services",
+    "help": "support",
+    "support": "support",
+    "ticket": "support",
+    "issue": "support",
+    "problem": "support",
+    "pricing": "pricing",
+    "cost": "pricing",
+    "price": "pricing",
+    "contact": "contact",
+    "phone": "contact",
+    "email": "contact",
+    "create ticket": "ticket_creation",
+    "new ticket": "ticket_creation",
+    "report issue": "ticket_creation"
+  }
 }
