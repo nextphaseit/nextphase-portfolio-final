@@ -7,6 +7,7 @@ import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
 import { CardWrapper } from "@/components/ui/card-wrapper"
 import { AuthProvider } from "@/providers/auth-provider"
+import { M365ServiceHealth } from "@/components/m365-service-health"
 import {
   Ticket,
   FileText,
@@ -843,6 +844,11 @@ function ClientPortalContent() {
                   <div className="text-2xl font-bold text-purple-400 mb-1">98%</div>
                   <div className="text-sm text-gray-400">Satisfaction Rate</div>
                 </CardWrapper>
+              </div>
+
+              {/* Microsoft 365 Service Health */}
+              <div>
+                <M365ServiceHealth maxItems={3} />
               </div>
 
               {/* Recent Activity */}
