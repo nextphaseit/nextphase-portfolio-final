@@ -161,22 +161,26 @@ export function M365ServiceHealth({ className = "", maxItems = 5, showHeader = t
     setError(null)
 
     try {
-      // Try to fetch from Microsoft Graph API
+      console.log("Fetching M365 service health from API...")
       const response = await fetch("/api/m365-service-health")
 
       if (response.ok) {
         const data = await response.json()
-        setServiceHealth(data.value || data)
+
+        if (data.fallback) {
+          setError("Using fallback data - real-time data temporarily unavailable")
+        }
+
+        setServiceHealth(data.value || [])
+        console.log(`Loaded ${data.value?.length || 0} service health items`)
       } else {
-        // Fallback to static data if API fails
-        console.warn("Failed to fetch M365 service health, using static data")
-        setServiceHealth(staticServiceHealth)
+        throw new Error(`API returned ${response.status}`)
       }
 
       setLastRefresh(new Date())
     } catch (err) {
       console.error("Error fetching service health:", err)
-      setError("Unable to fetch latest service health data")
+      setError("Unable to fetch service health data")
       // Use static data as fallback
       setServiceHealth(staticServiceHealth)
     } finally {
