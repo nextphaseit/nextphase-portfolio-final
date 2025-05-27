@@ -48,32 +48,68 @@ interface TicketResponse {
   isStaff: boolean
 }
 
-// OneDrive Integration Functions
-const handleOneDriveDownload = async (resource: any) => {
+// SharePoint/OneDrive Resources Configuration
+const sharePointResources = [
+  {
+    id: "1",
+    title: "Microsoft 365 User Guide",
+    type: "PDF",
+    size: "2.3 MB",
+    updated: "Jan 10, 2024",
+    description: "Complete guide for using Microsoft 365 applications",
+    category: "guides",
+    // Use your actual SharePoint site URL structure
+    shareUrl:
+      "https://nextphaseit968-my.sharepoint.com/:b:/g/personal/adrian_knight_nextphaseit_org/EdYO-tzeq1JNpWAZatJmO9sBlvrCpgd2o4o7_cICuyYD_w?e=BJhGyj",
+    downloadUrl:
+      "https://nextphaseit968-my.sharepoint.com/:b:/g/personal/adrian_knight_nextphaseit_org/EdYO-tzeq1JNpWAZatJmO9sBlvrCpgd2o4o7_cICuyYD_w?e=BJhGyj&download=1",
+    previewUrl:
+      "https://nextphaseit968-my.sharepoint.com/:b:/g/personal/adrian_knight_nextphaseit_org/EdYO-tzeq1JNpWAZatJmO9sBlvrCpgd2o4o7_cICuyYD_w?e=BJhGyj&action=embedview",
+    isAccessible: false, // Will be checked dynamically
+  },
+  // Add more resources here once you have working SharePoint links
+]
+
+// Update the handleOneDriveDownload function to handle SharePoint errors better:
+
+const handleSharePointDownload = async (resource: any) => {
   try {
-    // Track download
+    // Check if link is accessible first
+    const checkResponse = await fetch(resource.shareUrl, {
+      method: "HEAD",
+      mode: "no-cors",
+    }).catch(() => null)
+
+    // Track download attempt
     await fetch("/api/track-download", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         resourceId: resource.id,
         resourceTitle: resource.title,
-        downloadType: "onedrive",
+        downloadType: "sharepoint",
+        success: checkResponse !== null,
       }),
-    }).catch(() => {}) // Silent fail for tracking
+    }).catch(() => {})
 
-    // Open OneDrive share link in new tab
-    window.open(resource.shareUrl, "_blank")
+    // Open SharePoint download link
+    window.open(resource.downloadUrl, "_blank")
   } catch (error) {
-    console.error("Download error:", error)
-    // Fallback to direct share link
-    window.open(resource.shareUrl, "_blank")
+    console.error("SharePoint download error:", error)
+    // Show user-friendly error message
+    alert("Unable to access this resource. Please contact support if this issue persists.")
   }
 }
 
-const handleOneDrivePreview = (resource: any) => {
-  // Open preview in new tab
-  window.open(resource.previewUrl || resource.shareUrl, "_blank")
+const handleSharePointPreview = (resource: any) => {
+  try {
+    // Open preview in new tab
+    window.open(resource.previewUrl, "_blank")
+  } catch (error) {
+    console.error("SharePoint preview error:", error)
+    // Fallback to share URL
+    window.open(resource.shareUrl, "_blank")
+  }
 }
 
 const getFileIcon = (fileType: string) => {
@@ -381,89 +417,6 @@ function AlertCard({ alert }: { alert: any }) {
   )
 }
 
-// OneDrive Resources Configuration
-const oneDriveResources = [
-  {
-    id: "1",
-    title: "Microsoft 365 User Guide",
-    type: "PDF",
-    size: "2.3 MB",
-    updated: "Jan 10, 2024",
-    description: "Complete guide for using Microsoft 365 applications",
-    category: "guides",
-    oneDriveId: "01ABCDEFGHIJKLMNOPQRSTUVWXYZ",
-    shareUrl: "https://1drv.ms/b/s!your-share-link-here",
-    downloadUrl: "https://api.onedrive.com/v1.0/shares/your-encoded-url/root/content",
-    previewUrl: "https://onedrive.live.com/embed?resid=your-resource-id&authkey=your-auth-key",
-    thumbnailUrl: "https://api.onedrive.com/v1.0/shares/your-encoded-url/root/thumbnails/0/medium/content",
-  },
-  {
-    id: "2",
-    title: "Email Setup Instructions",
-    type: "PDF",
-    size: "1.1 MB",
-    updated: "Jan 8, 2024",
-    description: "Step-by-step email configuration for all devices",
-    category: "guides",
-    oneDriveId: "01BCDEFGHIJKLMNOPQRSTUVWXYZ",
-    shareUrl: "https://1drv.ms/b/s!your-share-link-here-2",
-    downloadUrl: "https://api.onedrive.com/v1.0/shares/your-encoded-url-2/root/content",
-    previewUrl: "https://onedrive.live.com/embed?resid=your-resource-id-2&authkey=your-auth-key-2",
-  },
-  {
-    id: "3",
-    title: "Security Best Practices",
-    type: "PDF",
-    size: "1.8 MB",
-    updated: "Jan 5, 2024",
-    description: "Essential security practices for small businesses",
-    category: "policies",
-    oneDriveId: "01CDEFGHIJKLMNOPQRSTUVWXYZ",
-    shareUrl: "https://1drv.ms/b/s!your-share-link-here-3",
-    downloadUrl: "https://api.onedrive.com/v1.0/shares/your-encoded-url-3/root/content",
-    previewUrl: "https://onedrive.live.com/embed?resid=your-resource-id-3&authkey=your-auth-key-3",
-  },
-  {
-    id: "4",
-    title: "Network Troubleshooting Guide",
-    type: "PDF",
-    size: "3.2 MB",
-    updated: "Jan 3, 2024",
-    description: "Common network issues and solutions",
-    category: "troubleshooting",
-    oneDriveId: "01DEFGHIJKLMNOPQRSTUVWXYZ",
-    shareUrl: "https://1drv.ms/b/s!your-share-link-here-4",
-    downloadUrl: "https://api.onedrive.com/v1.0/shares/your-encoded-url-4/root/content",
-    previewUrl: "https://onedrive.live.com/embed?resid=your-resource-id-4&authkey=your-auth-key-4",
-  },
-  {
-    id: "5",
-    title: "Backup & Recovery Procedures",
-    type: "DOCX",
-    size: "2.7 MB",
-    updated: "Dec 28, 2023",
-    description: "Data backup and disaster recovery procedures",
-    category: "policies",
-    oneDriveId: "01EFGHIJKLMNOPQRSTUVWXYZ",
-    shareUrl: "https://1drv.ms/w/s!your-share-link-here-5",
-    downloadUrl: "https://api.onedrive.com/v1.0/shares/your-encoded-url-5/root/content",
-    previewUrl: "https://onedrive.live.com/embed?resid=your-resource-id-5&authkey=your-auth-key-5",
-  },
-  {
-    id: "6",
-    title: "IT Request Form Template",
-    type: "XLSX",
-    size: "156 KB",
-    updated: "Dec 20, 2023",
-    description: "Template for submitting IT service requests",
-    category: "templates",
-    oneDriveId: "01FGHIJKLMNOPQRSTUVWXYZ",
-    shareUrl: "https://1drv.ms/x/s!your-share-link-here-6",
-    downloadUrl: "https://api.onedrive.com/v1.0/shares/your-encoded-url-6/root/content",
-    previewUrl: "https://onedrive.live.com/embed?resid=your-resource-id-6&authkey=your-auth-key-6",
-  },
-]
-
 // Resource categories for filtering
 const resourceCategories = {
   all: "All Resources",
@@ -648,7 +601,7 @@ function ClientPortalContent() {
   ]
 
   // Filter resources based on search and category
-  const filteredResources = oneDriveResources.filter((resource) => {
+  const filteredResources = sharePointResources.filter((resource) => {
     if (resourceFilter !== "all" && resource.category !== resourceFilter) return false
     if (
       resourceSearch &&
@@ -943,13 +896,13 @@ function ClientPortalContent() {
                       <div className="flex gap-2">
                         <Button
                           size="sm"
-                          onClick={() => handleOneDriveDownload(resource)}
+                          onClick={() => handleSharePointDownload(resource)}
                           className="flex-1 bg-primary hover:bg-primary/90"
                         >
                           <Download size={14} className="mr-2" />
                           Download
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => handleOneDrivePreview(resource)}>
+                        <Button size="sm" variant="outline" onClick={() => handleSharePointPreview(resource)}>
                           <ExternalLink size={14} className="mr-1" />
                           Preview
                         </Button>
@@ -988,24 +941,24 @@ function ClientPortalContent() {
                 </div>
               )}
 
-              {/* OneDrive Integration Info */}
+              {/* SharePoint Integration Info */}
               <div className="mt-8">
                 <CardWrapper className="bg-blue-500/10 border-blue-500/20">
                   <div className="flex items-start gap-3">
                     <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <span className="text-white text-sm font-bold">O</span>
+                      <span className="text-white text-sm font-bold">SP</span>
                     </div>
                     <div>
-                      <h3 className="font-semibold text-blue-400 mb-2">OneDrive Integration</h3>
+                      <h3 className="font-semibold text-blue-400 mb-2">SharePoint Integration</h3>
                       <p className="text-gray-400 text-sm mb-3">
-                        All resources are securely hosted on Microsoft OneDrive. You can download files directly or
+                        All resources are securely hosted on Microsoft SharePoint. You can download files directly or
                         preview them in your browser.
                       </p>
                       <div className="flex flex-wrap gap-4 text-xs text-gray-500">
-                        <span>✓ Secure cloud storage</span>
-                        <span>✓ Always up-to-date</span>
-                        <span>✓ Mobile accessible</span>
+                        <span>✓ Enterprise security</span>
                         <span>✓ Version controlled</span>
+                        <span>✓ Access controlled</span>
+                        <span>✓ Audit trail</span>
                       </div>
                     </div>
                   </div>
