@@ -48,7 +48,7 @@ interface TicketResponse {
   isStaff: boolean
 }
 
-// SharePoint/OneDrive Resources Configuration
+// SharePoint/OneDrive Resources Configuration - UPDATE THESE WITH YOUR REAL URLS
 const sharePointResources = [
   {
     id: "1",
@@ -58,27 +58,107 @@ const sharePointResources = [
     updated: "Jan 10, 2024",
     description: "Complete guide for using Microsoft 365 applications",
     category: "guides",
-    // Use your actual SharePoint site URL structure
+    // REPLACE WITH YOUR ACTUAL WORKING SHAREPOINT URLS
     shareUrl:
-      "https://nextphaseit968-my.sharepoint.com/:b:/g/personal/adrian_knight_nextphaseit_org/EdYO-tzeq1JNpWAZatJmO9sBlvrCpgd2o4o7_cICuyYD_w?e=BJhGyj",
+      "https://nextphaseit968-my.sharepoint.com/:b:/g/personal/adrian_knight_nextphaseit_org/YOUR_FILE_ID_1?e=YOUR_SHARE_KEY_1",
     downloadUrl:
-      "https://nextphaseit968-my.sharepoint.com/:b:/g/personal/adrian_knight_nextphaseit_org/EdYO-tzeq1JNpWAZatJmO9sBlvrCpgd2o4o7_cICuyYD_w?e=BJhGyj&download=1",
+      "https://nextphaseit968-my.sharepoint.com/:b:/g/personal/adrian_knight_nextphaseit_org/YOUR_FILE_ID_1?e=YOUR_SHARE_KEY_1&download=1",
     previewUrl:
-      "https://nextphaseit968-my.sharepoint.com/:b:/g/personal/adrian_knight_nextphaseit_org/EdYO-tzeq1JNpWAZatJmO9sBlvrCpgd2o4o7_cICuyYD_w?e=BJhGyj&action=embedview",
-    isAccessible: false, // Will be checked dynamically
+      "https://nextphaseit968-my.sharepoint.com/:b:/g/personal/adrian_knight_nextphaseit_org/YOUR_FILE_ID_1?e=YOUR_SHARE_KEY_1&action=embedview",
+    isAccessible: true, // Set to false if link doesn't work
   },
-  // Add more resources here once you have working SharePoint links
+  {
+    id: "2",
+    title: "Email Setup Instructions",
+    type: "PDF",
+    size: "1.1 MB",
+    updated: "Jan 8, 2024",
+    description: "Step-by-step email configuration for all devices",
+    category: "guides",
+    shareUrl:
+      "https://nextphaseit968-my.sharepoint.com/:b:/g/personal/adrian_knight_nextphaseit_org/YOUR_FILE_ID_2?e=YOUR_SHARE_KEY_2",
+    downloadUrl:
+      "https://nextphaseit968-my.sharepoint.com/:b:/g/personal/adrian_knight_nextphaseit_org/YOUR_FILE_ID_2?e=YOUR_SHARE_KEY_2&download=1",
+    previewUrl:
+      "https://nextphaseit968-my.sharepoint.com/:b:/g/personal/adrian_knight_nextphaseit_org/YOUR_FILE_ID_2?e=YOUR_SHARE_KEY_2&action=embedview",
+    isAccessible: true,
+  },
+  {
+    id: "3",
+    title: "Security Best Practices",
+    type: "PDF",
+    size: "1.8 MB",
+    updated: "Jan 5, 2024",
+    description: "Essential security practices for small businesses",
+    category: "policies",
+    shareUrl:
+      "https://nextphaseit968-my.sharepoint.com/:b:/g/personal/adrian_knight_nextphaseit_org/YOUR_FILE_ID_3?e=YOUR_SHARE_KEY_3",
+    downloadUrl:
+      "https://nextphaseit968-my.sharepoint.com/:b:/g/personal/adrian_knight_nextphaseit_org/YOUR_FILE_ID_3?e=YOUR_SHARE_KEY_3&download=1",
+    previewUrl:
+      "https://nextphaseit968-my.sharepoint.com/:b:/g/personal/adrian_knight_nextphaseit_org/YOUR_FILE_ID_3?e=YOUR_SHARE_KEY_3&action=embedview",
+    isAccessible: true,
+  },
+  {
+    id: "4",
+    title: "Network Troubleshooting Guide",
+    type: "PDF",
+    size: "3.2 MB",
+    updated: "Jan 3, 2024",
+    description: "Common network issues and solutions",
+    category: "troubleshooting",
+    shareUrl:
+      "https://nextphaseit968-my.sharepoint.com/:b:/g/personal/adrian_knight_nextphaseit_org/YOUR_FILE_ID_4?e=YOUR_SHARE_KEY_4",
+    downloadUrl:
+      "https://nextphaseit968-my.sharepoint.com/:b:/g/personal/adrian_knight_nextphaseit_org/YOUR_FILE_ID_4?e=YOUR_SHARE_KEY_4&download=1",
+    previewUrl:
+      "https://nextphaseit968-my.sharepoint.com/:b:/g/personal/adrian_knight_nextphaseit_org/YOUR_FILE_ID_4?e=YOUR_SHARE_KEY_4&action=embedview",
+    isAccessible: true,
+  },
+  {
+    id: "5",
+    title: "Backup & Recovery Procedures",
+    type: "DOCX",
+    size: "2.7 MB",
+    updated: "Dec 28, 2023",
+    description: "Data backup and disaster recovery procedures",
+    category: "policies",
+    shareUrl:
+      "https://nextphaseit968-my.sharepoint.com/:w:/g/personal/adrian_knight_nextphaseit_org/YOUR_FILE_ID_5?e=YOUR_SHARE_KEY_5",
+    downloadUrl:
+      "https://nextphaseit968-my.sharepoint.com/:w:/g/personal/adrian_knight_nextphaseit_org/YOUR_FILE_ID_5?e=YOUR_SHARE_KEY_5&download=1",
+    previewUrl:
+      "https://nextphaseit968-my.sharepoint.com/:w:/g/personal/adrian_knight_nextphaseit_org/YOUR_FILE_ID_5?e=YOUR_SHARE_KEY_5&action=embedview",
+    isAccessible: true,
+  },
+  {
+    id: "6",
+    title: "IT Request Form Template",
+    type: "XLSX",
+    size: "156 KB",
+    updated: "Dec 20, 2023",
+    description: "Template for submitting IT service requests",
+    category: "templates",
+    shareUrl:
+      "https://nextphaseit968-my.sharepoint.com/:x:/g/personal/adrian_knight_nextphaseit_org/YOUR_FILE_ID_6?e=YOUR_SHARE_KEY_6",
+    downloadUrl:
+      "https://nextphaseit968-my.sharepoint.com/:x:/g/personal/adrian_knight_nextphaseit_org/YOUR_FILE_ID_6?e=YOUR_SHARE_KEY_6&download=1",
+    previewUrl:
+      "https://nextphaseit968-my.sharepoint.com/:x:/g/personal/adrian_knight_nextphaseit_org/YOUR_FILE_ID_6?e=YOUR_SHARE_KEY_6&action=embedview",
+    isAccessible: true,
+  },
 ]
 
 // Update the handleOneDriveDownload function to handle SharePoint errors better:
 
 const handleSharePointDownload = async (resource: any) => {
   try {
-    // Check if link is accessible first
-    const checkResponse = await fetch(resource.shareUrl, {
-      method: "HEAD",
-      mode: "no-cors",
-    }).catch(() => null)
+    // Show loading state
+    const button = document.activeElement as HTMLButtonElement
+    if (button) {
+      button.disabled = true
+      button.textContent = "Downloading..."
+    }
 
     // Track download attempt
     await fetch("/api/track-download", {
@@ -88,16 +168,46 @@ const handleSharePointDownload = async (resource: any) => {
         resourceId: resource.id,
         resourceTitle: resource.title,
         downloadType: "sharepoint",
-        success: checkResponse !== null,
+        url: resource.downloadUrl,
       }),
-    }).catch(() => {})
+    }).catch(() => {}) // Silent fail for tracking
 
     // Open SharePoint download link
-    window.open(resource.downloadUrl, "_blank")
+    const downloadWindow = window.open(resource.downloadUrl, "_blank")
+
+    // Check if popup was blocked
+    if (!downloadWindow) {
+      alert("Popup blocked! Please allow popups for this site and try again.")
+      return
+    }
+
+    // Reset button after delay
+    setTimeout(() => {
+      if (button) {
+        button.disabled = false
+        button.innerHTML = "<svg>...</svg> Download"
+      }
+    }, 2000)
   } catch (error) {
     console.error("SharePoint download error:", error)
+
     // Show user-friendly error message
-    alert("Unable to access this resource. Please contact support if this issue persists.")
+    const errorMsg = `Unable to download "${resource.title}". This may be due to:
+    
+• File permissions need to be updated
+• SharePoint link has expired  
+• Network connectivity issues
+
+Please contact support at support@nextphaseit.org if this issue persists.`
+
+    alert(errorMsg)
+
+    // Reset button
+    const button = document.activeElement as HTMLButtonElement
+    if (button) {
+      button.disabled = false
+      button.innerHTML = "<svg>...</svg> Download"
+    }
   }
 }
 
@@ -869,6 +979,49 @@ function ClientPortalContent() {
                     ))}
                   </select>
                 </div>
+              </div>
+
+              {/* SharePoint Status Checker */}
+              <div className="mb-6">
+                <CardWrapper className="bg-yellow-500/10 border-yellow-500/20">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 bg-yellow-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                      <span className="text-white text-sm font-bold">!</span>
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-yellow-400 mb-2">SharePoint Setup Required</h3>
+                      <p className="text-gray-400 text-sm mb-3">
+                        Some resources may show "This link has been removed" errors. This means the SharePoint sharing
+                        permissions need to be updated.
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => window.open("/docs/sharepoint-permission-fix.md", "_blank")}
+                        >
+                          📋 View Setup Guide
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => window.open("https://nextphaseit968-admin.sharepoint.com", "_blank")}
+                        >
+                          🔧 SharePoint Admin
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            window.open("mailto:support@nextphaseit.org?subject=SharePoint Access Issue", "_blank")
+                          }
+                        >
+                          📧 Contact Support
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </CardWrapper>
               </div>
 
               {/* Resources Grid */}
