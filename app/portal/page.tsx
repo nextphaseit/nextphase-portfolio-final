@@ -752,7 +752,7 @@ function ClientPortalContent() {
                     Create Your First Ticket
                   </Button>
                 </div>
-              </div>
+              )}
             </div>
           )}
 
@@ -1024,7 +1024,7 @@ function ClientPortalContent() {
           </div>
         </footer>
       </div>
-  </main>
+    </main>
   )
 }
 
