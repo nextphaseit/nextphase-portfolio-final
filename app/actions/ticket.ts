@@ -199,27 +199,37 @@ async function triggerPowerAutomate(ticketData: TicketData & { ticketNumber: str
       return
     }
 
+    console.log("Triggering Power Automate with webhook URL:", webhookUrl.substring(0, 50) + "...")
+
+    const payload = {
+      ticketNumber: ticketData.ticketNumber,
+      subject: ticketData.subject,
+      priority: ticketData.priority,
+      description: ticketData.description,
+      clientName: ticketData.clientName || "Anonymous",
+      clientEmail: ticketData.clientEmail || "support@nextphaseit.org",
+      source: ticketData.source,
+      created: new Date().toISOString(),
+    }
+
+    console.log("Power Automate payload:", payload)
+
     const response = await fetch(webhookUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        ticketNumber: ticketData.ticketNumber,
-        subject: ticketData.subject,
-        priority: ticketData.priority,
-        description: ticketData.description,
-        clientName: ticketData.clientName || "Anonymous",
-        clientEmail: ticketData.clientEmail || "support@nextphaseit.org",
-        source: ticketData.source,
-        created: new Date().toISOString(),
-      }),
+      body: JSON.stringify(payload),
     })
 
     if (response.ok) {
       console.log("Power Automate workflow triggered successfully")
+      const responseText = await response.text()
+      console.log("Power Automate response:", responseText)
     } else {
-      console.error("Failed to trigger Power Automate workflow:", response.statusText)
+      console.error("Failed to trigger Power Automate workflow:", response.status, response.statusText)
+      const errorText = await response.text()
+      console.error("Power Automate error response:", errorText)
     }
   } catch (error) {
     console.error("Error triggering Power Automate workflow:", error)
@@ -228,6 +238,13 @@ async function triggerPowerAutomate(ticketData: TicketData & { ticketNumber: str
 
 export async function createSupportTicket(ticketData: TicketData) {
   try {
+    console.log("Starting ticket creation process...", {
+      subject: ticketData.subject,
+      priority: ticketData.priority,
+      clientEmail: ticketData.clientEmail,
+      source: ticketData.source,
+    })
+
     // Check if Resend API key is available
     if (!process.env.RESEND_API_KEY) {
       console.error("RESEND_API_KEY environment variable is not set")
@@ -238,6 +255,8 @@ export async function createSupportTicket(ticketData: TicketData) {
       }
     }
 
+    console.log("Resend API key found, initializing...")
+
     // Initialize Resend with API key
     const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -245,43 +264,60 @@ export async function createSupportTicket(ticketData: TicketData) {
     const ticketNumber = generateTicketNumber()
     const ticketWithNumber = { ...ticketData, ticketNumber }
 
+    console.log("Generated ticket number:", ticketNumber)
+
     // Send confirmation email to client (if email provided)
     if (ticketData.clientEmail) {
       try {
-        await resend.emails.send({
+        console.log("Sending client confirmation email to:", ticketData.clientEmail)
+
+        const clientEmailResult = await resend.emails.send({
           from: "NextPhase IT Support <support@nextphaseit.org>",
           to: [ticketData.clientEmail],
           subject: `Support Ticket Created - #${ticketNumber}`,
           html: generateClientConfirmationEmail(ticketWithNumber),
           replyTo: "support@nextphaseit.org",
         })
-        console.log(`Confirmation email sent to: ${ticketData.clientEmail}`)
+
+        console.log("Client email sent successfully:", clientEmailResult)
       } catch (emailError) {
         console.error("Failed to send client confirmation email:", emailError)
         // Continue with internal notification even if client email fails
       }
+    } else {
+      console.log("No client email provided, skipping client confirmation")
     }
 
     // Send internal notification to support team
     try {
-      await resend.emails.send({
+      console.log("Sending internal notification to support team...")
+
+      const internalEmailResult = await resend.emails.send({
         from: "NextPhase IT System <noreply@nextphaseit.org>",
         to: ["support@nextphaseit.org"],
         subject: `New Support Ticket #${ticketNumber} - ${ticketData.subject} [${ticketData.priority.toUpperCase()}]`,
         html: generateInternalNotificationEmail(ticketWithNumber),
         replyTo: ticketData.clientEmail || "support@nextphaseit.org",
       })
-      console.log("Internal notification sent to support@nextphaseit.org")
+
+      console.log("Internal email sent successfully:", internalEmailResult)
     } catch (emailError) {
       console.error("Failed to send internal notification:", emailError)
       // Still return success if ticket was created, even if email failed
     }
 
     // Trigger Power Automate workflow for SharePoint integration
-    await triggerPowerAutomate(ticketWithNumber)
+    try {
+      console.log("Triggering Power Automate workflow...")
+      await triggerPowerAutomate(ticketWithNumber)
+      console.log("Power Automate workflow triggered successfully")
+    } catch (powerAutomateError) {
+      console.error("Power Automate workflow failed:", powerAutomateError)
+      // Continue even if Power Automate fails
+    }
 
     // Log ticket creation
-    console.log("Support ticket created:", {
+    console.log("Support ticket created successfully:", {
       ticketNumber,
       subject: ticketData.subject,
       priority: ticketData.priority,
