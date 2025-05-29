@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Navbar } from "@/components/navbar"
+import Navbar from "@/components/navbar"
 import { Button } from "@/components/ui/button"
 import { CardWrapper } from "@/components/ui/card-wrapper"
 import { AuthProvider } from "@/providers/auth-provider"
