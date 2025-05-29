@@ -1,278 +1,227 @@
 "use client"
 
-import type React from "react"
-
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { CardWrapper } from "@/components/ui/card-wrapper"
-import { useAuth } from "@/providers/auth-provider"
 import {
   User,
   Mail,
   Phone,
-  Building,
+  MapPin,
   Shield,
+  Key,
+  Bell,
+  Globe,
+  Clock,
+  Smartphone,
+  Monitor,
   Edit,
   Save,
-  X,
-  Eye,
-  EyeOff,
-  CheckCircle,
-  Settings,
-  Bell,
-  Lock,
-  Key,
-  Calendar,
-  MapPin,
-  Clock,
+  Check,
+  AlertCircle,
 } from "lucide-react"
+import Image from "next/image"
 
 interface UserProfile {
   id: string
-  fullName: string
+  name: string
   email: string
   phone: string
   department: string
-  jobTitle: string
-  company: string
   preferredContact: "email" | "phone" | "teams"
   timezone: string
   language: string
-  notifications: {
-    email: boolean
-    sms: boolean
-    push: boolean
-  }
+  joinDate: string
   lastLogin: string
-  accountCreated: string
   profilePicture?: string
+  isM365User: boolean
 }
 
-interface SecuritySettings {
-  twoFactorEnabled: boolean
-  lastPasswordChange: string
-  loginHistory: Array<{
-    date: string
-    location: string
-    device: string
-    success: boolean
-  }>
+interface LoginHistory {
+  id: string
+  timestamp: string
+  device: string
+  location: string
+  ipAddress: string
+  success: boolean
 }
 
 export function AccountManagement() {
-  const { user, isAuthenticated } = useAuth()
-  const [activeSection, setActiveSection] = useState<"profile" | "security" | "preferences">("profile")
+  const [activeSection, setActiveSection] = useState<"profile" | "security" | "notifications" | "history">("profile")
   const [isEditing, setIsEditing] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [showSuccess, setShowSuccess] = useState(false)
-  const [showPasswordForm, setShowPasswordForm] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
 
-  // Mock user profile data - in production, this would come from your backend
+  // Mock user data - in production, this would come from your backend
   const [userProfile, setUserProfile] = useState<UserProfile>({
-    id: user?.id || "user-123",
-    fullName: user?.name || "John Smith",
-    email: user?.email || "john.smith@company.com",
+    id: "user_123",
+    name: "John Smith",
+    email: "john.smith@company.com",
     phone: "+1 (555) 123-4567",
-    department: user?.department || "Marketing",
-    jobTitle: "Marketing Manager",
-    company: "Acme Corporation",
+    department: "Marketing",
     preferredContact: "email",
     timezone: "America/New_York",
-    language: "English (US)",
-    notifications: {
-      email: true,
-      sms: false,
-      push: true,
-    },
-    lastLogin: "2024-01-28 09:15 AM",
-    accountCreated: "2023-06-15",
-    profilePicture: user?.picture,
+    language: "en-US",
+    joinDate: "2023-06-15",
+    lastLogin: "2024-01-28 14:30:00",
+    profilePicture: "/placeholder.svg?height=100&width=100&text=JS",
+    isM365User: true,
   })
 
-  const [securitySettings, setSecuritySettings] = useState<SecuritySettings>({
+  const [notifications, setNotifications] = useState({
+    emailUpdates: true,
+    smsAlerts: false,
+    ticketUpdates: true,
+    maintenanceAlerts: true,
+    securityAlerts: true,
+    weeklyReports: false,
+  })
+
+  const [security, setSecurity] = useState({
     twoFactorEnabled: false,
-    lastPasswordChange: "2023-12-15",
-    loginHistory: [
-      {
-        date: "2024-01-28 09:15 AM",
-        location: "Clayton, NC",
-        device: "Chrome on Windows",
-        success: true,
-      },
-      {
-        date: "2024-01-27 02:30 PM",
-        location: "Clayton, NC",
-        device: "Safari on iPhone",
-        success: true,
-      },
-      {
-        date: "2024-01-26 10:45 AM",
-        location: "Raleigh, NC",
-        device: "Chrome on Windows",
-        success: true,
-      },
-      {
-        date: "2024-01-25 08:20 AM",
-        location: "Unknown Location",
-        device: "Chrome on Linux",
-        success: false,
-      },
-    ],
+    passwordLastChanged: "2024-01-15",
+    sessionTimeout: 30,
   })
 
-  const [editedProfile, setEditedProfile] = useState<UserProfile>(userProfile)
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  })
-
-  useEffect(() => {
-    if (user) {
-      setUserProfile((prev) => ({
-        ...prev,
-        fullName: user.name,
-        email: user.email,
-        department: user.department || prev.department,
-        profilePicture: user.picture,
-      }))
-      setEditedProfile((prev) => ({
-        ...prev,
-        fullName: user.name,
-        email: user.email,
-        department: user.department || prev.department,
-        profilePicture: user.picture,
-      }))
-    }
-  }, [user])
+  // Mock login history
+  const loginHistory: LoginHistory[] = [
+    {
+      id: "1",
+      timestamp: "2024-01-28 14:30:00",
+      device: "Chrome on Windows",
+      location: "Clayton, NC",
+      ipAddress: "192.168.1.100",
+      success: true,
+    },
+    {
+      id: "2",
+      timestamp: "2024-01-27 09:15:00",
+      device: "Safari on iPhone",
+      location: "Clayton, NC",
+      ipAddress: "192.168.1.101",
+      success: true,
+    },
+    {
+      id: "3",
+      timestamp: "2024-01-26 16:45:00",
+      device: "Chrome on Windows",
+      location: "Clayton, NC",
+      ipAddress: "192.168.1.100",
+      success: true,
+    },
+    {
+      id: "4",
+      timestamp: "2024-01-25 11:20:00",
+      device: "Unknown Device",
+      location: "Unknown Location",
+      ipAddress: "203.0.113.1",
+      success: false,
+    },
+  ]
 
   const handleSaveProfile = async () => {
     setIsLoading(true)
+    setMessage(null)
 
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500))
+    setTimeout(() => {
+      setIsLoading(false)
+      setIsEditing(false)
+      setMessage({ type: "success", text: "Profile updated successfully!" })
 
-    setUserProfile(editedProfile)
-    setIsEditing(false)
-    setIsLoading(false)
-    setShowSuccess(true)
-
-    // Hide success message after 3 seconds
-    setTimeout(() => setShowSuccess(false), 3000)
+      // Clear message after 3 seconds
+      setTimeout(() => setMessage(null), 3000)
+    }, 1000)
   }
 
-  const handleCancelEdit = () => {
-    setEditedProfile(userProfile)
-    setIsEditing(false)
-  }
-
-  const handlePasswordChange = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      alert("New passwords don't match!")
-      return
-    }
-
-    if (passwordData.newPassword.length < 8) {
-      alert("Password must be at least 8 characters long!")
-      return
-    }
-
+  const handlePasswordReset = async () => {
     setIsLoading(true)
+    setMessage(null)
 
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 2000))
+    setTimeout(() => {
+      setIsLoading(false)
+      setMessage({
+        type: "success",
+        text: "Password reset email sent to your registered email address.",
+      })
 
-    setSecuritySettings((prev) => ({
-      ...prev,
-      lastPasswordChange: new Date().toISOString().split("T")[0],
-    }))
-
-    setPasswordData({
-      currentPassword: "",
-      newPassword: "",
-      confirmPassword: "",
-    })
-
-    setShowPasswordForm(false)
-    setIsLoading(false)
-    setShowSuccess(true)
-
-    setTimeout(() => setShowSuccess(false), 3000)
+      // Clear message after 5 seconds
+      setTimeout(() => setMessage(null), 5000)
+    }, 1000)
   }
 
-  const toggleTwoFactor = async () => {
+  const handleToggle2FA = async () => {
     setIsLoading(true)
+    setMessage(null)
 
     // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000))
+    setTimeout(() => {
+      setSecurity((prev) => ({ ...prev, twoFactorEnabled: !prev.twoFactorEnabled }))
+      setIsLoading(false)
+      setMessage({
+        type: "success",
+        text: `Two-factor authentication ${!security.twoFactorEnabled ? "enabled" : "disabled"} successfully!`,
+      })
 
-    setSecuritySettings((prev) => ({
-      ...prev,
-      twoFactorEnabled: !prev.twoFactorEnabled,
-    }))
-
-    setIsLoading(false)
-    setShowSuccess(true)
-    setTimeout(() => setShowSuccess(false), 3000)
+      // Clear message after 3 seconds
+      setTimeout(() => setMessage(null), 3000)
+    }, 1000)
   }
 
-  if (!isAuthenticated) {
-    return (
-      <div className="text-center py-12">
-        <Shield size={64} className="mx-auto mb-4 text-gray-600" />
-        <h3 className="text-xl font-semibold mb-2">Authentication Required</h3>
-        <p className="text-gray-400 mb-6">Please log in to access your account management settings.</p>
-        <Button onClick={() => (window.location.href = "/login")} className="bg-primary hover:bg-primary/90">
-          <Shield size={16} className="mr-2" />
-          Sign In
-        </Button>
-      </div>
-    )
-  }
+  const sections = [
+    { id: "profile", label: "Profile", icon: <User size={16} /> },
+    { id: "security", label: "Security", icon: <Shield size={16} /> },
+    { id: "notifications", label: "Notifications", icon: <Bell size={16} /> },
+    { id: "history", label: "Login History", icon: <Clock size={16} /> },
+  ]
 
   return (
     <div className="space-y-6">
-      {/* Success Message */}
-      {showSuccess && (
-        <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
-          <div className="flex items-center gap-2">
-            <CheckCircle className="text-green-400" size={20} />
-            <p className="text-green-400 font-medium">Changes saved successfully!</p>
-          </div>
-        </div>
-      )}
-
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold">Account Management</h2>
           <p className="text-gray-400">Manage your profile, security settings, and preferences</p>
         </div>
-        <div className="flex items-center gap-2 text-sm text-gray-400">
-          <Clock size={16} />
-          <span>Last login: {userProfile.lastLogin}</span>
-        </div>
+
+        {userProfile.isM365User && (
+          <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-lg px-3 py-2">
+            <div className="w-6 h-6 bg-blue-500 rounded-sm flex items-center justify-center">
+              <span className="text-white text-xs font-bold">M</span>
+            </div>
+            <span className="text-blue-400 text-sm">Microsoft 365 Account</span>
+          </div>
+        )}
       </div>
+
+      {/* Global Message */}
+      {message && (
+        <div
+          className={`p-4 rounded-lg border flex items-center gap-3 ${
+            message.type === "success"
+              ? "bg-green-500/10 border-green-500/20 text-green-400"
+              : "bg-red-500/10 border-red-500/20 text-red-400"
+          }`}
+        >
+          {message.type === "success" ? <Check size={20} /> : <AlertCircle size={20} />}
+          <span>{message.text}</span>
+        </div>
+      )}
 
       {/* Navigation Tabs */}
       <div className="flex space-x-1 bg-card/50 rounded-lg p-1">
-        {[
-          { id: "profile", label: "Profile", icon: <User size={16} /> },
-          { id: "security", label: "Security", icon: <Shield size={16} /> },
-          { id: "preferences", label: "Preferences", icon: <Settings size={16} /> },
-        ].map((tab) => (
+        {sections.map((section) => (
           <button
-            key={tab.id}
-            onClick={() => setActiveSection(tab.id as any)}
+            key={section.id}
+            onClick={() => setActiveSection(section.id as any)}
             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              activeSection === tab.id ? "bg-primary text-white" : "text-gray-400 hover:text-white hover:bg-white/5"
+              activeSection === section.id ? "bg-primary text-white" : "text-gray-400 hover:text-white hover:bg-white/5"
             }`}
           >
-            {tab.icon}
-            {tab.label}
+            {section.icon}
+            {section.label}
           </button>
         ))}
       </div>
@@ -283,31 +232,31 @@ export function AccountManagement() {
           {/* Profile Picture & Basic Info */}
           <CardWrapper className="lg:col-span-1">
             <div className="text-center">
-              <div className="w-24 h-24 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
-                {userProfile.profilePicture ? (
-                  <img
-                    src={userProfile.profilePicture || "/placeholder.svg"}
-                    alt="Profile"
-                    className="w-24 h-24 rounded-full object-cover"
-                  />
-                ) : (
-                  <User size={32} className="text-primary" />
+              <div className="relative inline-block mb-4">
+                <Image
+                  src={userProfile.profilePicture || "/placeholder.svg?height=100&width=100&text=JS"}
+                  alt="Profile"
+                  width={100}
+                  height={100}
+                  className="rounded-full border-4 border-primary/20"
+                />
+                {userProfile.isM365User && (
+                  <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center border-2 border-black">
+                    <span className="text-white text-xs font-bold">M</span>
+                  </div>
                 )}
               </div>
-              <h3 className="text-xl font-semibold mb-1">{userProfile.fullName}</h3>
-              <p className="text-gray-400 mb-2">{userProfile.jobTitle}</p>
-              <p className="text-sm text-gray-500">{userProfile.company}</p>
+              <h3 className="text-xl font-semibold mb-1">{userProfile.name}</h3>
+              <p className="text-gray-400 mb-2">{userProfile.department}</p>
+              <p className="text-sm text-gray-500">Member since {userProfile.joinDate}</p>
 
-              <div className="mt-6 space-y-3">
-                <div className="flex items-center justify-center gap-2 text-sm">
-                  <Calendar size={14} className="text-gray-400" />
-                  <span className="text-gray-400">Member since {userProfile.accountCreated}</span>
+              {userProfile.isM365User && (
+                <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                  <p className="text-blue-400 text-sm">
+                    This account is managed by Microsoft 365. Some settings may be controlled by your organization.
+                  </p>
                 </div>
-                <div className="flex items-center justify-center gap-2 text-sm">
-                  <MapPin size={14} className="text-gray-400" />
-                  <span className="text-gray-400">{userProfile.timezone}</span>
-                </div>
-              </div>
+              )}
             </div>
           </CardWrapper>
 
@@ -315,68 +264,66 @@ export function AccountManagement() {
           <CardWrapper className="lg:col-span-2">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-semibold">Profile Information</h3>
-              {!isEditing ? (
-                <Button onClick={() => setIsEditing(true)} size="sm" variant="outline">
-                  <Edit size={14} className="mr-2" />
-                  Edit Profile
-                </Button>
-              ) : (
-                <div className="flex gap-2">
-                  <Button
-                    onClick={handleSaveProfile}
-                    disabled={isLoading}
-                    size="sm"
-                    className="bg-primary hover:bg-primary/90"
-                  >
-                    {isLoading ? (
-                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                    ) : (
-                      <Save size={14} className="mr-2" />
-                    )}
-                    Save
-                  </Button>
-                  <Button onClick={handleCancelEdit} size="sm" variant="outline">
-                    <X size={14} className="mr-2" />
-                    Cancel
-                  </Button>
-                </div>
-              )}
+              <Button
+                onClick={() => (isEditing ? handleSaveProfile() : setIsEditing(true))}
+                disabled={isLoading}
+                className="bg-primary hover:bg-primary/90"
+              >
+                {isLoading ? (
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                ) : isEditing ? (
+                  <>
+                    <Save size={16} className="mr-2" />
+                    Save Changes
+                  </>
+                ) : (
+                  <>
+                    <Edit size={16} className="mr-2" />
+                    Edit Profile
+                  </>
+                )}
+              </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+                <label className="block text-sm font-medium mb-2">Full Name</label>
                 {isEditing ? (
                   <input
                     type="text"
-                    value={editedProfile.fullName}
-                    onChange={(e) => setEditedProfile({ ...editedProfile, fullName: e.target.value })}
+                    value={userProfile.name}
+                    onChange={(e) => setUserProfile((prev) => ({ ...prev, name: e.target.value }))}
                     className="w-full bg-black border border-primary/20 rounded-lg p-3 text-white focus:outline-none focus:border-primary"
                   />
                 ) : (
                   <div className="flex items-center gap-2 p-3 bg-gray-800/50 rounded-lg">
                     <User size={16} className="text-gray-400" />
-                    <span>{userProfile.fullName}</span>
+                    <span>{userProfile.name}</span>
                   </div>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+                <label className="block text-sm font-medium mb-2">Email Address</label>
                 <div className="flex items-center gap-2 p-3 bg-gray-800/50 rounded-lg">
                   <Mail size={16} className="text-gray-400" />
                   <span>{userProfile.email}</span>
-                  <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded ml-auto">Microsoft 365</span>
+                  {userProfile.isM365User && (
+                    <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">M365</span>
+                  )}
                 </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {userProfile.isM365User ? "Managed by Microsoft 365" : "Contact support to change email"}
+                </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number</label>
+                <label className="block text-sm font-medium mb-2">Phone Number</label>
                 {isEditing ? (
                   <input
                     type="tel"
-                    value={editedProfile.phone}
-                    onChange={(e) => setEditedProfile({ ...editedProfile, phone: e.target.value })}
+                    value={userProfile.phone}
+                    onChange={(e) => setUserProfile((prev) => ({ ...prev, phone: e.target.value }))}
                     className="w-full bg-black border border-primary/20 rounded-lg p-3 text-white focus:outline-none focus:border-primary"
                   />
                 ) : (
@@ -388,45 +335,34 @@ export function AccountManagement() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Department</label>
+                <label className="block text-sm font-medium mb-2">Department</label>
                 {isEditing ? (
-                  <input
-                    type="text"
-                    value={editedProfile.department}
-                    onChange={(e) => setEditedProfile({ ...editedProfile, department: e.target.value })}
+                  <select
+                    value={userProfile.department}
+                    onChange={(e) => setUserProfile((prev) => ({ ...prev, department: e.target.value }))}
                     className="w-full bg-black border border-primary/20 rounded-lg p-3 text-white focus:outline-none focus:border-primary"
-                  />
+                  >
+                    <option value="Marketing">Marketing</option>
+                    <option value="Sales">Sales</option>
+                    <option value="IT">IT</option>
+                    <option value="HR">Human Resources</option>
+                    <option value="Finance">Finance</option>
+                    <option value="Operations">Operations</option>
+                  </select>
                 ) : (
                   <div className="flex items-center gap-2 p-3 bg-gray-800/50 rounded-lg">
-                    <Building size={16} className="text-gray-400" />
+                    <MapPin size={16} className="text-gray-400" />
                     <span>{userProfile.department}</span>
                   </div>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Job Title</label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={editedProfile.jobTitle}
-                    onChange={(e) => setEditedProfile({ ...editedProfile, jobTitle: e.target.value })}
-                    className="w-full bg-black border border-primary/20 rounded-lg p-3 text-white focus:outline-none focus:border-primary"
-                  />
-                ) : (
-                  <div className="flex items-center gap-2 p-3 bg-gray-800/50 rounded-lg">
-                    <User size={16} className="text-gray-400" />
-                    <span>{userProfile.jobTitle}</span>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Preferred Contact</label>
+                <label className="block text-sm font-medium mb-2">Preferred Contact Method</label>
                 {isEditing ? (
                   <select
-                    value={editedProfile.preferredContact}
-                    onChange={(e) => setEditedProfile({ ...editedProfile, preferredContact: e.target.value as any })}
+                    value={userProfile.preferredContact}
+                    onChange={(e) => setUserProfile((prev) => ({ ...prev, preferredContact: e.target.value as any }))}
                     className="w-full bg-black border border-primary/20 rounded-lg p-3 text-white focus:outline-none focus:border-primary"
                   >
                     <option value="email">Email</option>
@@ -435,272 +371,243 @@ export function AccountManagement() {
                   </select>
                 ) : (
                   <div className="flex items-center gap-2 p-3 bg-gray-800/50 rounded-lg">
-                    <Bell size={16} className="text-gray-400" />
+                    {userProfile.preferredContact === "email" && <Mail size={16} className="text-gray-400" />}
+                    {userProfile.preferredContact === "phone" && <Phone size={16} className="text-gray-400" />}
+                    {userProfile.preferredContact === "teams" && <Monitor size={16} className="text-gray-400" />}
                     <span className="capitalize">{userProfile.preferredContact}</span>
                   </div>
                 )}
               </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Timezone</label>
+                {isEditing ? (
+                  <select
+                    value={userProfile.timezone}
+                    onChange={(e) => setUserProfile((prev) => ({ ...prev, timezone: e.target.value }))}
+                    className="w-full bg-black border border-primary/20 rounded-lg p-3 text-white focus:outline-none focus:border-primary"
+                  >
+                    <option value="America/New_York">Eastern Time (ET)</option>
+                    <option value="America/Chicago">Central Time (CT)</option>
+                    <option value="America/Denver">Mountain Time (MT)</option>
+                    <option value="America/Los_Angeles">Pacific Time (PT)</option>
+                  </select>
+                ) : (
+                  <div className="flex items-center gap-2 p-3 bg-gray-800/50 rounded-lg">
+                    <Globe size={16} className="text-gray-400" />
+                    <span>{userProfile.timezone.replace("America/", "").replace("_", " ")}</span>
+                  </div>
+                )}
+              </div>
             </div>
+
+            {isEditing && (
+              <div className="flex gap-3 mt-6 pt-6 border-t border-gray-700">
+                <Button onClick={handleSaveProfile} disabled={isLoading} className="bg-primary hover:bg-primary/90">
+                  {isLoading ? "Saving..." : "Save Changes"}
+                </Button>
+                <Button onClick={() => setIsEditing(false)} variant="outline" disabled={isLoading}>
+                  Cancel
+                </Button>
+              </div>
+            )}
           </CardWrapper>
         </div>
       )}
 
       {/* Security Section */}
       {activeSection === "security" && (
-        <div className="space-y-6">
-          {/* Password Management */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <CardWrapper>
-            <div className="flex items-center justify-between mb-4">
-              <div>
-                <h3 className="text-lg font-semibold flex items-center gap-2">
-                  <Lock size={20} className="text-primary" />
-                  Password & Authentication
-                </h3>
-                <p className="text-gray-400 text-sm">Manage your password and authentication settings</p>
-              </div>
-            </div>
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Key size={20} className="text-primary" />
+              Password & Authentication
+            </h3>
 
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg">
-                <div>
-                  <h4 className="font-medium">Password</h4>
-                  <p className="text-sm text-gray-400">Last changed: {securitySettings.lastPasswordChange}</p>
+              <div className="p-4 bg-gray-800/50 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium">Password</span>
+                  <span className="text-sm text-gray-400">Last changed: {security.passwordLastChanged}</span>
                 </div>
-                <Button onClick={() => setShowPasswordForm(!showPasswordForm)} size="sm" variant="outline">
-                  <Key size={14} className="mr-2" />
-                  Change Password
+                <p className="text-sm text-gray-400 mb-3">
+                  {userProfile.isM365User
+                    ? "Password is managed by Microsoft 365"
+                    : "Keep your account secure with a strong password"}
+                </p>
+                <Button onClick={handlePasswordReset} disabled={isLoading} variant="outline" size="sm">
+                  {isLoading ? "Sending..." : userProfile.isM365User ? "Reset via Microsoft" : "Change Password"}
                 </Button>
               </div>
 
-              {showPasswordForm && (
-                <form onSubmit={handlePasswordChange} className="p-4 bg-gray-800/30 rounded-lg space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Current Password</label>
-                    <div className="relative">
-                      <input
-                        type={showPassword ? "text" : "password"}
-                        value={passwordData.currentPassword}
-                        onChange={(e) => setPasswordData({ ...passwordData, currentPassword: e.target.value })}
-                        className="w-full bg-black border border-primary/20 rounded-lg p-3 pr-12 text-white focus:outline-none focus:border-primary"
-                        required
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white"
-                      >
-                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                      </button>
-                    </div>
+              <div className="p-4 bg-gray-800/50 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium">Two-Factor Authentication</span>
+                  <div
+                    className={`px-2 py-1 rounded text-xs ${
+                      security.twoFactorEnabled ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
+                    }`}
+                  >
+                    {security.twoFactorEnabled ? "Enabled" : "Disabled"}
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">New Password</label>
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      value={passwordData.newPassword}
-                      onChange={(e) => setPasswordData({ ...passwordData, newPassword: e.target.value })}
-                      className="w-full bg-black border border-primary/20 rounded-lg p-3 text-white focus:outline-none focus:border-primary"
-                      required
-                      minLength={8}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Confirm New Password</label>
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      value={passwordData.confirmPassword}
-                      onChange={(e) => setPasswordData({ ...passwordData, confirmPassword: e.target.value })}
-                      className="w-full bg-black border border-primary/20 rounded-lg p-3 text-white focus:outline-none focus:border-primary"
-                      required
-                      minLength={8}
-                    />
-                  </div>
-
-                  <div className="flex gap-3">
-                    <Button type="submit" disabled={isLoading} className="bg-primary hover:bg-primary/90">
-                      {isLoading ? (
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                      ) : (
-                        <Save size={14} className="mr-2" />
-                      )}
-                      Update Password
-                    </Button>
-                    <Button type="button" onClick={() => setShowPasswordForm(false)} variant="outline">
-                      Cancel
-                    </Button>
-                  </div>
-                </form>
-              )}
-
-              <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg">
-                <div>
-                  <h4 className="font-medium">Two-Factor Authentication</h4>
-                  <p className="text-sm text-gray-400">
-                    {securitySettings.twoFactorEnabled ? "Enabled" : "Add an extra layer of security"}
-                  </p>
                 </div>
+                <p className="text-sm text-gray-400 mb-3">Add an extra layer of security to your account</p>
                 <Button
-                  onClick={toggleTwoFactor}
+                  onClick={handleToggle2FA}
                   disabled={isLoading}
                   size="sm"
-                  variant={securitySettings.twoFactorEnabled ? "outline" : "default"}
-                  className={securitySettings.twoFactorEnabled ? "" : "bg-primary hover:bg-primary/90"}
+                  className={
+                    security.twoFactorEnabled ? "bg-red-600 hover:bg-red-700" : "bg-green-600 hover:bg-green-700"
+                  }
                 >
-                  {isLoading ? (
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                  ) : (
-                    <Shield size={14} className="mr-2" />
-                  )}
-                  {securitySettings.twoFactorEnabled ? "Disable" : "Enable"}
+                  {isLoading ? "Processing..." : security.twoFactorEnabled ? "Disable 2FA" : "Enable 2FA"}
                 </Button>
               </div>
             </div>
           </CardWrapper>
 
-          {/* Login History */}
           <CardWrapper>
-            <h3 className="text-lg font-semibold mb-4">Recent Login Activity</h3>
-            <div className="space-y-3">
-              {securitySettings.loginHistory.map((login, index) => (
-                <div
-                  key={index}
-                  className={`flex items-center justify-between p-3 rounded-lg ${
-                    login.success
-                      ? "bg-green-500/10 border border-green-500/20"
-                      : "bg-red-500/10 border border-red-500/20"
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`w-2 h-2 rounded-full ${login.success ? "bg-green-400" : "bg-red-400"}`} />
-                    <div>
-                      <p className="font-medium">{login.device}</p>
-                      <p className="text-sm text-gray-400">{login.location}</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm">{login.date}</p>
-                    <p className={`text-xs ${login.success ? "text-green-400" : "text-red-400"}`}>
-                      {login.success ? "Successful" : "Failed"}
-                    </p>
-                  </div>
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <Shield size={20} className="text-primary" />
+              Security Settings
+            </h3>
+
+            <div className="space-y-4">
+              <div className="p-4 bg-gray-800/50 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium">Session Timeout</span>
+                  <span className="text-sm text-gray-400">{security.sessionTimeout} minutes</span>
                 </div>
-              ))}
+                <p className="text-sm text-gray-400 mb-3">Automatically log out after period of inactivity</p>
+                <select
+                  value={security.sessionTimeout}
+                  onChange={(e) =>
+                    setSecurity((prev) => ({ ...prev, sessionTimeout: Number.parseInt(e.target.value) }))
+                  }
+                  className="w-full bg-black border border-primary/20 rounded-lg p-2 text-white text-sm focus:outline-none focus:border-primary"
+                >
+                  <option value={15}>15 minutes</option>
+                  <option value={30}>30 minutes</option>
+                  <option value={60}>1 hour</option>
+                  <option value={120}>2 hours</option>
+                  <option value={480}>8 hours</option>
+                </select>
+              </div>
+
+              <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                <h4 className="font-medium text-blue-400 mb-2">Security Recommendations</h4>
+                <ul className="text-sm text-gray-400 space-y-1">
+                  <li>• Enable two-factor authentication</li>
+                  <li>• Use a unique, strong password</li>
+                  <li>• Review login history regularly</li>
+                  <li>• Keep your contact information updated</li>
+                </ul>
+              </div>
             </div>
           </CardWrapper>
         </div>
       )}
 
-      {/* Preferences Section */}
-      {activeSection === "preferences" && (
-        <div className="space-y-6">
-          {/* Notification Preferences */}
-          <CardWrapper>
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <Bell size={20} className="text-primary" />
-              Notification Preferences
-            </h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg">
-                <div>
-                  <h4 className="font-medium">Email Notifications</h4>
-                  <p className="text-sm text-gray-400">Receive updates via email</p>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={userProfile.notifications.email}
-                    onChange={(e) =>
-                      setUserProfile({
-                        ...userProfile,
-                        notifications: { ...userProfile.notifications, email: e.target.checked },
-                      })
-                    }
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                </label>
-              </div>
+      {/* Notifications Section */}
+      {activeSection === "notifications" && (
+        <CardWrapper>
+          <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
+            <Bell size={20} className="text-primary" />
+            Notification Preferences
+          </h3>
 
-              <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {Object.entries(notifications).map(([key, value]) => (
+              <div key={key} className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg">
                 <div>
-                  <h4 className="font-medium">SMS Notifications</h4>
-                  <p className="text-sm text-gray-400">Receive urgent updates via SMS</p>
+                  <h4 className="font-medium capitalize">{key.replace(/([A-Z])/g, " $1").trim()}</h4>
+                  <p className="text-sm text-gray-400">
+                    {key === "emailUpdates" && "Receive general updates via email"}
+                    {key === "smsAlerts" && "Get urgent alerts via SMS"}
+                    {key === "ticketUpdates" && "Notifications about your support tickets"}
+                    {key === "maintenanceAlerts" && "Scheduled maintenance notifications"}
+                    {key === "securityAlerts" && "Security-related notifications"}
+                    {key === "weeklyReports" && "Weekly summary reports"}
+                  </p>
                 </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={userProfile.notifications.sms}
-                    onChange={(e) =>
-                      setUserProfile({
-                        ...userProfile,
-                        notifications: { ...userProfile.notifications, sms: e.target.checked },
-                      })
-                    }
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                </label>
-              </div>
-
-              <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg">
-                <div>
-                  <h4 className="font-medium">Push Notifications</h4>
-                  <p className="text-sm text-gray-400">Browser push notifications</p>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={userProfile.notifications.push}
-                    onChange={(e) =>
-                      setUserProfile({
-                        ...userProfile,
-                        notifications: { ...userProfile.notifications, push: e.target.checked },
-                      })
-                    }
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                </label>
-              </div>
-            </div>
-          </CardWrapper>
-
-          {/* Regional Settings */}
-          <CardWrapper>
-            <h3 className="text-lg font-semibold mb-4">Regional Settings</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Timezone</label>
-                <select
-                  value={userProfile.timezone}
-                  onChange={(e) => setUserProfile({ ...userProfile, timezone: e.target.value })}
-                  className="w-full bg-black border border-primary/20 rounded-lg p-3 text-white focus:outline-none focus:border-primary"
+                <button
+                  onClick={() => setNotifications((prev) => ({ ...prev, [key]: !value }))}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    value ? "bg-primary" : "bg-gray-600"
+                  }`}
                 >
-                  <option value="America/New_York">Eastern Time (ET)</option>
-                  <option value="America/Chicago">Central Time (CT)</option>
-                  <option value="America/Denver">Mountain Time (MT)</option>
-                  <option value="America/Los_Angeles">Pacific Time (PT)</option>
-                </select>
+                  <span
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                      value ? "translate-x-6" : "translate-x-1"
+                    }`}
+                  />
+                </button>
               </div>
+            ))}
+          </div>
+        </CardWrapper>
+      )}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Language</label>
-                <select
-                  value={userProfile.language}
-                  onChange={(e) => setUserProfile({ ...userProfile, language: e.target.value })}
-                  className="w-full bg-black border border-primary/20 rounded-lg p-3 text-white focus:outline-none focus:border-primary"
-                >
-                  <option value="English (US)">English (US)</option>
-                  <option value="English (UK)">English (UK)</option>
-                  <option value="Spanish">Spanish</option>
-                  <option value="French">French</option>
-                </select>
+      {/* Login History Section */}
+      {activeSection === "history" && (
+        <CardWrapper>
+          <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
+            <Clock size={20} className="text-primary" />
+            Login History
+          </h3>
+
+          <div className="space-y-4">
+            {loginHistory.map((login) => (
+              <div
+                key={login.id}
+                className={`p-4 rounded-lg border ${
+                  login.success ? "bg-gray-800/50 border-gray-700" : "bg-red-500/10 border-red-500/20"
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-3 h-3 rounded-full ${login.success ? "bg-green-400" : "bg-red-400"}`} />
+                    <span className="font-medium">{login.success ? "Successful Login" : "Failed Login Attempt"}</span>
+                  </div>
+                  <span className="text-sm text-gray-400">{login.timestamp}</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-400">
+                  <div className="flex items-center gap-2">
+                    {login.device.includes("iPhone") ? <Smartphone size={16} /> : <Monitor size={16} />}
+                    <span>{login.device}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <MapPin size={16} />
+                    <span>{login.location}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Globe size={16} />
+                    <span>{login.ipAddress}</span>
+                  </div>
+                </div>
+
+                {!login.success && (
+                  <div className="mt-3 p-2 bg-red-500/10 border border-red-500/20 rounded text-sm text-red-400">
+                    <AlertCircle size={14} className="inline mr-2" />
+                    If this wasn't you, please contact support immediately.
+                  </div>
+                )}
               </div>
-            </div>
-          </CardWrapper>
-        </div>
+            ))}
+          </div>
+
+          <div className="mt-6 p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+            <h4 className="font-medium text-blue-400 mb-2">Security Notice</h4>
+            <p className="text-sm text-gray-400">
+              We log all login attempts for security purposes. If you notice any suspicious activity, please contact our
+              support team immediately at{" "}
+              <a href="mailto:support@nextphaseit.org" className="text-primary hover:underline">
+                support@nextphaseit.org
+              </a>
+            </p>
+          </div>
+        </CardWrapper>
       )}
     </div>
   )
