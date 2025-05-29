@@ -1,26 +1,131 @@
-"use client"
+# Client Intake Form Power Automate Setup Guide
+
+This guide walks you through setting up the automated workflow for processing client intake form submissions.
+
+## Prerequisites
+
+1. Microsoft 365 account with Power Automate access
+2. Microsoft Forms form created with ID: `QWtKpJuvTg`
+3. SharePoint site with "ClientIntakeForms" document library
+4. PDF generation service (HTML/CSS to PDF API)
+
+## Step 1: Create SharePoint Document Library
+
+1. Go to your SharePoint site: `https://nextphaseit.sharepoint.com/sites/NextPhaseIT`
+2. Create a new document library called "ClientIntakeForms"
+3. Set appropriate permissions for the Power Automate service account
+
+## Step 2: Set up PDF Generation Service
+
+### Option A: HTML/CSS to PDF API (Recommended)
+1. Sign up for an HTML/CSS to PDF service (e.g., api.html-css-to-pdf.com)
+2. Get your API key
+3. Update the workflow JSON with your API key
+
+### Option B: Azure Function (Custom)
+1. Create an Azure Function that converts HTML to PDF
+2. Deploy the function and get the endpoint URL
+3. Update the workflow to use your custom endpoint
+
+## Step 3: Import Power Automate Flow
+
+1. Go to [Power Automate](https://flow.microsoft.com)
+2. Click "My flows" > "Import" > "Import Package (Legacy)"
+3. Upload the `client-intake-form-workflow.json` file
+4. Configure the connections:
+   - Microsoft Forms
+   - SharePoint Online
+   - Office 365 Outlook
+
+## Step 4: Configure Form Field Mappings
+
+Update the variable initialization actions to match your form fields:
+
+\`\`\`json
+{
+  "r1": "Full Name",
+  "r2": "Company Name", 
+  "r3": "Email Address",
+  "r4": "Phone Number",
+  "r5": "Services Needed",
+  "r6": "Additional Notes"
+}
+\`\`\`
+
+## Step 5: Test the Workflow
+
+1. Submit a test form response
+2. Check that:
+   - PDF is generated correctly
+   - File is saved to SharePoint
+   - Confirmation email is sent to the client
+   - Notification email is sent to the team
+
+## Step 6: Monitor and Maintain
+
+1. Set up flow analytics and monitoring
+2. Configure error handling and retry policies
+3. Set up alerts for failed runs
+4. Regularly review and update the workflow
+
+## Troubleshooting
+
+### Common Issues:
+
+1. **PDF Generation Fails**
+   - Check API key and endpoint
+   - Verify HTML template syntax
+   - Check API rate limits
+
+2. **SharePoint Access Denied**
+   - Verify service account permissions
+   - Check document library exists
+   - Ensure correct site URL
+
+3. **Email Delivery Issues**
+   - Check Office 365 connection
+   - Verify email addresses
+   - Check spam filters
+
+### Error Handling:
+
+The workflow includes automatic retry logic and error notifications. Failed runs will:
+- Retry up to 3 times
+- Send error notifications to admin team
+- Log detailed error information
+
+## Security Considerations
+
+1. **Data Protection**
+   - All form data is encrypted in transit and at rest
+   - SharePoint access is restricted to authorized users
+   - PDF files are stored securely with proper permissions
+
+2. **Access Control**
+   - Service account has minimal required permissions
+   - Regular access reviews and audits
+   - Secure API key management
+
+## Maintenance Schedule
+
+- **Weekly**: Review flow run history
+- **Monthly**: Check error rates and performance
+- **Quarterly**: Update security settings and permissions
+- **Annually**: Review and update workflow logic
+
+For additional support, contact the NextPhase IT development team.
+\`\`\`
+
+Now let me add the Client Intake Submissions section to the Admin Portal:
+
+```typescriptreact file="app/admin/page.tsx"
+[v0-no-op-code-block-prefix]"use client"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { CardWrapper } from "@/components/ui/card-wrapper"
 import { AdminAuthProvider, useAdminAuth, withAdminAuth } from "@/providers/admin-auth-provider"
 import { AdminAnalyticsDashboard } from "@/components/admin-analytics-dashboard"
-import {
-  BarChart3,
-  FileText,
-  Settings,
-  Shield,
-  Activity,
-  Download,
-  Calendar,
-  Building,
-  Eye,
-  Edit,
-  Plus,
-  RefreshCw,
-  Mail,
-  CheckCircle,
-  Award,
-} from "lucide-react"
+import { BarChart3, FileText, Settings, Shield, Activity, Download, Calendar, Building, Eye, Edit, Plus, RefreshCw, Mail, CheckCircle, Award } from 'lucide-react'
 import Image from "next/image"
 import { getAuditLog, type AuditLogEntry } from "@/lib/admin-auth"
 import { TENANT_CONFIGS } from "@/lib/tenant-config"
@@ -504,10 +609,10 @@ function AdminClientIntakeModule() {
           servicesNeeded: "Website Development, Cloud Migration",
           submittedDate: "2024-01-15 10:30:00",
           status: "new",
-          pdfUrl: "/ClientIntakeForms/ClientIntake_20240115_103000_John_Smith.pdf",
+          pdfUrl: "/ClientIntakeForms/ClientIntake_20240115_103000_John_Smith.pdf"
         },
         {
-          id: "INT-002",
+          id: "INT-002", 
           clientName: "Sarah Johnson",
           companyName: "Johnson Marketing",
           email: "sarah@johnsonmarketing.com",
@@ -515,8 +620,8 @@ function AdminClientIntakeModule() {
           servicesNeeded: "IT Support, Security Audit",
           submittedDate: "2024-01-14 14:15:00",
           status: "contacted",
-          pdfUrl: "/ClientIntakeForms/ClientIntake_20240114_141500_Sarah_Johnson.pdf",
-        },
+          pdfUrl: "/ClientIntakeForms/ClientIntake_20240114_141500_Sarah_Johnson.pdf"
+        }
       ]
       setIntakeSubmissions(mockData)
       setIsLoading(false)
@@ -524,20 +629,22 @@ function AdminClientIntakeModule() {
   }
 
   const updateSubmissionStatus = (id: string, status: string) => {
-    setIntakeSubmissions((prev) => prev.map((sub) => (sub.id === id ? { ...sub, status } : sub)))
+    setIntakeSubmissions(prev => 
+      prev.map(sub => sub.id === id ? { ...sub, status } : sub)
+    )
   }
 
   const downloadPDF = (pdfUrl: string, clientName: string) => {
     // In a real implementation, this would download from SharePoint
-    window.open(`https://nextphaseit.sharepoint.com/sites/NextPhaseIT${pdfUrl}`, "_blank")
+    window.open(`https://nextphaseit.sharepoint.com/sites/NextPhaseIT${pdfUrl}`, '_blank')
   }
 
   const statusColors = {
     new: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    contacted: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+    contacted: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30", 
     qualified: "bg-green-500/20 text-green-400 border-green-500/30",
     converted: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-    declined: "bg-gray-500/20 text-gray-400 border-gray-500/30",
+    declined: "bg-gray-500/20 text-gray-400 border-gray-500/30"
   }
 
   return (
@@ -560,7 +667,7 @@ function AdminClientIntakeModule() {
             <FileText className="text-blue-400" size={24} />
           </div>
           <div className="text-2xl font-bold text-blue-400 mb-1">
-            {intakeSubmissions.filter((s) => s.status === "new").length}
+            {intakeSubmissions.filter(s => s.status === 'new').length}
           </div>
           <div className="text-sm text-gray-400">New Submissions</div>
         </CardWrapper>
@@ -570,7 +677,7 @@ function AdminClientIntakeModule() {
             <Mail className="text-yellow-400" size={24} />
           </div>
           <div className="text-2xl font-bold text-yellow-400 mb-1">
-            {intakeSubmissions.filter((s) => s.status === "contacted").length}
+            {intakeSubmissions.filter(s => s.status === 'contacted').length}
           </div>
           <div className="text-sm text-gray-400">Contacted</div>
         </CardWrapper>
@@ -580,7 +687,7 @@ function AdminClientIntakeModule() {
             <CheckCircle className="text-green-400" size={24} />
           </div>
           <div className="text-2xl font-bold text-green-400 mb-1">
-            {intakeSubmissions.filter((s) => s.status === "qualified").length}
+            {intakeSubmissions.filter(s => s.status === 'qualified').length}
           </div>
           <div className="text-sm text-gray-400">Qualified</div>
         </CardWrapper>
@@ -590,7 +697,7 @@ function AdminClientIntakeModule() {
             <Award className="text-purple-400" size={24} />
           </div>
           <div className="text-2xl font-bold text-purple-400 mb-1">
-            {intakeSubmissions.filter((s) => s.status === "converted").length}
+            {intakeSubmissions.filter(s => s.status === 'converted').length}
           </div>
           <div className="text-sm text-gray-400">Converted</div>
         </CardWrapper>
@@ -664,7 +771,11 @@ function AdminClientIntakeModule() {
                           <Download size={12} className="mr-1" />
                           PDF
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => setSelectedSubmission(submission)}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setSelectedSubmission(submission)}
+                        >
                           <Eye size={12} className="mr-1" />
                           View
                         </Button>
@@ -782,9 +893,7 @@ function AdminTenantManagement() {
 
 function AdminPortalContent() {
   const { adminUser, logout, hasPermission } = useAdminAuth()
-  const [activeTab, setActiveTab] = useState<"dashboard" | "reports" | "settings" | "tenants" | "audit" | "intake">(
-    "dashboard",
-  )
+  const [activeTab, setActiveTab] = useState<"dashboard" | "reports" | "settings" | "tenants" | "audit" | "intake">("dashboard")
 
   if (!adminUser) {
     return (

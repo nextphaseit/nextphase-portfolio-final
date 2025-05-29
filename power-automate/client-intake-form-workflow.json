@@ -1,0 +1,263 @@
+{
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "triggers": {
+      "When_a_new_response_is_submitted": {
+        "type": "ApiConnectionWebhook",
+        "inputs": {
+          "host": {
+            "connection": {
+              "name": "@parameters('$connections')['microsoftforms']['connectionId']"
+            }
+          },
+          "path": "/formapi/api/forms/@{encodeURIComponent('QWtKpJuvTg')}/webhooks"
+        }
+      }
+    },
+    "actions": {
+      "Get_response_details": {
+        "type": "ApiConnection",
+        "inputs": {
+          "host": {
+            "connection": {
+              "name": "@parameters('$connections')['microsoftforms']['connectionId']"
+            }
+          },
+          "method": "get",
+          "path": "/formapi/api/forms/@{encodeURIComponent('QWtKpJuvTg')}/responses",
+          "queries": {
+            "response_id": "@triggerBody()?['resourceData']?['responseId']"
+          }
+        },
+        "runAfter": {}
+      },
+      "Initialize_variable_-_Client_Name": {
+        "type": "InitializeVariable",
+        "inputs": {
+          "variables": [
+            {
+              "name": "ClientName",
+              "type": "string",
+              "value": "@{body('Get_response_details')?['r1']}"
+            }
+          ]
+        },
+        "runAfter": {
+          "Get_response_details": ["Succeeded"]
+        }
+      },
+      "Initialize_variable_-_Company_Name": {
+        "type": "InitializeVariable",
+        "inputs": {
+          "variables": [
+            {
+              "name": "CompanyName",
+              "type": "string",
+              "value": "@{body('Get_response_details')?['r2']}"
+            }
+          ]
+        },
+        "runAfter": {
+          "Initialize_variable_-_Client_Name": ["Succeeded"]
+        }
+      },
+      "Initialize_variable_-_Email": {
+        "type": "InitializeVariable",
+        "inputs": {
+          "variables": [
+            {
+              "name": "ClientEmail",
+              "type": "string",
+              "value": "@{body('Get_response_details')?['r3']}"
+            }
+          ]
+        },
+        "runAfter": {
+          "Initialize_variable_-_Company_Name": ["Succeeded"]
+        }
+      },
+      "Initialize_variable_-_Phone": {
+        "type": "InitializeVariable",
+        "inputs": {
+          "variables": [
+            {
+              "name": "ClientPhone",
+              "type": "string",
+              "value": "@{body('Get_response_details')?['r4']}"
+            }
+          ]
+        },
+        "runAfter": {
+          "Initialize_variable_-_Email": ["Succeeded"]
+        }
+      },
+      "Initialize_variable_-_Services_Needed": {
+        "type": "InitializeVariable",
+        "inputs": {
+          "variables": [
+            {
+              "name": "ServicesNeeded",
+              "type": "string",
+              "value": "@{body('Get_response_details')?['r5']}"
+            }
+          ]
+        },
+        "runAfter": {
+          "Initialize_variable_-_Phone": ["Succeeded"]
+        }
+      },
+      "Initialize_variable_-_Additional_Notes": {
+        "type": "InitializeVariable",
+        "inputs": {
+          "variables": [
+            {
+              "name": "AdditionalNotes",
+              "type": "string",
+              "value": "@{body('Get_response_details')?['r6']}"
+            }
+          ]
+        },
+        "runAfter": {
+          "Initialize_variable_-_Services_Needed": ["Succeeded"]
+        }
+      },
+      "Initialize_variable_-_File_Name": {
+        "type": "InitializeVariable",
+        "inputs": {
+          "variables": [
+            {
+              "name": "FileName",
+              "type": "string",
+              "value": "ClientIntake_@{formatDateTime(utcNow(), 'yyyyMMdd_HHmmss')}_@{replace(variables('ClientName'), ' ', '_')}.pdf"
+            }
+          ]
+        },
+        "runAfter": {
+          "Initialize_variable_-_Additional_Notes": ["Succeeded"]
+        }
+      },
+      "Generate_PDF_from_HTML": {
+        "type": "Http",
+        "inputs": {
+          "method": "POST",
+          "uri": "https://api.html-css-to-pdf.com/v1/generate",
+          "headers": {
+            "Content-Type": "application/json",
+            "Authorization": "Bearer YOUR_PDF_API_KEY"
+          },
+          "body": {
+            "html": "<html><head><style>body{font-family:Arial,sans-serif;margin:40px;color:#333}.header{text-align:center;border-bottom:2px solid #dc2626;padding-bottom:20px;margin-bottom:30px}.logo{color:#dc2626;font-size:24px;font-weight:bold}.title{color:#666;margin-top:10px}.section{margin-bottom:25px}.label{font-weight:bold;color:#555;margin-bottom:5px}.value{background:#f9f9f9;padding:10px;border-left:3px solid #dc2626;margin-bottom:15px}.footer{margin-top:40px;padding-top:20px;border-top:1px solid #ddd;text-align:center;color:#666;font-size:12px}</style></head><body><div class='header'><div class='logo'>NextPhase IT</div><div class='title'>Client Intake Form Submission</div><div style='margin-top:10px;color:#666;font-size:14px'>Submitted: @{formatDateTime(utcNow(), 'MMMM dd, yyyy at hh:mm tt')}</div></div><div class='section'><div class='label'>Full Name:</div><div class='value'>@{variables('ClientName')}</div></div><div class='section'><div class='label'>Company Name:</div><div class='value'>@{variables('CompanyName')}</div></div><div class='section'><div class='label'>Email Address:</div><div class='value'>@{variables('ClientEmail')}</div></div><div class='section'><div class='label'>Phone Number:</div><div class='value'>@{variables('ClientPhone')}</div></div><div class='section'><div class='label'>Services Needed:</div><div class='value'>@{variables('ServicesNeeded')}</div></div><div class='section'><div class='label'>Additional Notes:</div><div class='value'>@{variables('AdditionalNotes')}</div></div><div class='footer'><p>Thank you for your interest in NextPhase IT!</p><p>Our team will review your submission and contact you within 24 hours.</p><p>NextPhase IT | info@nextphaseit.org | (984) 310-9533</p></div></body></html>",
+            "css": "",
+            "pdf_options": {
+              "format": "A4",
+              "margin": {
+                "top": "20mm",
+                "right": "20mm",
+                "bottom": "20mm",
+                "left": "20mm"
+              }
+            }
+          }
+        },
+        "runAfter": {
+          "Initialize_variable_-_File_Name": ["Succeeded"]
+        }
+      },
+      "Create_file_in_SharePoint": {
+        "type": "ApiConnection",
+        "inputs": {
+          "host": {
+            "connection": {
+              "name": "@parameters('$connections')['sharepointonline']['connectionId']"
+            }
+          },
+          "method": "post",
+          "path": "/datasets/@{encodeURIComponent(encodeURIComponent('https://nextphaseit.sharepoint.com/sites/NextPhaseIT'))}/files",
+          "queries": {
+            "folderPath": "/ClientIntakeForms",
+            "name": "@variables('FileName')"
+          },
+          "body": "@base64ToBinary(body('Generate_PDF_from_HTML')?['pdf'])"
+        },
+        "runAfter": {
+          "Generate_PDF_from_HTML": ["Succeeded"]
+        }
+      },
+      "Send_confirmation_email_to_client": {
+        "type": "ApiConnection",
+        "inputs": {
+          "host": {
+            "connection": {
+              "name": "@parameters('$connections')['office365']['connectionId']"
+            }
+          },
+          "method": "post",
+          "path": "/v2/Mail",
+          "body": {
+            "To": "@variables('ClientEmail')",
+            "Subject": "Thank you for your interest in NextPhase IT - Submission Confirmation",
+            "Body": "<html><body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'><div style='max-width: 600px; margin: 0 auto; padding: 20px;'><div style='text-align: center; border-bottom: 2px solid #dc2626; padding-bottom: 20px; margin-bottom: 30px;'><h1 style='color: #dc2626; margin: 0;'>NextPhase IT</h1><p style='color: #666; margin: 10px 0 0 0;'>Thank you for your submission!</p></div><p>Dear @{variables('ClientName')},</p><p>Thank you for your interest in NextPhase IT. We have successfully received your client intake form submission.</p><div style='background: #f9f9f9; padding: 20px; border-left: 4px solid #dc2626; margin: 20px 0;'><h3 style='margin-top: 0; color: #dc2626;'>What happens next?</h3><ul style='margin: 0; padding-left: 20px;'><li>Our team will review your information within 24 hours</li><li>A NextPhase IT consultant will contact you to discuss your specific needs</li><li>We'll schedule an initial consultation at your convenience</li><li>You'll receive a customized proposal tailored to your business requirements</li></ul></div><p>For your records, we've attached a PDF copy of your submission to this email.</p><p>If you have any immediate questions, please don't hesitate to contact us:</p><ul><li><strong>Email:</strong> info@nextphaseit.org</li><li><strong>Phone:</strong> (984) 310-9533</li></ul><p>We look forward to helping you transform your business with cutting-edge technology solutions!</p><p>Best regards,<br><strong>The NextPhase IT Team</strong></p><div style='margin-top: 40px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #666; font-size: 12px;'><p>NextPhase IT | Empowering Small Businesses with Enterprise Technology</p></div></div></body></html>",
+            "Attachments": [
+              {
+                "Name": "@variables('FileName')",
+                "ContentBytes": "@body('Generate_PDF_from_HTML')?['pdf']"
+              }
+            ]
+          }
+        },
+        "runAfter": {
+          "Create_file_in_SharePoint": ["Succeeded"]
+        }
+      },
+      "Send_notification_to_team": {
+        "type": "ApiConnection",
+        "inputs": {
+          "host": {
+            "connection": {
+              "name": "@parameters('$connections')['office365']['connectionId']"
+            }
+          },
+          "method": "post",
+          "path": "/v2/Mail",
+          "body": {
+            "To": "info@nextphaseit.org",
+            "Subject": "New Client Intake Form: @{variables('ClientName')} - @{variables('CompanyName')}",
+            "Body": "<html><body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333;'><div style='max-width: 600px; margin: 0 auto; padding: 20px;'><div style='text-align: center; border-bottom: 2px solid #dc2626; padding-bottom: 20px; margin-bottom: 30px;'><h1 style='color: #dc2626; margin: 0;'>NextPhase IT</h1><p style='color: #666; margin: 10px 0 0 0;'>New Client Intake Form Submission</p></div><div style='background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 20px 0;'><h3 style='margin-top: 0; color: #dc2626;'>Client Information</h3><table style='width: 100%; border-collapse: collapse;'><tr><td style='padding: 8px 0; border-bottom: 1px solid #ddd; font-weight: bold; width: 30%;'>Name:</td><td style='padding: 8px 0; border-bottom: 1px solid #ddd;'>@{variables('ClientName')}</td></tr><tr><td style='padding: 8px 0; border-bottom: 1px solid #ddd; font-weight: bold;'>Company:</td><td style='padding: 8px 0; border-bottom: 1px solid #ddd;'>@{variables('CompanyName')}</td></tr><tr><td style='padding: 8px 0; border-bottom: 1px solid #ddd; font-weight: bold;'>Email:</td><td style='padding: 8px 0; border-bottom: 1px solid #ddd;'><a href='mailto:@{variables('ClientEmail')}'>@{variables('ClientEmail')}</a></td></tr><tr><td style='padding: 8px 0; border-bottom: 1px solid #ddd; font-weight: bold;'>Phone:</td><td style='padding: 8px 0; border-bottom: 1px solid #ddd;'><a href='tel:@{variables('ClientPhone')}'>@{variables('ClientPhone')}</a></td></tr><tr><td style='padding: 8px 0; border-bottom: 1px solid #ddd; font-weight: bold;'>Services:</td><td style='padding: 8px 0; border-bottom: 1px solid #ddd;'>@{variables('ServicesNeeded')}</td></tr><tr><td style='padding: 8px 0; font-weight: bold; vertical-align: top;'>Notes:</td><td style='padding: 8px 0;'>@{variables('AdditionalNotes')}</td></tr></table></div><div style='background: #e7f3ff; padding: 15px; border-radius: 8px; margin: 20px 0;'><p style='margin: 0; color: #0066cc;'><strong>Action Required:</strong> Please follow up with this client within 24 hours.</p></div><p>The PDF submission has been saved to SharePoint: <a href='https://nextphaseit.sharepoint.com/sites/NextPhaseIT/ClientIntakeForms/@{variables('FileName')}'>View File</a></p><p>Submission Time: @{formatDateTime(utcNow(), 'MMMM dd, yyyy at hh:mm tt')}</p></div></body></html>",
+            "Attachments": [
+              {
+                "Name": "@variables('FileName')",
+                "ContentBytes": "@body('Generate_PDF_from_HTML')?['pdf']"
+              }
+            ]
+          }
+        },
+        "runAfter": {
+          "Send_confirmation_email_to_client": ["Succeeded"]
+        }
+      }
+    }
+  },
+  "parameters": {
+    "$connections": {
+      "value": {
+        "microsoftforms": {
+          "connectionId": "/subscriptions/{subscription-id}/resourceGroups/{resource-group}/providers/Microsoft.Web/connections/microsoftforms",
+          "connectionName": "microsoftforms",
+          "id": "/subscriptions/{subscription-id}/providers/Microsoft.Web/locations/{location}/managedApis/microsoftforms"
+        },
+        "sharepointonline": {
+          "connectionId": "/subscriptions/{subscription-id}/resourceGroups/{resource-group}/providers/Microsoft.Web/connections/sharepointonline",
+          "connectionName": "sharepointonline",
+          "id": "/subscriptions/{subscription-id}/providers/Microsoft.Web/locations/{location}/managedApis/sharepointonline"
+        },
+        "office365": {
+          "connectionId": "/subscriptions/{subscription-id}/resourceGroups/{resource-group}/providers/Microsoft.Web/connections/office365",
+          "connectionName": "office365",
+          "id": "/subscriptions/{subscription-id}/providers/Microsoft.Web/locations/{location}/managedApis/office365"
+        }
+      }
+    }
+  }
+}

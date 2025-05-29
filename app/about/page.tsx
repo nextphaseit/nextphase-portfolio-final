@@ -3,15 +3,12 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Navbar } from "@/components/navbar"
-import { Download, Users, Target, Award, Heart, FileText, Mail } from "lucide-react"
+import { Users, Target, Award, Heart, Mail } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 
 export default function AboutPage() {
-  const [isFormDialogOpen, setIsFormDialogOpen] = useState(false)
-  const [isFormSubmitted, setIsFormSubmitted] = useState(false)
   const [formData, setFormData] = useState<any>(null)
 
   const handleDownloadPDF = () => {
@@ -25,7 +22,6 @@ export default function AboutPage() {
   // Function to handle form submission message
   const handleFormSubmitted = (data: any) => {
     setFormData(data)
-    setIsFormSubmitted(true)
   }
 
   // Function to handle form message from iframe
@@ -192,33 +188,35 @@ export default function AboutPage() {
           <Card className="bg-gradient-to-r from-primary/20 to-primary/5 border-primary/20">
             <CardContent className="p-8 md:p-12">
               <div className="text-center mb-8">
+                <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <span className="text-4xl">📋</span>
+                </div>
                 <h2 className="text-3xl font-bold mb-4">Ready to Get Started?</h2>
                 <p className="text-gray-400 max-w-2xl mx-auto mb-8">
-                  Fill out our New Client Contact Form to begin your journey with NextPhase IT. Our team will review
-                  your information and contact you within 24 hours to discuss your specific needs.
+                  Complete our New Client Contact Form to begin your onboarding process. Our team will review your
+                  information and contact you within 24 hours to discuss your specific needs.
                 </p>
 
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button
-                    size="lg"
-                    onClick={() => setIsFormDialogOpen(true)}
-                    className="bg-primary hover:bg-primary/90"
+                {/* Primary CTA Button */}
+                <Button
+                  size="lg"
+                  asChild
+                  className="bg-primary hover:bg-primary/90 text-black font-semibold px-8 py-4 text-lg"
+                >
+                  <a
+                    href="https://forms.cloud.microsoft/r/QWtKpJuvTg"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3"
                   >
-                    <FileText className="w-4 h-4 mr-2" />
-                    New Client Contact Form
-                  </Button>
+                    <span className="text-xl">📨</span>
+                    Fill Out Form
+                  </a>
+                </Button>
 
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    onClick={handleDownloadPDF}
-                    className="border-primary text-primary hover:bg-primary hover:text-black"
-                  >
-                    <Download className="w-4 h-4 mr-2" />
-                    Download PDF Form
-                  </Button>
-                </div>
+                <p className="text-sm text-gray-500 mt-4">
+                  Form opens in a new tab • Submission confirmation sent via email
+                </p>
               </div>
 
               <div className="bg-black/30 p-6 rounded-lg mt-8">
@@ -232,18 +230,51 @@ export default function AboutPage() {
                     You'll receive an immediate confirmation email with a PDF copy of your submission
                   </li>
                   <li className="flex items-start">
-                    <span className="text-primary mr-2">2.</span>A NextPhase IT consultant will review your information
+                    <span className="text-primary mr-2">2.</span>
+                    Your information is securely stored in our client intake system
+                  </li>
+                  <li className="flex items-start">
+                    <span className="text-primary mr-2">3.</span>A NextPhase IT consultant will review your information
                     within 24 hours
                   </li>
                   <li className="flex items-start">
-                    <span className="text-primary mr-2">3.</span>
+                    <span className="text-primary mr-2">4.</span>
                     We'll schedule an initial consultation to discuss your specific needs and goals
                   </li>
                   <li className="flex items-start">
-                    <span className="text-primary mr-2">4.</span>
+                    <span className="text-primary mr-2">5.</span>
                     You'll receive a customized proposal tailored to your business requirements
                   </li>
                 </ul>
+              </div>
+
+              {/* Alternative Options */}
+              <div className="mt-8 pt-6 border-t border-gray-700">
+                <p className="text-center text-gray-400 mb-4">Prefer other contact methods?</p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    asChild
+                    className="border-primary/50 text-primary hover:bg-primary hover:text-black"
+                  >
+                    <a href="mailto:info@nextphaseit.org">
+                      <Mail className="w-4 h-4 mr-2" />
+                      Email Us Directly
+                    </a>
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    asChild
+                    className="border-primary/50 text-primary hover:bg-primary hover:text-black"
+                  >
+                    <a href="tel:+19843109533">
+                      <span className="mr-2">📞</span>
+                      Call (984) 310-9533
+                    </a>
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -311,69 +342,6 @@ export default function AboutPage() {
           </Card>
         </section>
       </div>
-
-      {/* Microsoft Form Dialog */}
-      <Dialog open={isFormDialogOpen} onOpenChange={setIsFormDialogOpen}>
-        <DialogContent className="max-w-4xl h-[90vh] max-h-[90vh]">
-          <DialogHeader>
-            <DialogTitle>New Client Contact Form</DialogTitle>
-            <DialogDescription>Please fill out the form below to get started with NextPhase IT</DialogDescription>
-          </DialogHeader>
-
-          {isFormSubmitted ? (
-            <div className="flex flex-col items-center justify-center h-full p-8 text-center">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                <svg
-                  className="w-8 h-8 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-              </div>
-              <h3 className="text-2xl font-bold mb-2">Thank You!</h3>
-              <p className="text-gray-500 mb-6">
-                Your form has been successfully submitted. We'll be in touch within 24 hours.
-              </p>
-              <div className="space-y-4">
-                <Button
-                  onClick={() => window.open("/api/generate-pdf?formId=" + formData?.id, "_blank")}
-                  className="w-full"
-                >
-                  <Download className="w-4 h-4 mr-2" />
-                  Download PDF Copy
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setIsFormSubmitted(false)
-                    setIsFormDialogOpen(false)
-                  }}
-                >
-                  Close
-                </Button>
-              </div>
-            </div>
-          ) : (
-            <div className="h-full">
-              <iframe
-                src="https://forms.office.com/Pages/ResponsePage.aspx?id=DQSIkWdsW0yxEjajBLZtrQAAAAAAAAAAAAN__jVeO49UMkZUNzBHVDNTWTVLNkdTSzJTWkFXWEJGWS4u&embed=true"
-                width="100%"
-                height="100%"
-                frameBorder="0"
-                marginHeight={0}
-                marginWidth={0}
-                className="rounded-lg"
-                title="NextPhase IT Client Contact Form"
-              >
-                Loading form...
-              </iframe>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </main>
   )
 }
