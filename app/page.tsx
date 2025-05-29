@@ -50,9 +50,7 @@ export default function Home() {
                     asChild
                     className="bg-primary hover:bg-primary/90 hover:ring-2 hover:ring-primary hover:ring-offset-2 hover:ring-offset-black transition-all duration-300"
                   >
-                    <a href="https://forms.cloud.microsoft/r/5Ad9WuMA3G" target="_blank" rel="noopener noreferrer">
-                      Get Started
-                    </a>
+                    <Link href="/about">Get Started</Link>
                   </Button>
                 </div>
               </div>
@@ -145,7 +143,7 @@ export default function Home() {
                   <h4 className="font-semibold mb-4">Company</h4>
                   <ul className="space-y-2 text-gray-400">
                     <li>
-                      <Link href="/#services" className="hover:text-primary transition-colors">
+                      <Link href="/about" className="hover:text-primary transition-colors">
                         About
                       </Link>
                     </li>
