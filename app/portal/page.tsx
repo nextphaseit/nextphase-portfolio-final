@@ -26,6 +26,8 @@ import {
   MessageSquare,
   Calendar,
   Building,
+  Plus,
+  Download,
 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -885,6 +887,259 @@ function ServiceDeskPortalContent() {
               <MultiTenantAccountManagement />
             </div>
           )}
+
+          {/* Tickets Tab */}
+          {activeTab === "tickets" && (
+            <div className="space-y-8">
+              {/* Header with New Ticket Button */}
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Support Tickets</h2>
+                  <p className="text-gray-400">Manage your support requests and track their progress</p>
+                </div>
+                <Button onClick={() => setShowNewTicket(true)} className="bg-primary hover:bg-primary/90">
+                  <Plus size={16} className="mr-2" />
+                  New Ticket
+                </Button>
+              </div>
+
+              {/* Filters and Search */}
+              <CardWrapper>
+                <div className="flex flex-wrap gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
+                    <select
+                      value={ticketFilter}
+                      onChange={(e) => setTicketFilter(e.target.value as any)}
+                      className="px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
+                    >
+                      <option value="all">All Tickets</option>
+                      <option value="open">Open</option>
+                      <option value="in-progress">In Progress</option>
+                      <option value="resolved">Resolved</option>
+                      <option value="closed">Closed</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Sort By</label>
+                    <select
+                      value={ticketSort}
+                      onChange={(e) => setTicketSort(e.target.value as any)}
+                      className="px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
+                    >
+                      <option value="newest">Newest First</option>
+                      <option value="oldest">Oldest First</option>
+                      <option value="priority">Priority</option>
+                    </select>
+                  </div>
+
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Search</label>
+                    <input
+                      type="text"
+                      value={ticketSearch}
+                      onChange={(e) => setTicketSearch(e.target.value)}
+                      placeholder="Search tickets..."
+                      className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                </div>
+              </CardWrapper>
+
+              {/* Tickets Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredTickets.length > 0 ? (
+                  filteredTickets.map((ticket) => (
+                    <TicketCard key={ticket.id} ticket={ticket} onViewDetails={setSelectedTicket} />
+                  ))
+                ) : (
+                  <div className="col-span-full text-center py-12">
+                    <Ticket size={64} className="mx-auto mb-4 text-gray-600" />
+                    <h3 className="text-xl font-semibold mb-2">No tickets found</h3>
+                    <p className="text-gray-400 mb-6">
+                      {ticketFilter === "all"
+                        ? "You haven't submitted any tickets yet."
+                        : `No tickets with status "${ticketFilter}" found.`}
+                    </p>
+                    <Button onClick={() => setShowNewTicket(true)} className="bg-primary hover:bg-primary/90">
+                      Submit Your First Ticket
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Resources Tab */}
+          {activeTab === "resources" && (
+            <div className="space-y-8">
+              {/* Header */}
+              <div>
+                <h2 className="text-2xl font-bold mb-2">Knowledge Base & Resources</h2>
+                <p className="text-gray-400">Access guides, documentation, and helpful resources</p>
+              </div>
+
+              {/* Search and Filter */}
+              <CardWrapper>
+                <div className="flex flex-wrap gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Category</label>
+                    <select
+                      value={resourceFilter}
+                      onChange={(e) => setResourceFilter(e.target.value)}
+                      className="px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
+                    >
+                      {Object.entries(resourceCategories).map(([key, label]) => (
+                        <option key={key} value={key}>
+                          {label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Search Resources</label>
+                    <input
+                      type="text"
+                      value={resourceSearch}
+                      onChange={(e) => setResourceSearch(e.target.value)}
+                      placeholder="Search guides, documents..."
+                      className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary"
+                    />
+                  </div>
+                </div>
+              </CardWrapper>
+
+              {/* Resources Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredResources.map((resource) => (
+                  <CardWrapper key={resource.id} className="hover:border-primary/40 transition-colors">
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">{getFileIcon(resource.type)}</span>
+                        <div>
+                          <h3 className="font-semibold">{resource.title}</h3>
+                          <p className="text-sm text-gray-400">
+                            {resource.type} • {resource.size}
+                          </p>
+                        </div>
+                      </div>
+                      <span
+                        className={`px-2 py-1 rounded text-xs ${
+                          resource.isAccessible ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
+                        }`}
+                      >
+                        {resource.isAccessible ? "Available" : "Restricted"}
+                      </span>
+                    </div>
+
+                    <p className="text-gray-400 text-sm mb-4">{resource.description}</p>
+
+                    <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                      <span>Updated {resource.updated}</span>
+                      <span className="capitalize">{resource.category}</span>
+                    </div>
+
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleSharePointDownload(resource)}
+                        disabled={!resource.isAccessible}
+                        className="flex-1"
+                      >
+                        <Download size={12} className="mr-1" />
+                        Download
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleSharePointPreview(resource)}
+                        disabled={!resource.isAccessible}
+                      >
+                        <Eye size={12} className="mr-1" />
+                        Preview
+                      </Button>
+                    </div>
+                  </CardWrapper>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* New Ticket Modal */}
+          {showNewTicket && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+              <div className="bg-card rounded-lg w-full max-w-2xl border border-primary/20">
+                <div className="bg-primary/10 p-6 border-b border-primary/20">
+                  <div className="flex items-center justify-between">
+                    <h2 className="text-2xl font-bold">Submit New Ticket</h2>
+                    <Button variant="ghost" onClick={() => setShowNewTicket(false)}>
+                      ✕
+                    </Button>
+                  </div>
+                </div>
+
+                <form className="p-6 space-y-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Subject *</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Brief description of your issue"
+                      className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Priority</label>
+                      <select className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary">
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                        <option value="urgent">Urgent</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Category</label>
+                      <select className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary">
+                        <option value="email">Email Issues</option>
+                        <option value="network">Network Problems</option>
+                        <option value="software">Software Support</option>
+                        <option value="hardware">Hardware Issues</option>
+                        <option value="security">Security Concerns</option>
+                        <option value="other">Other</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2">Description *</label>
+                    <textarea
+                      required
+                      rows={6}
+                      placeholder="Please provide detailed information about your issue, including any error messages and steps you've already tried..."
+                      className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary resize-vertical"
+                    />
+                  </div>
+
+                  <div className="flex gap-3">
+                    <Button type="submit" className="bg-primary hover:bg-primary/90">
+                      Submit Ticket
+                    </Button>
+                    <Button type="button" variant="outline" onClick={() => setShowNewTicket(false)}>
+                      Cancel
+                    </Button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* Ticket Details Modal */}
+          <TicketDetailsModal ticket={selectedTicket} onClose={() => setSelectedTicket(null)} />
 
           {/* Other tabs would be implemented similarly with tenant-specific data */}
         </section>

@@ -42,7 +42,7 @@ export function Navbar() {
             <Link href="/pricing" className="text-gray-300 hover:text-primary transition-colors font-medium">
               Pricing
             </Link>
-            <Link href="/#testimonials" className="text-gray-300 hover:text-primary transition-colors font-medium">
+            <Link href="/testimonials" className="text-gray-300 hover:text-primary transition-colors font-medium">
               Testimonials
             </Link>
             <Link href="/#contact" className="text-gray-300 hover:text-primary transition-colors font-medium">
@@ -106,7 +106,7 @@ export function Navbar() {
                 Pricing
               </Link>
               <Link
-                href="/#testimonials"
+                href="/testimonials"
                 className="block px-3 py-2 text-gray-300 hover:text-primary hover:bg-gray-600 rounded-md transition-colors font-medium"
                 onClick={closeMenu}
               >

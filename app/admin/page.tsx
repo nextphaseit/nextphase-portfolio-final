@@ -10,569 +10,180 @@ import {
   Settings,
   Shield,
   Activity,
-  Download,
-  Calendar,
   Building,
   Eye,
-  Edit,
-  Plus,
-  RefreshCw,
-  Mail,
   CheckCircle,
-  Award,
+  Ticket,
+  Clock,
+  AlertCircle,
+  MessageSquare,
+  RefreshCwIcon as RefreshIcon,
 } from "lucide-react"
 import Image from "next/image"
-import { getAuditLog, type AuditLogEntry } from "@/lib/admin-auth"
-import { TENANT_CONFIGS } from "@/lib/tenant-config"
+import { AdminReportsModule } from "@/components/admin-reports-module"
+import { AdminSettingsModule } from "@/components/admin-settings-module"
+import { AdminTenantManagement } from "@/components/admin-tenant-management"
+import { AdminAuditModule } from "@/components/admin-audit-module"
+import { AdminClientIntakeModule } from "@/components/admin-client-intake-module"
 
-function AdminReportsModule() {
-  const [reportType, setReportType] = useState<"analytics" | "tickets" | "users" | "audit">("analytics")
-  const [dateRange, setDateRange] = useState({ start: "2024-01-01", end: "2024-01-31" })
-  const [isGenerating, setIsGenerating] = useState(false)
-
-  const generateReport = async (format: "csv" | "pdf") => {
-    setIsGenerating(true)
-    // Simulate report generation
-    setTimeout(() => {
-      const filename = `${reportType}-report-${dateRange.start}-to-${dateRange.end}.${format}`
-      console.log(`Generating ${format.toUpperCase()} report: ${filename}`)
-      alert(`${format.toUpperCase()} report "${filename}" would be downloaded`)
-      setIsGenerating(false)
-    }, 2000)
-  }
-
-  const scheduleReport = () => {
-    alert("Report scheduling feature would open a configuration modal")
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold mb-2">Reports & Analytics</h2>
-          <p className="text-gray-400">Generate and schedule comprehensive reports</p>
-        </div>
-      </div>
-
-      {/* Report Configuration */}
-      <CardWrapper>
-        <h3 className="text-lg font-semibold mb-4">Report Configuration</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Report Type</label>
-            <select
-              value={reportType}
-              onChange={(e) => setReportType(e.target.value as any)}
-              className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
-            >
-              <option value="analytics">Analytics Summary</option>
-              <option value="tickets">Ticket Details</option>
-              <option value="users">User Activity</option>
-              <option value="audit">Audit Log</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Start Date</label>
-            <input
-              type="date"
-              value={dateRange.start}
-              onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
-              className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">End Date</label>
-            <input
-              type="date"
-              value={dateRange.end}
-              onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
-              className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
-            />
-          </div>
-
-          <div className="flex items-end">
-            <Button onClick={scheduleReport} variant="outline" className="w-full">
-              <Calendar size={16} className="mr-2" />
-              Schedule
-            </Button>
-          </div>
-        </div>
-
-        <div className="flex gap-3">
-          <Button
-            onClick={() => generateReport("csv")}
-            disabled={isGenerating}
-            className="bg-primary hover:bg-primary/90"
-          >
-            {isGenerating ? (
-              <RefreshCw size={16} className="mr-2 animate-spin" />
-            ) : (
-              <Download size={16} className="mr-2" />
-            )}
-            Export CSV
-          </Button>
-          <Button onClick={() => generateReport("pdf")} disabled={isGenerating} variant="outline">
-            {isGenerating ? (
-              <RefreshCw size={16} className="mr-2 animate-spin" />
-            ) : (
-              <Download size={16} className="mr-2" />
-            )}
-            Export PDF
-          </Button>
-        </div>
-      </CardWrapper>
-
-      {/* Recent Reports */}
-      <CardWrapper>
-        <h3 className="text-lg font-semibold mb-4">Recent Reports</h3>
-        <div className="space-y-3">
-          {[
-            {
-              name: "Monthly Analytics Report - January 2024",
-              type: "Analytics",
-              generated: "2024-01-28 14:30:00",
-              size: "2.3 MB",
-              format: "PDF",
-            },
-            {
-              name: "Ticket Summary - Q4 2023",
-              type: "Tickets",
-              generated: "2024-01-15 09:15:00",
-              size: "1.8 MB",
-              format: "CSV",
-            },
-            {
-              name: "User Activity Report - December 2023",
-              type: "Users",
-              generated: "2024-01-01 16:45:00",
-              size: "945 KB",
-              format: "PDF",
-            },
-          ].map((report, index) => (
-            <div key={index} className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
-              <div className="flex items-center gap-3">
-                <FileText className="text-primary" size={20} />
-                <div>
-                  <div className="font-medium">{report.name}</div>
-                  <div className="text-sm text-gray-400">
-                    {report.type} • {report.generated} • {report.size}
-                  </div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded">{report.format}</span>
-                <Button size="sm" variant="outline">
-                  <Download size={14} className="mr-1" />
-                  Download
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
-      </CardWrapper>
-    </div>
-  )
-}
-
-function AdminSettingsModule() {
-  const [selectedTenant, setSelectedTenant] = useState<string>("all")
-  const [settings, setSettings] = useState({
-    defaultNotifications: {
-      email: true,
-      sms: false,
-      push: true,
-    },
-    sessionTimeout: 480,
-    maxLoginAttempts: 5,
-    twoFactorRequired: false,
-  })
-
-  const tenants = Object.values(TENANT_CONFIGS)
-
-  const saveSettings = () => {
-    alert("Settings would be saved to the database")
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold mb-2">Admin Settings</h2>
-          <p className="text-gray-400">Configure tenant settings and system preferences</p>
-        </div>
-      </div>
-
-      {/* Tenant Selection */}
-      <CardWrapper>
-        <h3 className="text-lg font-semibold mb-4">Tenant Configuration</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Select Tenant</label>
-            <select
-              value={selectedTenant}
-              onChange={(e) => setSelectedTenant(e.target.value)}
-              className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
-            >
-              <option value="all">Global Settings</option>
-              {tenants.map((tenant) => (
-                <option key={tenant.id} value={tenant.id}>
-                  {tenant.name} ({tenant.domain})
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Settings Form */}
-        <div className="space-y-6">
-          <div>
-            <h4 className="font-semibold mb-3">Default Notification Settings</h4>
-            <div className="space-y-3">
-              <label className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={settings.defaultNotifications.email}
-                  onChange={(e) =>
-                    setSettings({
-                      ...settings,
-                      defaultNotifications: { ...settings.defaultNotifications, email: e.target.checked },
-                    })
-                  }
-                  className="rounded"
-                />
-                <span>Email notifications enabled by default</span>
-              </label>
-              <label className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={settings.defaultNotifications.sms}
-                  onChange={(e) =>
-                    setSettings({
-                      ...settings,
-                      defaultNotifications: { ...settings.defaultNotifications, sms: e.target.checked },
-                    })
-                  }
-                  className="rounded"
-                />
-                <span>SMS notifications enabled by default</span>
-              </label>
-              <label className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={settings.defaultNotifications.push}
-                  onChange={(e) =>
-                    setSettings({
-                      ...settings,
-                      defaultNotifications: { ...settings.defaultNotifications, push: e.target.checked },
-                    })
-                  }
-                  className="rounded"
-                />
-                <span>Push notifications enabled by default</span>
-              </label>
-            </div>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-3">Security Settings</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Session Timeout (minutes)</label>
-                <input
-                  type="number"
-                  value={settings.sessionTimeout}
-                  onChange={(e) => setSettings({ ...settings, sessionTimeout: Number.parseInt(e.target.value) })}
-                  className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">Max Login Attempts</label>
-                <input
-                  type="number"
-                  value={settings.maxLoginAttempts}
-                  onChange={(e) => setSettings({ ...settings, maxLoginAttempts: Number.parseInt(e.target.value) })}
-                  className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
-                />
-              </div>
-            </div>
-            <div className="mt-4">
-              <label className="flex items-center gap-3">
-                <input
-                  type="checkbox"
-                  checked={settings.twoFactorRequired}
-                  onChange={(e) => setSettings({ ...settings, twoFactorRequired: e.target.checked })}
-                  className="rounded"
-                />
-                <span>Require two-factor authentication for all users</span>
-              </label>
-            </div>
-          </div>
-
-          <div className="flex gap-3">
-            <Button onClick={saveSettings} className="bg-primary hover:bg-primary/90">
-              Save Settings
-            </Button>
-            <Button variant="outline">Reset to Defaults</Button>
-          </div>
-        </div>
-      </CardWrapper>
-    </div>
-  )
-}
-
-function AdminAuditModule() {
-  const [auditLog, setAuditLog] = useState<AuditLogEntry[]>([])
+function AdminRealTimeTicketing() {
+  const [tickets, setTickets] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [filters, setFilters] = useState({
-    action: "all",
-    resource: "all",
-    userId: "all",
-    dateRange: "7d",
+    status: "all",
+    priority: "all",
+    tenant: "all",
+    category: "all",
   })
+  const [selectedTicket, setSelectedTicket] = useState<any>(null)
 
   useEffect(() => {
-    loadAuditLog()
+    loadTickets()
+    // Set up real-time updates (WebSocket simulation)
+    const interval = setInterval(loadTickets, 30000) // Refresh every 30 seconds
+    return () => clearInterval(interval)
   }, [filters])
 
-  const loadAuditLog = async () => {
-    setIsLoading(true)
-    // Simulate API call
-    setTimeout(() => {
-      const data = getAuditLog()
-      setAuditLog(data)
-      setIsLoading(false)
-    }, 1000)
-  }
-
-  const exportAuditLog = () => {
-    const filename = `audit-log-${new Date().toISOString().split("T")[0]}.csv`
-    console.log(`Exporting audit log: ${filename}`)
-    alert(`Audit log "${filename}" would be downloaded`)
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold mb-2">Audit Log</h2>
-          <p className="text-gray-400">Track all administrative actions and changes</p>
-        </div>
-        <Button onClick={exportAuditLog} variant="outline">
-          <Download size={16} className="mr-2" />
-          Export Log
-        </Button>
-      </div>
-
-      {/* Filters */}
-      <CardWrapper>
-        <div className="flex flex-wrap gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Action</label>
-            <select
-              value={filters.action}
-              onChange={(e) => setFilters({ ...filters, action: e.target.value })}
-              className="px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
-            >
-              <option value="all">All Actions</option>
-              <option value="CREATE">Create</option>
-              <option value="UPDATE">Update</option>
-              <option value="DELETE">Delete</option>
-              <option value="VIEW">View</option>
-              <option value="EXPORT">Export</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Resource</label>
-            <select
-              value={filters.resource}
-              onChange={(e) => setFilters({ ...filters, resource: e.target.value })}
-              className="px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
-            >
-              <option value="all">All Resources</option>
-              <option value="tenant_settings">Tenant Settings</option>
-              <option value="user_account">User Accounts</option>
-              <option value="analytics_report">Analytics Reports</option>
-              <option value="notification_settings">Notifications</option>
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Time Range</label>
-            <select
-              value={filters.dateRange}
-              onChange={(e) => setFilters({ ...filters, dateRange: e.target.value })}
-              className="px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
-            >
-              <option value="1d">Last 24 hours</option>
-              <option value="7d">Last 7 days</option>
-              <option value="30d">Last 30 days</option>
-              <option value="90d">Last 90 days</option>
-            </select>
-          </div>
-
-          <div className="flex items-end">
-            <Button onClick={loadAuditLog} variant="outline">
-              <RefreshCw size={16} className="mr-2" />
-              Refresh
-            </Button>
-          </div>
-        </div>
-      </CardWrapper>
-
-      {/* Audit Log Table */}
-      <CardWrapper>
-        {isLoading ? (
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
-              <p className="text-gray-400">Loading audit log...</p>
-            </div>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-700">
-                  <th className="text-left py-3 px-4 font-medium text-gray-400">Timestamp</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-400">User</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-400">Action</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-400">Resource</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-400">Details</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-400">IP Address</th>
-                </tr>
-              </thead>
-              <tbody>
-                {auditLog.map((entry) => (
-                  <tr key={entry.id} className="border-b border-gray-800 hover:bg-gray-800/50">
-                    <td className="py-3 px-4 text-sm">{entry.timestamp}</td>
-                    <td className="py-3 px-4">
-                      <div className="font-medium">{entry.userName}</div>
-                      <div className="text-sm text-gray-400">{entry.userId}</div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`px-2 py-1 rounded text-xs ${
-                          entry.action === "CREATE"
-                            ? "bg-green-500/20 text-green-400"
-                            : entry.action === "UPDATE"
-                              ? "bg-yellow-500/20 text-yellow-400"
-                              : entry.action === "DELETE"
-                                ? "bg-red-500/20 text-red-400"
-                                : "bg-blue-500/20 text-blue-400"
-                        }`}
-                      >
-                        {entry.action}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-sm">{entry.resource}</td>
-                    <td className="py-3 px-4 text-sm text-gray-400 max-w-xs truncate">{entry.details}</td>
-                    <td className="py-3 px-4 text-sm text-gray-400">{entry.ipAddress}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </CardWrapper>
-    </div>
-  )
-}
-
-function AdminClientIntakeModule() {
-  const [intakeSubmissions, setIntakeSubmissions] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const [selectedSubmission, setSelectedSubmission] = useState<any>(null)
-
-  useEffect(() => {
-    loadIntakeSubmissions()
-  }, [])
-
-  const loadIntakeSubmissions = async () => {
+  const loadTickets = async () => {
     setIsLoading(true)
     // Simulate API call to SharePoint
     setTimeout(() => {
-      const mockData = [
+      const mockTickets = [
         {
-          id: "INT-001",
+          id: "TK-001234",
+          title: "Email setup not working on mobile",
+          status: "in-progress",
+          priority: "high",
+          category: "email",
+          tenant: "nextphase-it",
+          tenantName: "NextPhase IT",
           clientName: "John Smith",
-          companyName: "Smith Consulting LLC",
-          email: "john@smithconsulting.com",
-          phone: "(555) 123-4567",
-          servicesNeeded: "Website Development, Cloud Migration",
-          submittedDate: "2024-01-15 10:30:00",
-          status: "new",
-          pdfUrl: "/ClientIntakeForms/ClientIntake_20240115_103000_John_Smith.pdf",
+          clientEmail: "john@company.com",
+          created: "2024-01-15 10:30:00",
+          lastUpdate: "2024-01-15 14:30:00",
+          assignedTo: "Sarah Johnson",
+          description: "Unable to receive emails on iPhone after recent iOS update.",
+          responses: 2,
         },
         {
-          id: "INT-002",
-          clientName: "Sarah Johnson",
-          companyName: "Johnson Marketing",
-          email: "sarah@johnsonmarketing.com",
-          phone: "(555) 987-6543",
-          servicesNeeded: "IT Support, Security Audit",
-          submittedDate: "2024-01-14 14:15:00",
-          status: "contacted",
-          pdfUrl: "/ClientIntakeForms/ClientIntake_20240114_141500_Sarah_Johnson.pdf",
+          id: "TK-001235",
+          title: "SharePoint access permission issue",
+          status: "open",
+          priority: "medium",
+          category: "sharepoint",
+          tenant: "example-corp",
+          tenantName: "Example Corporation",
+          clientName: "Jane Doe",
+          clientEmail: "jane@example.com",
+          created: "2024-01-14 09:15:00",
+          lastUpdate: "2024-01-14 09:15:00",
+          assignedTo: null,
+          description: "New employee cannot access shared documents.",
+          responses: 0,
+        },
+        {
+          id: "TK-001236",
+          title: "Website contact form not sending",
+          status: "resolved",
+          priority: "urgent",
+          category: "website",
+          tenant: "demo-company",
+          tenantName: "Demo Company",
+          clientName: "Mike Wilson",
+          clientEmail: "mike@demo.com",
+          created: "2024-01-12 11:00:00",
+          lastUpdate: "2024-01-12 15:30:00",
+          assignedTo: "David Kim",
+          description: "Contact form submissions are not being received.",
+          responses: 3,
         },
       ]
-      setIntakeSubmissions(mockData)
+      setTickets(mockTickets)
       setIsLoading(false)
     }, 1000)
   }
 
-  const updateSubmissionStatus = (id: string, status: string) => {
-    setIntakeSubmissions((prev) => prev.map((sub) => (sub.id === id ? { ...sub, status } : sub)))
+  const updateTicketStatus = (ticketId: string, newStatus: string) => {
+    setTickets((prev) =>
+      prev.map((ticket) =>
+        ticket.id === ticketId ? { ...ticket, status: newStatus, lastUpdate: new Date().toISOString() } : ticket,
+      ),
+    )
   }
 
-  const downloadPDF = (pdfUrl: string, clientName: string) => {
-    // In a real implementation, this would download from SharePoint
-    window.open(`https://nextphaseit.sharepoint.com/sites/NextPhaseIT${pdfUrl}`, "_blank")
+  const assignTicket = (ticketId: string, assignee: string) => {
+    setTickets((prev) =>
+      prev.map((ticket) =>
+        ticket.id === ticketId ? { ...ticket, assignedTo: assignee, lastUpdate: new Date().toISOString() } : ticket,
+      ),
+    )
   }
+
+  const filteredTickets = tickets.filter((ticket) => {
+    if (filters.status !== "all" && ticket.status !== filters.status) return false
+    if (filters.priority !== "all" && ticket.priority !== filters.priority) return false
+    if (filters.tenant !== "all" && ticket.tenant !== filters.tenant) return false
+    if (filters.category !== "all" && ticket.category !== filters.category) return false
+    return true
+  })
 
   const statusColors = {
-    new: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    contacted: "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-    qualified: "bg-green-500/20 text-green-400 border-green-500/30",
-    converted: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-    declined: "bg-gray-500/20 text-gray-400 border-gray-500/30",
+    open: "bg-blue-500/20 text-blue-400 border-blue-500/30",
+    "in-progress": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
+    resolved: "bg-green-500/20 text-green-400 border-green-500/30",
+    closed: "bg-gray-500/20 text-gray-400 border-gray-500/30",
+  }
+
+  const priorityColors = {
+    low: "text-green-400",
+    medium: "text-yellow-400",
+    high: "text-orange-400",
+    urgent: "text-red-400",
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold mb-2">Client Intake Submissions</h2>
-          <p className="text-gray-400">Review and manage new client contact form submissions</p>
+          <h2 className="text-2xl font-bold mb-2">Real-Time Ticketing</h2>
+          <p className="text-gray-400">Monitor and manage support tickets across all tenants</p>
         </div>
-        <Button onClick={loadIntakeSubmissions} variant="outline">
-          <RefreshCw size={16} className="mr-2" />
-          Refresh
-        </Button>
+        <div className="flex items-center gap-2">
+          <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+          <span className="text-sm text-gray-400">Live Updates</span>
+        </div>
       </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <CardWrapper className="text-center">
           <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-            <FileText className="text-blue-400" size={24} />
+            <Ticket className="text-blue-400" size={24} />
           </div>
           <div className="text-2xl font-bold text-blue-400 mb-1">
-            {intakeSubmissions.filter((s) => s.status === "new").length}
+            {tickets.filter((t) => t.status === "open").length}
           </div>
-          <div className="text-sm text-gray-400">New Submissions</div>
+          <div className="text-sm text-gray-400">Open Tickets</div>
         </CardWrapper>
 
         <CardWrapper className="text-center">
           <div className="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-            <Mail className="text-yellow-400" size={24} />
+            <Clock className="text-yellow-400" size={24} />
           </div>
           <div className="text-2xl font-bold text-yellow-400 mb-1">
-            {intakeSubmissions.filter((s) => s.status === "contacted").length}
+            {tickets.filter((t) => t.status === "in-progress").length}
           </div>
-          <div className="text-sm text-gray-400">Contacted</div>
+          <div className="text-sm text-gray-400">In Progress</div>
+        </CardWrapper>
+
+        <CardWrapper className="text-center">
+          <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+            <AlertCircle className="text-red-400" size={24} />
+          </div>
+          <div className="text-2xl font-bold text-red-400 mb-1">
+            {tickets.filter((t) => t.priority === "urgent").length}
+          </div>
+          <div className="text-sm text-gray-400">Urgent Priority</div>
         </CardWrapper>
 
         <CardWrapper className="text-center">
@@ -580,29 +191,91 @@ function AdminClientIntakeModule() {
             <CheckCircle className="text-green-400" size={24} />
           </div>
           <div className="text-2xl font-bold text-green-400 mb-1">
-            {intakeSubmissions.filter((s) => s.status === "qualified").length}
+            {tickets.filter((t) => t.status === "resolved").length}
           </div>
-          <div className="text-sm text-gray-400">Qualified</div>
-        </CardWrapper>
-
-        <CardWrapper className="text-center">
-          <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-            <Award className="text-purple-400" size={24} />
-          </div>
-          <div className="text-2xl font-bold text-purple-400 mb-1">
-            {intakeSubmissions.filter((s) => s.status === "converted").length}
-          </div>
-          <div className="text-sm text-gray-400">Converted</div>
+          <div className="text-sm text-gray-400">Resolved Today</div>
         </CardWrapper>
       </div>
 
-      {/* Submissions Table */}
+      {/* Filters */}
+      <CardWrapper>
+        <div className="flex flex-wrap gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
+            <select
+              value={filters.status}
+              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+              className="px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
+            >
+              <option value="all">All Status</option>
+              <option value="open">Open</option>
+              <option value="in-progress">In Progress</option>
+              <option value="resolved">Resolved</option>
+              <option value="closed">Closed</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Priority</label>
+            <select
+              value={filters.priority}
+              onChange={(e) => setFilters({ ...filters, priority: e.target.value })}
+              className="px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
+            >
+              <option value="all">All Priority</option>
+              <option value="urgent">Urgent</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Tenant</label>
+            <select
+              value={filters.tenant}
+              onChange={(e) => setFilters({ ...filters, tenant: e.target.value })}
+              className="px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
+            >
+              <option value="all">All Tenants</option>
+              <option value="nextphase-it">NextPhase IT</option>
+              <option value="example-corp">Example Corporation</option>
+              <option value="demo-company">Demo Company</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Category</label>
+            <select
+              value={filters.category}
+              onChange={(e) => setFilters({ ...filters, category: e.target.value })}
+              className="px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
+            >
+              <option value="all">All Categories</option>
+              <option value="email">Email</option>
+              <option value="sharepoint">SharePoint</option>
+              <option value="website">Website</option>
+              <option value="network">Network</option>
+              <option value="security">Security</option>
+            </select>
+          </div>
+
+          <div className="flex items-end">
+            <Button onClick={loadTickets} variant="outline">
+              <RefreshIcon size={16} className="mr-2" />
+              Refresh
+            </Button>
+          </div>
+        </div>
+      </CardWrapper>
+
+      {/* Tickets Table */}
       <CardWrapper>
         {isLoading ? (
           <div className="flex items-center justify-center py-12">
             <div className="text-center">
-              <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
-              <p className="text-gray-400">Loading submissions...</p>
+              <RefreshIcon className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+              <p className="text-gray-400">Loading tickets...</p>
             </div>
           </div>
         ) : (
@@ -610,63 +283,70 @@ function AdminClientIntakeModule() {
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-700">
+                  <th className="text-left py-3 px-4 font-medium text-gray-400">Ticket</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-400">Client</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-400">Company</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-400">Contact</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-400">Services</th>
-                  <th className="text-left py-3 px-4 font-medium text-gray-400">Submitted</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-400">Tenant</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-400">Priority</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-400">Status</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-400">Assigned</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-400">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {intakeSubmissions.map((submission) => (
-                  <tr key={submission.id} className="border-b border-gray-800 hover:bg-gray-800/50">
+                {filteredTickets.map((ticket) => (
+                  <tr key={ticket.id} className="border-b border-gray-800 hover:bg-gray-800/50">
                     <td className="py-3 px-4">
-                      <div className="font-medium">{submission.clientName}</div>
-                      <div className="text-sm text-gray-400">ID: {submission.id}</div>
+                      <div className="font-medium">{ticket.id}</div>
+                      <div className="text-sm text-gray-400 max-w-xs truncate">{ticket.title}</div>
+                      <div className="text-xs text-gray-500">{ticket.created}</div>
                     </td>
-                    <td className="py-3 px-4">{submission.companyName}</td>
                     <td className="py-3 px-4">
-                      <div className="text-sm">
-                        <a href={`mailto:${submission.email}`} className="text-primary hover:underline">
-                          {submission.email}
-                        </a>
-                      </div>
-                      <div className="text-sm text-gray-400">
-                        <a href={`tel:${submission.phone}`} className="hover:text-primary">
-                          {submission.phone}
-                        </a>
-                      </div>
+                      <div className="font-medium">{ticket.clientName}</div>
+                      <div className="text-sm text-gray-400">{ticket.clientEmail}</div>
                     </td>
-                    <td className="py-3 px-4 text-sm max-w-xs truncate">{submission.servicesNeeded}</td>
-                    <td className="py-3 px-4 text-sm text-gray-400">{submission.submittedDate}</td>
+                    <td className="py-3 px-4">
+                      <div className="text-sm">{ticket.tenantName}</div>
+                      <div className="text-xs text-gray-500">{ticket.tenant}</div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <span className={`font-medium ${priorityColors[ticket.priority as keyof typeof priorityColors]}`}>
+                        {ticket.priority.toUpperCase()}
+                      </span>
+                    </td>
                     <td className="py-3 px-4">
                       <select
-                        value={submission.status}
-                        onChange={(e) => updateSubmissionStatus(submission.id, e.target.value)}
-                        className={`px-2 py-1 rounded text-xs border ${statusColors[submission.status as keyof typeof statusColors]} bg-transparent`}
+                        value={ticket.status}
+                        onChange={(e) => updateTicketStatus(ticket.id, e.target.value)}
+                        className={`px-2 py-1 rounded text-xs border ${statusColors[ticket.status as keyof typeof statusColors]} bg-transparent`}
                       >
-                        <option value="new">New</option>
-                        <option value="contacted">Contacted</option>
-                        <option value="qualified">Qualified</option>
-                        <option value="converted">Converted</option>
-                        <option value="declined">Declined</option>
+                        <option value="open">Open</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="closed">Closed</option>
+                      </select>
+                    </td>
+                    <td className="py-3 px-4">
+                      <select
+                        value={ticket.assignedTo || ""}
+                        onChange={(e) => assignTicket(ticket.id, e.target.value)}
+                        className="px-2 py-1 rounded text-xs bg-black border border-gray-600 text-white"
+                      >
+                        <option value="">Unassigned</option>
+                        <option value="Sarah Johnson">Sarah Johnson</option>
+                        <option value="David Kim">David Kim</option>
+                        <option value="Alex Rodriguez">Alex Rodriguez</option>
+                        <option value="Lisa Wang">Lisa Wang</option>
                       </select>
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => downloadPDF(submission.pdfUrl, submission.clientName)}
-                        >
-                          <Download size={12} className="mr-1" />
-                          PDF
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={() => setSelectedSubmission(submission)}>
+                        <Button size="sm" variant="outline" onClick={() => setSelectedTicket(ticket)}>
                           <Eye size={12} className="mr-1" />
                           View
+                        </Button>
+                        <Button size="sm" variant="outline">
+                          <MessageSquare size={12} className="mr-1" />
+                          {ticket.responses}
                         </Button>
                       </div>
                     </td>
@@ -681,110 +361,11 @@ function AdminClientIntakeModule() {
   )
 }
 
-function AdminTenantManagement() {
-  const [tenants] = useState(Object.values(TENANT_CONFIGS))
-  const [selectedTenant, setSelectedTenant] = useState<string | null>(null)
-
-  const editTenant = (tenantId: string) => {
-    setSelectedTenant(tenantId)
-    alert(`Edit tenant configuration for ${tenantId}`)
-  }
-
-  const addTenant = () => {
-    alert("Add new tenant configuration modal would open")
-  }
-
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-        <div>
-          <h2 className="text-2xl font-bold mb-2">Tenant Management</h2>
-          <p className="text-gray-400">Manage tenant configurations and access</p>
-        </div>
-        <Button onClick={addTenant} className="bg-primary hover:bg-primary/90">
-          <Plus size={16} className="mr-2" />
-          Add Tenant
-        </Button>
-      </div>
-
-      {/* Tenant Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {tenants.map((tenant) => (
-          <CardWrapper key={tenant.id} className="hover:border-primary/40 transition-colors">
-            <div className="flex items-start justify-between mb-4">
-              <div className="flex items-center gap-3">
-                <div
-                  className="w-12 h-12 rounded-lg flex items-center justify-center"
-                  style={{ backgroundColor: tenant.branding.primaryColor + "20" }}
-                >
-                  <Building className="text-primary" size={24} />
-                </div>
-                <div>
-                  <h3 className="font-semibold">{tenant.name}</h3>
-                  <p className="text-sm text-gray-400">{tenant.domain}</p>
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <Button size="sm" variant="outline" onClick={() => editTenant(tenant.id)}>
-                  <Edit size={14} />
-                </Button>
-                <Button size="sm" variant="outline">
-                  <Eye size={14} />
-                </Button>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Tenant ID:</span>
-                <span className="font-mono text-xs">{tenant.id}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Features:</span>
-                <div className="flex gap-1">
-                  {tenant.features.twoFactorAuth && (
-                    <span className="text-xs bg-green-500/20 text-green-400 px-1 py-0.5 rounded">2FA</span>
-                  )}
-                  {tenant.features.customThemes && (
-                    <span className="text-xs bg-blue-500/20 text-blue-400 px-1 py-0.5 rounded">Themes</span>
-                  )}
-                  {tenant.features.adminOverride && (
-                    <span className="text-xs bg-red-500/20 text-red-400 px-1 py-0.5 rounded">Admin</span>
-                  )}
-                </div>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Admins:</span>
-                <span>{tenant.admins.length}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-400">Session Timeout:</span>
-                <span>{tenant.settings.sessionTimeout}min</span>
-              </div>
-            </div>
-
-            <div className="mt-4 pt-4 border-t border-gray-700">
-              <div className="flex gap-2">
-                <Button size="sm" onClick={() => editTenant(tenant.id)} className="flex-1">
-                  Configure
-                </Button>
-                <Button size="sm" variant="outline" className="flex-1">
-                  View Users
-                </Button>
-              </div>
-            </div>
-          </CardWrapper>
-        ))}
-      </div>
-    </div>
-  )
-}
-
 function AdminPortalContent() {
   const { adminUser, logout, hasPermission } = useAdminAuth()
-  const [activeTab, setActiveTab] = useState<"dashboard" | "reports" | "settings" | "tenants" | "audit" | "intake">(
-    "dashboard",
-  )
+  const [activeTab, setActiveTab] = useState<
+    "dashboard" | "reports" | "settings" | "tenants" | "audit" | "intake" | "tickets"
+  >("dashboard")
 
   if (!adminUser) {
     return (
@@ -859,6 +440,7 @@ function AdminPortalContent() {
             <div className="flex space-x-1 overflow-x-auto py-2">
               {[
                 { id: "dashboard", label: "Analytics", icon: <BarChart3 size={16} />, permission: "analytics.view" },
+                { id: "tickets", label: "Live Tickets", icon: <Ticket size={16} />, permission: "tickets.view" },
                 { id: "reports", label: "Reports", icon: <FileText size={16} />, permission: "reports.view" },
                 { id: "tenants", label: "Tenants", icon: <Building size={16} />, permission: "tenants.view" },
                 { id: "settings", label: "Settings", icon: <Settings size={16} />, permission: "settings.manage" },
@@ -887,6 +469,7 @@ function AdminPortalContent() {
         {/* Main Content */}
         <main className="container mx-auto px-4 py-8">
           {activeTab === "dashboard" && <AdminAnalyticsDashboard />}
+          {activeTab === "tickets" && <AdminRealTimeTicketing />}
           {activeTab === "reports" && <AdminReportsModule />}
           {activeTab === "settings" && <AdminSettingsModule />}
           {activeTab === "tenants" && <AdminTenantManagement />}
