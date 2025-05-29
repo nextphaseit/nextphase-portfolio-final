@@ -28,6 +28,7 @@ import {
 import Image from "next/image"
 import Link from "next/link"
 import { createSupportTicket } from "@/app/actions/ticket"
+import { AccountManagement as AccountManagementComponent } from "@/components/account-management"
 
 interface TicketProps {
   id: string
@@ -538,7 +539,7 @@ const resourceCategories = {
 }
 
 function ClientPortalContent() {
-  const [activeTab, setActiveTab] = useState<"overview" | "tickets" | "resources">("overview")
+  const [activeTab, setActiveTab] = useState<"overview" | "tickets" | "resources" | "account">("overview")
   const [showNewTicket, setShowNewTicket] = useState(false)
   const [selectedTicket, setSelectedTicket] = useState<TicketProps | null>(null)
   const [ticketFilter, setTicketFilter] = useState<"all" | "open" | "in-progress" | "resolved" | "closed">("all")
@@ -787,6 +788,7 @@ function ClientPortalContent() {
               { id: "overview", label: "Overview", icon: <User size={16} /> },
               { id: "tickets", label: "Support Tickets", icon: <Ticket size={16} /> },
               { id: "resources", label: "Resources", icon: <FileText size={16} /> },
+              { id: "account", label: "Account", icon: <User size={16} /> },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -1123,6 +1125,13 @@ function ClientPortalContent() {
                   </div>
                 </CardWrapper>
               </div>
+            </div>
+          )}
+
+          {/* Account Tab */}
+          {activeTab === "account" && (
+            <div>
+              <AccountManagementComponent />
             </div>
           )}
         </section>
