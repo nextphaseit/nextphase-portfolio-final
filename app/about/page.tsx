@@ -1,44 +1,13 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardWrapper } from "@/components/ui/card-wrapper"
 import { Navbar } from "@/components/navbar"
-import { Users, Target, Award, Heart, Mail } from "lucide-react"
+import { Users, Target, Award, Heart, Mail, Download } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { useState } from "react"
 
 export default function AboutPage() {
-  const [formData, setFormData] = useState<any>(null)
-
-  const handleDownloadPDF = () => {
-    // Create a link to download the PDF form
-    const link = document.createElement("a")
-    link.href = "/form"
-    link.target = "_blank"
-    link.click()
-  }
-
-  // Function to handle form submission message
-  const handleFormSubmitted = (data: any) => {
-    setFormData(data)
-  }
-
-  // Function to handle form message from iframe
-  const handleFormMessage = (event: MessageEvent) => {
-    // Check if the message is from Microsoft Forms
-    if (event.origin.includes("forms.office.com") || event.origin.includes("forms.microsoft.com")) {
-      if (event.data && event.data.formSubmitted) {
-        handleFormSubmitted(event.data.formData)
-      }
-    }
-  }
-
-  // Add event listener for form submission
-  if (typeof window !== "undefined") {
-    window.addEventListener("message", handleFormMessage)
-  }
-
   return (
     <main className="min-h-screen bg-black text-white">
       <Navbar />
@@ -97,53 +66,37 @@ export default function AboutPage() {
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-center mb-12">Our Core Values</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <Card className="bg-card border-primary/20">
-              <CardHeader className="text-center">
-                <Users className="w-12 h-12 text-primary mx-auto mb-4" />
-                <CardTitle>Client-Focused</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-400 text-center">
-                  Every solution is tailored to meet your specific business needs and goals.
-                </p>
-              </CardContent>
-            </Card>
+            <CardWrapper className="text-center">
+              <Users className="w-12 h-12 text-primary mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-3">Client-Focused</h3>
+              <p className="text-gray-400">
+                Every solution is tailored to meet your specific business needs and goals.
+              </p>
+            </CardWrapper>
 
-            <Card className="bg-card border-primary/20">
-              <CardHeader className="text-center">
-                <Target className="w-12 h-12 text-primary mx-auto mb-4" />
-                <CardTitle>Results-Driven</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-400 text-center">
-                  We measure success by the tangible improvements we bring to your business.
-                </p>
-              </CardContent>
-            </Card>
+            <CardWrapper className="text-center">
+              <Target className="w-12 h-12 text-primary mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-3">Results-Driven</h3>
+              <p className="text-gray-400">
+                We measure success by the tangible improvements we bring to your business.
+              </p>
+            </CardWrapper>
 
-            <Card className="bg-card border-primary/20">
-              <CardHeader className="text-center">
-                <Award className="w-12 h-12 text-primary mx-auto mb-4" />
-                <CardTitle>Excellence</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-400 text-center">
-                  We maintain the highest standards in everything we do, from code to customer service.
-                </p>
-              </CardContent>
-            </Card>
+            <CardWrapper className="text-center">
+              <Award className="w-12 h-12 text-primary mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-3">Excellence</h3>
+              <p className="text-gray-400">
+                We maintain the highest standards in everything we do, from code to customer service.
+              </p>
+            </CardWrapper>
 
-            <Card className="bg-card border-primary/20">
-              <CardHeader className="text-center">
-                <Heart className="w-12 h-12 text-primary mx-auto mb-4" />
-                <CardTitle>Integrity</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-gray-400 text-center">
-                  Honest communication and transparent processes build lasting partnerships.
-                </p>
-              </CardContent>
-            </Card>
+            <CardWrapper className="text-center">
+              <Heart className="w-12 h-12 text-primary mx-auto mb-4" />
+              <h3 className="text-xl font-semibold mb-3">Integrity</h3>
+              <p className="text-gray-400">
+                Honest communication and transparent processes build lasting partnerships.
+              </p>
+            </CardWrapper>
           </div>
         </section>
 
@@ -151,42 +104,40 @@ export default function AboutPage() {
         <section className="mb-16">
           <h2 className="text-3xl font-bold text-center mb-12">Meet Our Team</h2>
           <div className="max-w-2xl mx-auto">
-            <Card className="bg-card border-primary/20">
-              <CardContent className="p-8">
-                <div className="flex flex-col md:flex-row items-center gap-8">
-                  <div className="flex-shrink-0">
-                    <Image
-                      src="/images/lucien.jpg"
-                      alt="Adrian Knight"
-                      width={200}
-                      height={200}
-                      className="rounded-full"
-                    />
-                  </div>
-                  <div className="text-center md:text-left">
-                    <h3 className="text-2xl font-bold mb-2">Adrian Knight</h3>
-                    <p className="text-primary mb-4">Lead Web & IT Solutions Consultant</p>
-                    <p className="text-gray-400 mb-4">
-                      With over a decade of experience in web development and IT infrastructure, Adrian leads our team
-                      in delivering innovative solutions that drive business growth. Specializing in cloud migrations,
-                      security audits, and custom web applications.
-                    </p>
-                    <div className="flex justify-center md:justify-start gap-4">
-                      <a href="mailto:adrian.knight@nextphaseit.org" className="text-primary hover:underline">
-                        adrian.knight@nextphaseit.org
-                      </a>
-                    </div>
+            <CardWrapper>
+              <div className="flex flex-col md:flex-row items-center gap-8 p-8">
+                <div className="flex-shrink-0">
+                  <Image
+                    src="/images/lucien.jpg"
+                    alt="Adrian Knight"
+                    width={200}
+                    height={200}
+                    className="rounded-full"
+                  />
+                </div>
+                <div className="text-center md:text-left">
+                  <h3 className="text-2xl font-bold mb-2">Adrian Knight</h3>
+                  <p className="text-primary mb-4">Lead Web & IT Solutions Consultant</p>
+                  <p className="text-gray-400 mb-4">
+                    With over a decade of experience in web development and IT infrastructure, Adrian leads our team in
+                    delivering innovative solutions that drive business growth. Specializing in cloud migrations,
+                    security audits, and custom web applications.
+                  </p>
+                  <div className="flex justify-center md:justify-start gap-4">
+                    <a href="mailto:adrian.knight@nextphaseit.org" className="text-primary hover:underline">
+                      adrian.knight@nextphaseit.org
+                    </a>
                   </div>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </CardWrapper>
           </div>
         </section>
 
         {/* NEW CLIENT CONTACT FORM SECTION */}
         <section id="new-client-form" className="mb-16">
-          <Card className="bg-gradient-to-r from-primary/20 to-primary/5 border-primary/20">
-            <CardContent className="p-8 md:p-12">
+          <CardWrapper className="bg-gradient-to-r from-primary/20 to-primary/5 border-primary/20">
+            <div className="p-8 md:p-12">
               <div className="text-center mb-8">
                 <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6">
                   <span className="text-4xl">📋</span>
@@ -274,10 +225,21 @@ export default function AboutPage() {
                       Call (984) 310-9533
                     </a>
                   </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    asChild
+                    className="border-primary/50 text-primary hover:bg-primary hover:text-black"
+                  >
+                    <Link href="/form">
+                      <Download className="w-4 h-4 mr-2" />
+                      Download PDF Form
+                    </Link>
+                  </Button>
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </CardWrapper>
         </section>
 
         {/* Why Choose Us */}
@@ -318,8 +280,8 @@ export default function AboutPage() {
 
         {/* CTA Section */}
         <section className="text-center">
-          <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
-            <CardContent className="p-12">
+          <CardWrapper className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/20">
+            <div className="p-12">
               <h2 className="text-3xl font-bold mb-4">Transform Your Business Today</h2>
               <p className="text-gray-400 mb-8 max-w-2xl mx-auto">
                 Join the growing number of businesses that trust NextPhase IT to power their digital transformation.
@@ -338,8 +300,8 @@ export default function AboutPage() {
                   <Link href="/#contact">Contact Us Today</Link>
                 </Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </CardWrapper>
         </section>
       </div>
     </main>
