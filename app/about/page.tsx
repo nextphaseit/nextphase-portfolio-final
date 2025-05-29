@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button"
 import { CardWrapper } from "@/components/ui/card-wrapper"
 import { Navbar } from "@/components/navbar"
 import { Users, Target, Award, Heart, Mail, Download } from "lucide-react"
-import Image from "next/image"
 import Link from "next/link"
 
 export default function AboutPage() {
@@ -26,38 +25,27 @@ export default function AboutPage() {
 
         {/* Company Overview */}
         <section className="mb-16">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <h2 className="text-3xl font-bold mb-6">Our Story</h2>
-              <p className="text-gray-400 mb-6">
-                NextPhase IT was founded with a simple mission: to make enterprise-level technology accessible to small
-                and medium-sized businesses. We believe that every business, regardless of size, deserves secure,
-                scalable, and efficient IT solutions.
-              </p>
-              <p className="text-gray-400 mb-6">
-                Our team combines years of experience in web development, cloud infrastructure, cybersecurity, and
-                business automation to deliver comprehensive solutions that help our clients focus on what they do best
-                – running their business.
-              </p>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-primary mb-2">50+</div>
-                  <div className="text-gray-400">Projects Completed</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-3xl font-bold text-primary mb-2">99%</div>
-                  <div className="text-gray-400">Client Satisfaction</div>
-                </div>
+          <div className="max-w-4xl mx-auto">
+            <h2 className="text-3xl font-bold mb-6">Our Story</h2>
+            <p className="text-gray-400 mb-6">
+              NextPhase IT was founded with a simple mission: to make enterprise-level technology accessible to small
+              and medium-sized businesses. We believe that every business, regardless of size, deserves secure,
+              scalable, and efficient IT solutions.
+            </p>
+            <p className="text-gray-400 mb-6">
+              Our team combines years of experience in web development, cloud infrastructure, cybersecurity, and
+              business automation to deliver comprehensive solutions that help our clients focus on what they do best –
+              running their business.
+            </p>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary mb-2">50+</div>
+                <div className="text-gray-400">Projects Completed</div>
               </div>
-            </div>
-            <div className="relative">
-              <Image
-                src="/images/about-img.png"
-                alt="NextPhase IT Team"
-                width={600}
-                height={400}
-                className="rounded-lg"
-              />
+              <div className="text-center">
+                <div className="text-3xl font-bold text-primary mb-2">99%</div>
+                <div className="text-gray-400">Client Satisfaction</div>
+              </div>
             </div>
           </div>
         </section>
@@ -105,29 +93,18 @@ export default function AboutPage() {
           <h2 className="text-3xl font-bold text-center mb-12">Meet Our Team</h2>
           <div className="max-w-2xl mx-auto">
             <CardWrapper>
-              <div className="flex flex-col md:flex-row items-center gap-8 p-8">
-                <div className="flex-shrink-0">
-                  <Image
-                    src="/images/lucien.jpg"
-                    alt="Adrian Knight"
-                    width={200}
-                    height={200}
-                    className="rounded-full"
-                  />
-                </div>
-                <div className="text-center md:text-left">
-                  <h3 className="text-2xl font-bold mb-2">Adrian Knight</h3>
-                  <p className="text-primary mb-4">Lead Web & IT Solutions Consultant</p>
-                  <p className="text-gray-400 mb-4">
-                    With over a decade of experience in web development and IT infrastructure, Adrian leads our team in
-                    delivering innovative solutions that drive business growth. Specializing in cloud migrations,
-                    security audits, and custom web applications.
-                  </p>
-                  <div className="flex justify-center md:justify-start gap-4">
-                    <a href="mailto:adrian.knight@nextphaseit.org" className="text-primary hover:underline">
-                      adrian.knight@nextphaseit.org
-                    </a>
-                  </div>
+              <div className="text-center p-8">
+                <h3 className="text-2xl font-bold mb-2">Adrian Knight</h3>
+                <p className="text-primary mb-4">Lead Web & IT Solutions Consultant</p>
+                <p className="text-gray-400 mb-4">
+                  With over a decade of experience in web development and IT infrastructure, Adrian leads our team in
+                  delivering innovative solutions that drive business growth. Specializing in cloud migrations, security
+                  audits, and custom web applications.
+                </p>
+                <div className="flex justify-center md:justify-start gap-4">
+                  <a href="mailto:adrian.knight@nextphaseit.org" className="text-primary hover:underline">
+                    adrian.knight@nextphaseit.org
+                  </a>
                 </div>
               </div>
             </CardWrapper>
