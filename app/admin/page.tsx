@@ -20,11 +20,11 @@ import {
   RefreshCwIcon as RefreshIcon,
 } from "lucide-react"
 import Image from "next/image"
-import { AdminReportsModule } from "@/components/admin-reports-module"
-import { AdminSettingsModule } from "@/components/admin-settings-module"
-import { AdminTenantManagement } from "@/components/admin-tenant-management"
-import { AdminAuditModule } from "@/components/admin-audit-module"
-import { AdminClientIntakeModule } from "@/components/admin-client-intake-module"
+import AdminReportsModule from "@/components/admin-reports-module"
+import AdminSettingsModule from "@/components/admin-settings-module"
+import AdminTenantManagement from "@/components/admin-tenant-management"
+import AdminAuditModule from "@/components/admin-audit-module"
+import AdminClientIntakeModule from "@/components/admin-client-intake-module"
 
 function AdminRealTimeTicketing() {
   const [tickets, setTickets] = useState<any[]>([])
