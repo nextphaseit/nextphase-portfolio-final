@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useState } from "react"
-import Navbar from "@/components/navbar"
+import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
 import { CardWrapper } from "@/components/ui/card-wrapper"
 import { AuthProvider } from "@/providers/auth-provider"
@@ -866,7 +866,7 @@ function ClientPortalContent() {
                   </div>
                   <div className="text-2xl font-bold text-purple-400 mb-1">98%</div>
                   <div className="text-sm text-gray-400">Satisfaction Rate</div>
-                </CardWrapper>
+                </div>
               </div>
 
               {/* Microsoft 365 Service Health */}
