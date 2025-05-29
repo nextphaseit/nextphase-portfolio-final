@@ -783,9 +783,9 @@ function ClientPortalContent() {
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex space-x-1 bg-card/50 rounded-lg p-1 mb-8">
+          <div className="flex flex-wrap space-x-1 bg-card/50 rounded-lg p-1 mb-8 overflow-x-auto">
             {[
-              { id: "overview", label: "Overview", icon: <User size={16} /> },
+              { id: "overview", label: "Overview", icon: <CheckCircle size={16} /> },
               { id: "tickets", label: "Support Tickets", icon: <Ticket size={16} /> },
               { id: "resources", label: "Resources", icon: <FileText size={16} /> },
               { id: "account", label: "Account", icon: <User size={16} /> },
@@ -793,12 +793,15 @@ function ClientPortalContent() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  activeTab === tab.id ? "bg-primary text-white" : "text-gray-400 hover:text-white hover:bg-white/5"
+                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? "bg-primary text-white shadow-lg"
+                    : "text-gray-400 hover:text-white hover:bg-white/10"
                 }`}
               >
                 {tab.icon}
-                {tab.label}
+                <span className="hidden sm:inline">{tab.label}</span>
+                <span className="sm:hidden">{tab.label.split(" ")[0]}</span>
               </button>
             ))}
           </div>
@@ -806,6 +809,24 @@ function ClientPortalContent() {
 
         {/* Tab Content */}
         <section className="container mx-auto px-4 pb-16">
+          {/* Mobile Tab Indicator */}
+          <div className="block sm:hidden mb-6">
+            <div className="bg-card/30 rounded-lg p-3 border border-primary/20">
+              <div className="flex items-center gap-2">
+                {activeTab === "overview" && <CheckCircle size={20} className="text-primary" />}
+                {activeTab === "tickets" && <Ticket size={20} className="text-primary" />}
+                {activeTab === "resources" && <FileText size={20} className="text-primary" />}
+                {activeTab === "account" && <User size={20} className="text-primary" />}
+                <h2 className="text-lg font-semibold">
+                  {activeTab === "overview" && "Dashboard Overview"}
+                  {activeTab === "tickets" && "Support Tickets"}
+                  {activeTab === "resources" && "Resources & Documentation"}
+                  {activeTab === "account" && "Account Management"}
+                </h2>
+              </div>
+            </div>
+          </div>
+
           {/* Overview Tab */}
           {activeTab === "overview" && (
             <div className="space-y-8">
