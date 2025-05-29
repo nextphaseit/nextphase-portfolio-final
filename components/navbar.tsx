@@ -5,7 +5,7 @@ const Navbar = () => {
     <nav className="bg-gray-800 py-4">
       <div className="container mx-auto flex items-center justify-between">
         <Link href="/" className="text-white font-bold text-xl">
-          My App
+          NextPhase IT
         </Link>
         <div className="space-x-4">
           <Link href="/" className="text-gray-300 hover:text-primary transition-colors">
@@ -21,7 +21,7 @@ const Navbar = () => {
             Contact
           </Link>
           <Link href="/portal/client-login" className="text-gray-300 hover:text-primary transition-colors">
-            Client Login
+            Service Desk Portal
           </Link>
         </div>
       </div>
@@ -29,5 +29,4 @@ const Navbar = () => {
   )
 }
 
-export { Navbar }
 export default Navbar
