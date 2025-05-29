@@ -1,571 +1,597 @@
 "use client"
-
-import type React from "react"
-
 import { useState, useEffect } from "react"
-import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
 import { CardWrapper } from "@/components/ui/card-wrapper"
-import { AuthProvider } from "@/providers/auth-provider"
+import { AdminAuthProvider, useAdminAuth, withAdminAuth } from "@/providers/admin-auth-provider"
+import { AdminAnalyticsDashboard } from "@/components/admin-analytics-dashboard"
 import {
-  Ticket,
-  User,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  Search,
-  MoreHorizontal,
-  Mail,
-  Phone,
-  Settings,
   BarChart3,
-  Users,
-  TrendingUp,
+  FileText,
+  Settings,
+  Shield,
+  Activity,
+  Download,
+  Calendar,
+  Building,
   Eye,
   Edit,
-  Trash2,
-  Archive,
+  Plus,
+  RefreshCw,
 } from "lucide-react"
 import Image from "next/image"
+import { getAuditLog, type AuditLogEntry } from "@/lib/admin-auth"
+import { TENANT_CONFIGS } from "@/lib/tenant-config"
 
-interface AdminTicket {
-  id: string
-  title: string
-  status: "open" | "in-progress" | "resolved" | "closed"
-  priority: "low" | "medium" | "high" | "urgent"
-  created: string
-  lastUpdate: string
-  description: string
-  clientName: string
-  clientEmail: string
-  assignedTo?: string
-  source: "portal" | "chatbot" | "email" | "phone"
-  responses: TicketResponse[]
-  tags: string[]
-}
+function AdminReportsModule() {
+  const [reportType, setReportType] = useState<"analytics" | "tickets" | "users" | "audit">("analytics")
+  const [dateRange, setDateRange] = useState({ start: "2024-01-01", end: "2024-01-31" })
+  const [isGenerating, setIsGenerating] = useState(false)
 
-interface TicketResponse {
-  id: string
-  message: string
-  author: string
-  timestamp: string
-  isStaff: boolean
-  isInternal?: boolean
-}
-
-interface AdminStats {
-  totalTickets: number
-  openTickets: number
-  inProgressTickets: number
-  resolvedToday: number
-  avgResponseTime: string
-  customerSatisfaction: number
-}
-
-function AdminTicketCard({
-  ticket,
-  onViewDetails,
-  onStatusChange,
-  onAssign,
-}: {
-  ticket: AdminTicket
-  onViewDetails: (ticket: AdminTicket) => void
-  onStatusChange: (ticketId: string, status: AdminTicket["status"]) => void
-  onAssign: (ticketId: string, assignee: string) => void
-}) {
-  const statusColors = {
-    open: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    "in-progress": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-    resolved: "bg-green-500/20 text-green-400 border-green-500/30",
-    closed: "bg-gray-500/20 text-gray-400 border-gray-500/30",
+  const generateReport = async (format: "csv" | "pdf") => {
+    setIsGenerating(true)
+    // Simulate report generation
+    setTimeout(() => {
+      const filename = `${reportType}-report-${dateRange.start}-to-${dateRange.end}.${format}`
+      console.log(`Generating ${format.toUpperCase()} report: ${filename}`)
+      alert(`${format.toUpperCase()} report "${filename}" would be downloaded`)
+      setIsGenerating(false)
+    }, 2000)
   }
 
-  const priorityColors = {
-    low: "text-green-400",
-    medium: "text-yellow-400",
-    high: "text-orange-400",
-    urgent: "text-red-400 animate-pulse",
-  }
-
-  const sourceIcons = {
-    portal: "🌐",
-    chatbot: "🤖",
-    email: "📧",
-    phone: "📞",
+  const scheduleReport = () => {
+    alert("Report scheduling feature would open a configuration modal")
   }
 
   return (
-    <CardWrapper className="hover:border-primary/40 transition-colors">
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <Ticket className="text-primary" size={20} />
-          <h3 className="font-semibold">#{ticket.id}</h3>
-          <span className="text-xs">{sourceIcons[ticket.source]}</span>
+    <div className="space-y-6">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <div>
+          <h2 className="text-2xl font-bold mb-2">Reports & Analytics</h2>
+          <p className="text-gray-400">Generate and schedule comprehensive reports</p>
         </div>
-        <div className="flex items-center gap-2">
-          <div className={`px-2 py-1 rounded-full text-xs border ${statusColors[ticket.status]}`}>
-            {ticket.status.replace("-", " ")}
+      </div>
+
+      {/* Report Configuration */}
+      <CardWrapper>
+        <h3 className="text-lg font-semibold mb-4">Report Configuration</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Report Type</label>
+            <select
+              value={reportType}
+              onChange={(e) => setReportType(e.target.value as any)}
+              className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
+            >
+              <option value="analytics">Analytics Summary</option>
+              <option value="tickets">Ticket Details</option>
+              <option value="users">User Activity</option>
+              <option value="audit">Audit Log</option>
+            </select>
           </div>
-          <Button size="sm" variant="ghost" onClick={() => onViewDetails(ticket)} className="p-1 h-auto">
-            <MoreHorizontal size={16} />
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Start Date</label>
+            <input
+              type="date"
+              value={dateRange.start}
+              onChange={(e) => setDateRange({ ...dateRange, start: e.target.value })}
+              className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">End Date</label>
+            <input
+              type="date"
+              value={dateRange.end}
+              onChange={(e) => setDateRange({ ...dateRange, end: e.target.value })}
+              className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
+            />
+          </div>
+
+          <div className="flex items-end">
+            <Button onClick={scheduleReport} variant="outline" className="w-full">
+              <Calendar size={16} className="mr-2" />
+              Schedule
+            </Button>
+          </div>
+        </div>
+
+        <div className="flex gap-3">
+          <Button
+            onClick={() => generateReport("csv")}
+            disabled={isGenerating}
+            className="bg-primary hover:bg-primary/90"
+          >
+            {isGenerating ? (
+              <RefreshCw size={16} className="mr-2 animate-spin" />
+            ) : (
+              <Download size={16} className="mr-2" />
+            )}
+            Export CSV
+          </Button>
+          <Button onClick={() => generateReport("pdf")} disabled={isGenerating} variant="outline">
+            {isGenerating ? (
+              <RefreshCw size={16} className="mr-2 animate-spin" />
+            ) : (
+              <Download size={16} className="mr-2" />
+            )}
+            Export PDF
           </Button>
         </div>
-      </div>
+      </CardWrapper>
 
-      <h4 className="font-medium mb-2">{ticket.title}</h4>
-      <p className="text-gray-400 text-sm mb-3 line-clamp-2">{ticket.description}</p>
-
-      <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
-        <span className={priorityColors[ticket.priority]}>{ticket.priority.toUpperCase()} Priority</span>
-        <span>Updated {ticket.lastUpdate}</span>
-      </div>
-
-      <div className="flex items-center justify-between text-xs">
-        <div className="flex items-center gap-2">
-          <User size={12} />
-          <span>{ticket.clientName}</span>
+      {/* Recent Reports */}
+      <CardWrapper>
+        <h3 className="text-lg font-semibold mb-4">Recent Reports</h3>
+        <div className="space-y-3">
+          {[
+            {
+              name: "Monthly Analytics Report - January 2024",
+              type: "Analytics",
+              generated: "2024-01-28 14:30:00",
+              size: "2.3 MB",
+              format: "PDF",
+            },
+            {
+              name: "Ticket Summary - Q4 2023",
+              type: "Tickets",
+              generated: "2024-01-15 09:15:00",
+              size: "1.8 MB",
+              format: "CSV",
+            },
+            {
+              name: "User Activity Report - December 2023",
+              type: "Users",
+              generated: "2024-01-01 16:45:00",
+              size: "945 KB",
+              format: "PDF",
+            },
+          ].map((report, index) => (
+            <div key={index} className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
+              <div className="flex items-center gap-3">
+                <FileText className="text-primary" size={20} />
+                <div>
+                  <div className="font-medium">{report.name}</div>
+                  <div className="text-sm text-gray-400">
+                    {report.type} • {report.generated} • {report.size}
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded">{report.format}</span>
+                <Button size="sm" variant="outline">
+                  <Download size={14} className="mr-1" />
+                  Download
+                </Button>
+              </div>
+            </div>
+          ))}
         </div>
-        <div className="flex items-center gap-2">
-          {ticket.assignedTo ? (
-            <span className="bg-primary/20 text-primary px-2 py-1 rounded text-xs">{ticket.assignedTo}</span>
-          ) : (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => onAssign(ticket.id, "current-user")}
-              className="text-xs h-6 px-2"
-            >
-              Assign to me
-            </Button>
-          )}
-        </div>
-      </div>
-
-      <div className="flex gap-2 mt-3">
-        <Button size="sm" onClick={() => onViewDetails(ticket)} className="flex-1 bg-primary hover:bg-primary/90">
-          <Eye size={12} className="mr-1" />
-          View
-        </Button>
-        <Button
-          size="sm"
-          variant="outline"
-          onClick={() => onStatusChange(ticket.id, ticket.status === "open" ? "in-progress" : "resolved")}
-          className="flex-1"
-        >
-          {ticket.status === "open" ? "Start" : "Resolve"}
-        </Button>
-      </div>
-    </CardWrapper>
+      </CardWrapper>
+    </div>
   )
 }
 
-function AdminTicketDetailsModal({
-  ticket,
-  onClose,
-  onStatusChange,
-  onAddResponse,
-}: {
-  ticket: AdminTicket | null
-  onClose: () => void
-  onStatusChange: (ticketId: string, status: AdminTicket["status"]) => void
-  onAddResponse: (ticketId: string, message: string, isInternal: boolean) => void
-}) {
-  const [newResponse, setNewResponse] = useState("")
-  const [isInternal, setIsInternal] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
+function AdminSettingsModule() {
+  const [selectedTenant, setSelectedTenant] = useState<string>("all")
+  const [settings, setSettings] = useState({
+    defaultNotifications: {
+      email: true,
+      sms: false,
+      push: true,
+    },
+    sessionTimeout: 480,
+    maxLoginAttempts: 5,
+    twoFactorRequired: false,
+  })
 
-  if (!ticket) return null
+  const tenants = Object.values(TENANT_CONFIGS)
 
-  const handleSubmitResponse = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!newResponse.trim()) return
-
-    setIsSubmitting(true)
-    await onAddResponse(ticket.id, newResponse, isInternal)
-    setNewResponse("")
-    setIsSubmitting(false)
-  }
-
-  const statusColors = {
-    open: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    "in-progress": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
-    resolved: "bg-green-500/20 text-green-400 border-green-500/30",
-    closed: "bg-gray-500/20 text-gray-400 border-gray-500/30",
+  const saveSettings = () => {
+    alert("Settings would be saved to the database")
   }
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-card rounded-lg w-full max-w-5xl max-h-[90vh] overflow-hidden border border-primary/20">
-        {/* Header */}
-        <div className="bg-primary/10 p-6 border-b border-primary/20">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <h2 className="text-2xl font-bold">Admin - Ticket #{ticket.id}</h2>
-                <div className={`px-3 py-1 rounded-full text-sm border ${statusColors[ticket.status]}`}>
-                  {ticket.status.replace("-", " ")}
-                </div>
-              </div>
-              <h3 className="text-xl font-semibold mb-2">{ticket.title}</h3>
-              <div className="flex items-center gap-4 text-sm text-gray-400">
-                <span>Client: {ticket.clientName}</span>
-                <span>Email: {ticket.clientEmail}</span>
-                <span>Source: {ticket.source}</span>
-                <span>Created: {ticket.created}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <select
-                value={ticket.status}
-                onChange={(e) => onStatusChange(ticket.id, e.target.value as AdminTicket["status"])}
-                className="bg-black border border-primary/20 rounded px-3 py-1 text-sm"
-              >
-                <option value="open">Open</option>
-                <option value="in-progress">In Progress</option>
-                <option value="resolved">Resolved</option>
-                <option value="closed">Closed</option>
-              </select>
-              <Button variant="ghost" onClick={onClose} className="text-gray-400 hover:text-white">
-                ✕
-              </Button>
-            </div>
-          </div>
+    <div className="space-y-6">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <div>
+          <h2 className="text-2xl font-bold mb-2">Admin Settings</h2>
+          <p className="text-gray-400">Configure tenant settings and system preferences</p>
         </div>
+      </div>
 
-        {/* Content */}
-        <div className="flex">
-          {/* Main Content */}
-          <div className="flex-1 p-6 overflow-y-auto max-h-[60vh]">
-            {/* Original Description */}
-            <div className="mb-6">
-              <h4 className="font-semibold mb-3">Original Request</h4>
-              <div className="bg-gray-800/50 rounded-lg p-4 border border-gray-700">
-                <p className="whitespace-pre-wrap">{ticket.description}</p>
-              </div>
-            </div>
-
-            {/* Responses */}
-            <div className="space-y-4">
-              <h4 className="font-semibold">Conversation History</h4>
-              {ticket.responses.map((response) => (
-                <div
-                  key={response.id}
-                  className={`p-4 rounded-lg border ${
-                    response.isInternal
-                      ? "bg-purple-500/10 border-purple-500/20 ml-8"
-                      : response.isStaff
-                        ? "bg-primary/10 border-primary/20 ml-4"
-                        : "bg-gray-800/50 border-gray-700 mr-4"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{response.author}</span>
-                      {response.isInternal && (
-                        <span className="text-xs bg-purple-500/20 text-purple-400 px-2 py-1 rounded">
-                          Internal Note
-                        </span>
-                      )}
-                      {response.isStaff && !response.isInternal && (
-                        <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded">Staff</span>
-                      )}
-                    </div>
-                    <span className="text-xs text-gray-400">{response.timestamp}</span>
-                  </div>
-                  <p className="whitespace-pre-wrap">{response.message}</p>
-                </div>
+      {/* Tenant Selection */}
+      <CardWrapper>
+        <h3 className="text-lg font-semibold mb-4">Tenant Configuration</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Select Tenant</label>
+            <select
+              value={selectedTenant}
+              onChange={(e) => setSelectedTenant(e.target.value)}
+              className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
+            >
+              <option value="all">Global Settings</option>
+              {tenants.map((tenant) => (
+                <option key={tenant.id} value={tenant.id}>
+                  {tenant.name} ({tenant.domain})
+                </option>
               ))}
-            </div>
-
-            {/* Add Response Form */}
-            <div className="mt-6">
-              <h4 className="font-semibold mb-3">Add Response</h4>
-              <form onSubmit={handleSubmitResponse} className="space-y-4">
-                <div className="flex items-center gap-4 mb-2">
-                  <label className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={isInternal}
-                      onChange={(e) => setIsInternal(e.target.checked)}
-                      className="rounded"
-                    />
-                    <span className="text-sm">Internal note (not visible to client)</span>
-                  </label>
-                </div>
-                <textarea
-                  value={newResponse}
-                  onChange={(e) => setNewResponse(e.target.value)}
-                  placeholder={isInternal ? "Add internal note..." : "Respond to client..."}
-                  rows={4}
-                  className="w-full bg-black border border-primary/20 rounded-lg p-3 text-white placeholder-gray-400 focus:outline-none focus:border-primary resize-vertical"
-                />
-                <div className="flex gap-3">
-                  <Button type="submit" disabled={isSubmitting || !newResponse.trim()}>
-                    {isSubmitting ? "Sending..." : isInternal ? "Add Note" : "Send Response"}
-                  </Button>
-                  <Button type="button" variant="outline" asChild>
-                    <a href={`mailto:${ticket.clientEmail}?subject=Re: Support Ticket #${ticket.id} - ${ticket.title}`}>
-                      <Mail size={14} className="mr-2" />
-                      Email Client
-                    </a>
-                  </Button>
-                </div>
-              </form>
-            </div>
-          </div>
-
-          {/* Sidebar */}
-          <div className="w-80 bg-gray-800/30 p-6 border-l border-gray-700">
-            <h4 className="font-semibold mb-4">Ticket Actions</h4>
-            <div className="space-y-3">
-              <Button className="w-full justify-start" variant="outline">
-                <Edit size={16} className="mr-2" />
-                Edit Ticket
-              </Button>
-              <Button className="w-full justify-start" variant="outline">
-                <Archive size={16} className="mr-2" />
-                Archive
-              </Button>
-              <Button className="w-full justify-start" variant="outline">
-                <Trash2 size={16} className="mr-2" />
-                Delete
-              </Button>
-            </div>
-
-            <div className="mt-6">
-              <h4 className="font-semibold mb-4">Client Information</h4>
-              <div className="space-y-2 text-sm">
-                <div>
-                  <span className="text-gray-400">Name:</span>
-                  <p>{ticket.clientName}</p>
-                </div>
-                <div>
-                  <span className="text-gray-400">Email:</span>
-                  <p>{ticket.clientEmail}</p>
-                </div>
-                <div>
-                  <span className="text-gray-400">Priority:</span>
-                  <p className="capitalize">{ticket.priority}</p>
-                </div>
-                <div>
-                  <span className="text-gray-400">Source:</span>
-                  <p className="capitalize">{ticket.source}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <h4 className="font-semibold mb-4">Quick Actions</h4>
-              <div className="space-y-2">
-                <Button size="sm" className="w-full" asChild>
-                  <a href={`mailto:${ticket.clientEmail}`}>
-                    <Mail size={14} className="mr-2" />
-                    Email Client
-                  </a>
-                </Button>
-                <Button size="sm" variant="outline" className="w-full" asChild>
-                  <a href="tel:+19843109533">
-                    <Phone size={14} className="mr-2" />
-                    Call Client
-                  </a>
-                </Button>
-              </div>
-            </div>
+            </select>
           </div>
         </div>
+
+        {/* Settings Form */}
+        <div className="space-y-6">
+          <div>
+            <h4 className="font-semibold mb-3">Default Notification Settings</h4>
+            <div className="space-y-3">
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={settings.defaultNotifications.email}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      defaultNotifications: { ...settings.defaultNotifications, email: e.target.checked },
+                    })
+                  }
+                  className="rounded"
+                />
+                <span>Email notifications enabled by default</span>
+              </label>
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={settings.defaultNotifications.sms}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      defaultNotifications: { ...settings.defaultNotifications, sms: e.target.checked },
+                    })
+                  }
+                  className="rounded"
+                />
+                <span>SMS notifications enabled by default</span>
+              </label>
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={settings.defaultNotifications.push}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      defaultNotifications: { ...settings.defaultNotifications, push: e.target.checked },
+                    })
+                  }
+                  className="rounded"
+                />
+                <span>Push notifications enabled by default</span>
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <h4 className="font-semibold mb-3">Security Settings</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Session Timeout (minutes)</label>
+                <input
+                  type="number"
+                  value={settings.sessionTimeout}
+                  onChange={(e) => setSettings({ ...settings, sessionTimeout: Number.parseInt(e.target.value) })}
+                  className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Max Login Attempts</label>
+                <input
+                  type="number"
+                  value={settings.maxLoginAttempts}
+                  onChange={(e) => setSettings({ ...settings, maxLoginAttempts: Number.parseInt(e.target.value) })}
+                  className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
+                />
+              </div>
+            </div>
+            <div className="mt-4">
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={settings.twoFactorRequired}
+                  onChange={(e) => setSettings({ ...settings, twoFactorRequired: e.target.checked })}
+                  className="rounded"
+                />
+                <span>Require two-factor authentication for all users</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="flex gap-3">
+            <Button onClick={saveSettings} className="bg-primary hover:bg-primary/90">
+              Save Settings
+            </Button>
+            <Button variant="outline">Reset to Defaults</Button>
+          </div>
+        </div>
+      </CardWrapper>
+    </div>
+  )
+}
+
+function AdminAuditModule() {
+  const [auditLog, setAuditLog] = useState<AuditLogEntry[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [filters, setFilters] = useState({
+    action: "all",
+    resource: "all",
+    userId: "all",
+    dateRange: "7d",
+  })
+
+  useEffect(() => {
+    loadAuditLog()
+  }, [filters])
+
+  const loadAuditLog = async () => {
+    setIsLoading(true)
+    // Simulate API call
+    setTimeout(() => {
+      const data = getAuditLog()
+      setAuditLog(data)
+      setIsLoading(false)
+    }, 1000)
+  }
+
+  const exportAuditLog = () => {
+    const filename = `audit-log-${new Date().toISOString().split("T")[0]}.csv`
+    console.log(`Exporting audit log: ${filename}`)
+    alert(`Audit log "${filename}" would be downloaded`)
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <div>
+          <h2 className="text-2xl font-bold mb-2">Audit Log</h2>
+          <p className="text-gray-400">Track all administrative actions and changes</p>
+        </div>
+        <Button onClick={exportAuditLog} variant="outline">
+          <Download size={16} className="mr-2" />
+          Export Log
+        </Button>
+      </div>
+
+      {/* Filters */}
+      <CardWrapper>
+        <div className="flex flex-wrap gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Action</label>
+            <select
+              value={filters.action}
+              onChange={(e) => setFilters({ ...filters, action: e.target.value })}
+              className="px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
+            >
+              <option value="all">All Actions</option>
+              <option value="CREATE">Create</option>
+              <option value="UPDATE">Update</option>
+              <option value="DELETE">Delete</option>
+              <option value="VIEW">View</option>
+              <option value="EXPORT">Export</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Resource</label>
+            <select
+              value={filters.resource}
+              onChange={(e) => setFilters({ ...filters, resource: e.target.value })}
+              className="px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
+            >
+              <option value="all">All Resources</option>
+              <option value="tenant_settings">Tenant Settings</option>
+              <option value="user_account">User Accounts</option>
+              <option value="analytics_report">Analytics Reports</option>
+              <option value="notification_settings">Notifications</option>
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-2">Time Range</label>
+            <select
+              value={filters.dateRange}
+              onChange={(e) => setFilters({ ...filters, dateRange: e.target.value })}
+              className="px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
+            >
+              <option value="1d">Last 24 hours</option>
+              <option value="7d">Last 7 days</option>
+              <option value="30d">Last 30 days</option>
+              <option value="90d">Last 90 days</option>
+            </select>
+          </div>
+
+          <div className="flex items-end">
+            <Button onClick={loadAuditLog} variant="outline">
+              <RefreshCw size={16} className="mr-2" />
+              Refresh
+            </Button>
+          </div>
+        </div>
+      </CardWrapper>
+
+      {/* Audit Log Table */}
+      <CardWrapper>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-primary" />
+              <p className="text-gray-400">Loading audit log...</p>
+            </div>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-700">
+                  <th className="text-left py-3 px-4 font-medium text-gray-400">Timestamp</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-400">User</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-400">Action</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-400">Resource</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-400">Details</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-400">IP Address</th>
+                </tr>
+              </thead>
+              <tbody>
+                {auditLog.map((entry) => (
+                  <tr key={entry.id} className="border-b border-gray-800 hover:bg-gray-800/50">
+                    <td className="py-3 px-4 text-sm">{entry.timestamp}</td>
+                    <td className="py-3 px-4">
+                      <div className="font-medium">{entry.userName}</div>
+                      <div className="text-sm text-gray-400">{entry.userId}</div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <span
+                        className={`px-2 py-1 rounded text-xs ${
+                          entry.action === "CREATE"
+                            ? "bg-green-500/20 text-green-400"
+                            : entry.action === "UPDATE"
+                              ? "bg-yellow-500/20 text-yellow-400"
+                              : entry.action === "DELETE"
+                                ? "bg-red-500/20 text-red-400"
+                                : "bg-blue-500/20 text-blue-400"
+                        }`}
+                      >
+                        {entry.action}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-sm">{entry.resource}</td>
+                    <td className="py-3 px-4 text-sm text-gray-400 max-w-xs truncate">{entry.details}</td>
+                    <td className="py-3 px-4 text-sm text-gray-400">{entry.ipAddress}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </CardWrapper>
+    </div>
+  )
+}
+
+function AdminTenantManagement() {
+  const [tenants] = useState(Object.values(TENANT_CONFIGS))
+  const [selectedTenant, setSelectedTenant] = useState<string | null>(null)
+
+  const editTenant = (tenantId: string) => {
+    setSelectedTenant(tenantId)
+    alert(`Edit tenant configuration for ${tenantId}`)
+  }
+
+  const addTenant = () => {
+    alert("Add new tenant configuration modal would open")
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <div>
+          <h2 className="text-2xl font-bold mb-2">Tenant Management</h2>
+          <p className="text-gray-400">Manage tenant configurations and access</p>
+        </div>
+        <Button onClick={addTenant} className="bg-primary hover:bg-primary/90">
+          <Plus size={16} className="mr-2" />
+          Add Tenant
+        </Button>
+      </div>
+
+      {/* Tenant Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {tenants.map((tenant) => (
+          <CardWrapper key={tenant.id} className="hover:border-primary/40 transition-colors">
+            <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-12 h-12 rounded-lg flex items-center justify-center"
+                  style={{ backgroundColor: tenant.branding.primaryColor + "20" }}
+                >
+                  <Building className="text-primary" size={24} />
+                </div>
+                <div>
+                  <h3 className="font-semibold">{tenant.name}</h3>
+                  <p className="text-sm text-gray-400">{tenant.domain}</p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button size="sm" variant="outline" onClick={() => editTenant(tenant.id)}>
+                  <Edit size={14} />
+                </Button>
+                <Button size="sm" variant="outline">
+                  <Eye size={14} />
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-400">Tenant ID:</span>
+                <span className="font-mono text-xs">{tenant.id}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-400">Features:</span>
+                <div className="flex gap-1">
+                  {tenant.features.twoFactorAuth && (
+                    <span className="text-xs bg-green-500/20 text-green-400 px-1 py-0.5 rounded">2FA</span>
+                  )}
+                  {tenant.features.customThemes && (
+                    <span className="text-xs bg-blue-500/20 text-blue-400 px-1 py-0.5 rounded">Themes</span>
+                  )}
+                  {tenant.features.adminOverride && (
+                    <span className="text-xs bg-red-500/20 text-red-400 px-1 py-0.5 rounded">Admin</span>
+                  )}
+                </div>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-400">Admins:</span>
+                <span>{tenant.admins.length}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span className="text-gray-400">Session Timeout:</span>
+                <span>{tenant.settings.sessionTimeout}min</span>
+              </div>
+            </div>
+
+            <div className="mt-4 pt-4 border-t border-gray-700">
+              <div className="flex gap-2">
+                <Button size="sm" onClick={() => editTenant(tenant.id)} className="flex-1">
+                  Configure
+                </Button>
+                <Button size="sm" variant="outline" className="flex-1">
+                  View Users
+                </Button>
+              </div>
+            </div>
+          </CardWrapper>
+        ))}
       </div>
     </div>
   )
 }
 
 function AdminPortalContent() {
-  const [activeTab, setActiveTab] = useState<"dashboard" | "tickets" | "analytics" | "settings">("dashboard")
-  const [tickets, setTickets] = useState<AdminTicket[]>([])
-  const [selectedTicket, setSelectedTicket] = useState<AdminTicket | null>(null)
-  const [ticketFilter, setTicketFilter] = useState<"all" | "open" | "in-progress" | "resolved" | "closed">("all")
-  const [ticketSearch, setTicketSearch] = useState("")
-  const [assigneeFilter, setAssigneeFilter] = useState<"all" | "assigned" | "unassigned">("all")
+  const { adminUser, logout, hasPermission } = useAdminAuth()
+  const [activeTab, setActiveTab] = useState<"dashboard" | "reports" | "settings" | "tenants" | "audit">("dashboard")
 
-  // Sample admin stats
-  const stats: AdminStats = {
-    totalTickets: 156,
-    openTickets: 23,
-    inProgressTickets: 12,
-    resolvedToday: 8,
-    avgResponseTime: "2.3 hours",
-    customerSatisfaction: 98,
-  }
-
-  // Sample tickets data
-  useEffect(() => {
-    const sampleTickets: AdminTicket[] = [
-      {
-        id: "TK-001234",
-        title: "Email setup not working on mobile",
-        status: "in-progress",
-        priority: "high",
-        created: "2024-01-15",
-        lastUpdate: "2 hours ago",
-        description: "Unable to receive emails on iPhone after recent iOS update. Desktop email works fine.",
-        clientName: "John Smith",
-        clientEmail: "john@company.com",
-        assignedTo: "Sarah Johnson",
-        source: "portal",
-        tags: ["email", "mobile", "ios"],
-        responses: [
-          {
-            id: "1",
-            message:
-              "Thank you for contacting support. We've received your ticket and our technical team is investigating the iOS email issue.",
-            author: "Sarah Johnson",
-            timestamp: "2024-01-15 10:30 AM",
-            isStaff: true,
-          },
-          {
-            id: "2",
-            message:
-              "I've tried the basic troubleshooting steps but still having issues. The problem started after updating to iOS 17.2.",
-            author: "John Smith",
-            timestamp: "2024-01-15 2:15 PM",
-            isStaff: false,
-          },
-          {
-            id: "3",
-            message: "Checking with Apple support team about known iOS 17.2 issues with Exchange.",
-            author: "Sarah Johnson",
-            timestamp: "2024-01-15 3:00 PM",
-            isStaff: true,
-            isInternal: true,
-          },
-        ],
-      },
-      {
-        id: "TK-001235",
-        title: "SharePoint access permission issue",
-        status: "open",
-        priority: "medium",
-        created: "2024-01-14",
-        lastUpdate: "1 day ago",
-        description: "New employee cannot access shared documents in SharePoint site.",
-        clientName: "HR Department",
-        clientEmail: "hr@company.com",
-        source: "email",
-        tags: ["sharepoint", "permissions"],
-        responses: [],
-      },
-      {
-        id: "TK-001236",
-        title: "Website contact form not sending",
-        status: "resolved",
-        priority: "urgent",
-        created: "2024-01-12",
-        lastUpdate: "3 days ago",
-        description: "Contact form submissions are not being received.",
-        clientName: "Admin User",
-        clientEmail: "admin@company.com",
-        assignedTo: "Mike Chen",
-        source: "chatbot",
-        tags: ["website", "forms", "urgent"],
-        responses: [
-          {
-            id: "1",
-            message: "This is marked as urgent. Our development team is investigating immediately.",
-            author: "Mike Chen",
-            timestamp: "2024-01-12 11:00 AM",
-            isStaff: true,
-          },
-          {
-            id: "2",
-            message: "Issue resolved. SMTP configuration was missing.",
-            author: "Mike Chen",
-            timestamp: "2024-01-12 2:30 PM",
-            isStaff: true,
-          },
-        ],
-      },
-    ]
-    setTickets(sampleTickets)
-  }, [])
-
-  // Real-time ticket updates (simulated)
-  useEffect(() => {
-    const interval = setInterval(() => {
-      // Simulate new tickets coming in
-      const newTicketChance = Math.random()
-      if (newTicketChance > 0.95) {
-        // 5% chance every 5 seconds
-        const newTicket: AdminTicket = {
-          id: `TK-${Date.now().toString().slice(-6)}`,
-          title: "New support request",
-          status: "open",
-          priority: "medium",
-          created: new Date().toLocaleDateString(),
-          lastUpdate: "Just now",
-          description: "A new support ticket has been submitted.",
-          clientName: "New Client",
-          clientEmail: "client@example.com",
-          source: "portal",
-          tags: ["new"],
-          responses: [],
-        }
-        setTickets((prev) => [newTicket, ...prev])
-      }
-    }, 5000)
-
-    return () => clearInterval(interval)
-  }, [])
-
-  const handleStatusChange = (ticketId: string, status: AdminTicket["status"]) => {
-    setTickets((prev) =>
-      prev.map((ticket) => (ticket.id === ticketId ? { ...ticket, status, lastUpdate: "Just now" } : ticket)),
+  if (!adminUser) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <Shield size={64} className="mx-auto mb-4 text-gray-600" />
+          <h3 className="text-xl font-semibold mb-2">Authentication Required</h3>
+          <p className="text-gray-400">Please log in to access the Admin Portal.</p>
+        </div>
+      </div>
     )
   }
-
-  const handleAssign = (ticketId: string, assignee: string) => {
-    setTickets((prev) =>
-      prev.map((ticket) =>
-        ticket.id === ticketId ? { ...ticket, assignedTo: assignee, lastUpdate: "Just now" } : ticket,
-      ),
-    )
-  }
-
-  const handleAddResponse = async (ticketId: string, message: string, isInternal: boolean) => {
-    const newResponse: TicketResponse = {
-      id: Date.now().toString(),
-      message,
-      author: "Current Admin",
-      timestamp: new Date().toLocaleString(),
-      isStaff: true,
-      isInternal,
-    }
-
-    setTickets((prev) =>
-      prev.map((ticket) =>
-        ticket.id === ticketId
-          ? {
-              ...ticket,
-              responses: [...ticket.responses, newResponse],
-              lastUpdate: "Just now",
-            }
-          : ticket,
-      ),
-    )
-  }
-
-  // Filter tickets
-  const filteredTickets = tickets.filter((ticket) => {
-    if (ticketFilter !== "all" && ticket.status !== ticketFilter) return false
-    if (assigneeFilter === "assigned" && !ticket.assignedTo) return false
-    if (assigneeFilter === "unassigned" && ticket.assignedTo) return false
-    if (
-      ticketSearch &&
-      !ticket.title.toLowerCase().includes(ticketSearch.toLowerCase()) &&
-      !ticket.id.toLowerCase().includes(ticketSearch.toLowerCase()) &&
-      !ticket.clientName.toLowerCase().includes(ticketSearch.toLowerCase())
-    )
-      return false
-    return true
-  })
 
   return (
     <main className="min-h-screen bg-black text-white relative">
@@ -584,217 +610,110 @@ function AdminPortalContent() {
 
       {/* Content */}
       <div className="relative z-10">
-        <Navbar />
-
         {/* Header */}
-        <section className="container mx-auto px-4 pt-32 pb-16">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">Admin Portal</h1>
-              <p className="text-gray-400">Manage support tickets and monitor system performance</p>
-            </div>
-            <div className="flex items-center gap-4 mt-4 md:mt-0">
-              <div className="text-sm text-gray-400">Last updated: {new Date().toLocaleTimeString()}</div>
-            </div>
-          </div>
-
-          {/* Navigation Tabs */}
-          <div className="flex space-x-1 bg-card/50 rounded-lg p-1 mb-8">
-            {[
-              { id: "dashboard", label: "Dashboard", icon: <BarChart3 size={16} /> },
-              { id: "tickets", label: "Tickets", icon: <Ticket size={16} /> },
-              { id: "analytics", label: "Analytics", icon: <TrendingUp size={16} /> },
-              { id: "settings", label: "Settings", icon: <Settings size={16} /> },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                  activeTab === tab.id ? "bg-primary text-white" : "text-gray-400 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                {tab.icon}
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {/* Tab Content */}
-        <section className="container mx-auto px-4 pb-16">
-          {/* Dashboard Tab */}
-          {activeTab === "dashboard" && (
-            <div className="space-y-8">
-              {/* Stats Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
-                <CardWrapper className="text-center">
-                  <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Ticket className="text-blue-400" size={24} />
-                  </div>
-                  <div className="text-2xl font-bold text-blue-400 mb-1">{stats.totalTickets}</div>
-                  <div className="text-sm text-gray-400">Total Tickets</div>
-                </CardWrapper>
-
-                <CardWrapper className="text-center">
-                  <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <AlertCircle className="text-red-400" size={24} />
-                  </div>
-                  <div className="text-2xl font-bold text-red-400 mb-1">{stats.openTickets}</div>
-                  <div className="text-sm text-gray-400">Open Tickets</div>
-                </CardWrapper>
-
-                <CardWrapper className="text-center">
-                  <div className="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Clock className="text-yellow-400" size={24} />
-                  </div>
-                  <div className="text-2xl font-bold text-yellow-400 mb-1">{stats.inProgressTickets}</div>
-                  <div className="text-sm text-gray-400">In Progress</div>
-                </CardWrapper>
-
-                <CardWrapper className="text-center">
-                  <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <CheckCircle className="text-green-400" size={24} />
-                  </div>
-                  <div className="text-2xl font-bold text-green-400 mb-1">{stats.resolvedToday}</div>
-                  <div className="text-sm text-gray-400">Resolved Today</div>
-                </CardWrapper>
-
-                <CardWrapper className="text-center">
-                  <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Clock className="text-purple-400" size={24} />
-                  </div>
-                  <div className="text-2xl font-bold text-purple-400 mb-1">{stats.avgResponseTime}</div>
-                  <div className="text-sm text-gray-400">Avg Response</div>
-                </CardWrapper>
-
-                <CardWrapper className="text-center">
-                  <div className="w-12 h-12 bg-pink-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Users className="text-pink-400" size={24} />
-                  </div>
-                  <div className="text-2xl font-bold text-pink-400 mb-1">{stats.customerSatisfaction}%</div>
-                  <div className="text-sm text-gray-400">Satisfaction</div>
-                </CardWrapper>
-              </div>
-
-              {/* Recent Tickets */}
-              <div>
-                <h2 className="text-xl font-bold mb-4">Recent Tickets</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {tickets.slice(0, 6).map((ticket) => (
-                    <AdminTicketCard
-                      key={ticket.id}
-                      ticket={ticket}
-                      onViewDetails={setSelectedTicket}
-                      onStatusChange={handleStatusChange}
-                      onAssign={handleAssign}
-                    />
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Tickets Tab */}
-          {activeTab === "tickets" && (
-            <div>
-              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                <h2 className="text-2xl font-bold">All Support Tickets</h2>
-                <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                  {/* Search */}
-                  <div className="relative">
-                    <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                    <input
-                      type="text"
-                      placeholder="Search tickets..."
-                      value={ticketSearch}
-                      onChange={(e) => setTicketSearch(e.target.value)}
-                      className="pl-10 pr-4 py-2 bg-black border border-primary/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary w-full sm:w-64"
-                    />
-                  </div>
-
-                  {/* Filters */}
-                  <select
-                    value={ticketFilter}
-                    onChange={(e) => setTicketFilter(e.target.value as any)}
-                    className="px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
-                  >
-                    <option value="all">All Status</option>
-                    <option value="open">Open</option>
-                    <option value="in-progress">In Progress</option>
-                    <option value="resolved">Resolved</option>
-                    <option value="closed">Closed</option>
-                  </select>
-
-                  <select
-                    value={assigneeFilter}
-                    onChange={(e) => setAssigneeFilter(e.target.value as any)}
-                    className="px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
-                  >
-                    <option value="all">All Assignments</option>
-                    <option value="assigned">Assigned</option>
-                    <option value="unassigned">Unassigned</option>
-                  </select>
+        <header className="bg-card border-b border-gray-800">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Image
+                  src="/images/nextphase-logo.png"
+                  alt="NextPhase IT"
+                  width={150}
+                  height={45}
+                  className="h-10 w-auto"
+                />
+                <div className="hidden md:block">
+                  <h1 className="text-xl font-bold text-red-400">Admin Portal</h1>
+                  <p className="text-sm text-gray-400">NextPhase IT Administrative Console</p>
                 </div>
               </div>
 
-              {/* Tickets Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredTickets.map((ticket) => (
-                  <AdminTicketCard
-                    key={ticket.id}
-                    ticket={ticket}
-                    onViewDetails={setSelectedTicket}
-                    onStatusChange={handleStatusChange}
-                    onAssign={handleAssign}
-                  />
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <div className="font-medium">{adminUser.name}</div>
+                  <div className="text-sm text-gray-400">{adminUser.role.replace("_", " ")}</div>
+                </div>
+                <Image
+                  src={adminUser.picture || "/placeholder.svg?height=40&width=40&text=" + adminUser.name.charAt(0)}
+                  alt={adminUser.name}
+                  width={40}
+                  height={40}
+                  className="rounded-full"
+                />
+                <Button onClick={logout} variant="outline" size="sm">
+                  Sign Out
+                </Button>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Navigation */}
+        <nav className="bg-gray-900 border-b border-gray-800">
+          <div className="container mx-auto px-4">
+            <div className="flex space-x-1 overflow-x-auto py-2">
+              {[
+                { id: "dashboard", label: "Analytics", icon: <BarChart3 size={16} />, permission: "analytics.view" },
+                { id: "reports", label: "Reports", icon: <FileText size={16} />, permission: "reports.view" },
+                { id: "tenants", label: "Tenants", icon: <Building size={16} />, permission: "tenants.view" },
+                { id: "settings", label: "Settings", icon: <Settings size={16} />, permission: "settings.manage" },
+                { id: "audit", label: "Audit Log", icon: <Activity size={16} />, permission: "audit.view" },
+              ]
+                .filter((tab) => hasPermission(tab.permission.split(".")[0], tab.permission.split(".")[1]))
+                .map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
+                      activeTab === tab.id
+                        ? "bg-red-600 text-white shadow-lg"
+                        : "text-gray-400 hover:text-white hover:bg-gray-800"
+                    }`}
+                  >
+                    {tab.icon}
+                    {tab.label}
+                  </button>
                 ))}
+            </div>
+          </div>
+        </nav>
+
+        {/* Main Content */}
+        <main className="container mx-auto px-4 py-8">
+          {activeTab === "dashboard" && <AdminAnalyticsDashboard />}
+          {activeTab === "reports" && <AdminReportsModule />}
+          {activeTab === "settings" && <AdminSettingsModule />}
+          {activeTab === "tenants" && <AdminTenantManagement />}
+          {activeTab === "audit" && <AdminAuditModule />}
+        </main>
+
+        {/* Footer */}
+        <footer className="bg-card border-t border-gray-800 mt-20">
+          <div className="container mx-auto px-4 py-8">
+            <div className="flex flex-col md:flex-row justify-between items-center">
+              <div className="text-center md:text-left mb-4 md:mb-0">
+                <p className="text-gray-400">© 2024 NextPhase IT. All rights reserved.</p>
+                <p className="text-sm text-gray-500">Administrative Portal - Restricted Access</p>
               </div>
-
-              {filteredTickets.length === 0 && (
-                <div className="text-center py-12">
-                  <Ticket size={64} className="mx-auto mb-4 text-gray-600" />
-                  <h3 className="text-xl font-semibold mb-2">No tickets found</h3>
-                  <p className="text-gray-400">Try adjusting your search or filter criteria.</p>
-                </div>
-              )}
+              <div className="flex items-center gap-4 text-sm text-gray-400">
+                <span>User: {adminUser.email}</span>
+                <span>Role: {adminUser.role.replace("_", " ")}</span>
+                <span>Last Login: {adminUser.lastLogin}</span>
+              </div>
             </div>
-          )}
-
-          {/* Analytics Tab */}
-          {activeTab === "analytics" && (
-            <div className="text-center py-12">
-              <BarChart3 size={64} className="mx-auto mb-4 text-gray-600" />
-              <h3 className="text-xl font-semibold mb-2">Analytics Dashboard</h3>
-              <p className="text-gray-400">Detailed analytics and reporting features coming soon.</p>
-            </div>
-          )}
-
-          {/* Settings Tab */}
-          {activeTab === "settings" && (
-            <div className="text-center py-12">
-              <Settings size={64} className="mx-auto mb-4 text-gray-600" />
-              <h3 className="text-xl font-semibold mb-2">Admin Settings</h3>
-              <p className="text-gray-400">Configuration and settings panel coming soon.</p>
-            </div>
-          )}
-        </section>
-
-        {/* Ticket Details Modal */}
-        <AdminTicketDetailsModal
-          ticket={selectedTicket}
-          onClose={() => setSelectedTicket(null)}
-          onStatusChange={handleStatusChange}
-          onAddResponse={handleAddResponse}
-        />
+          </div>
+        </footer>
       </div>
     </main>
   )
 }
 
+const ProtectedAdminPortal = withAdminAuth(AdminPortalContent)
+
 export default function AdminPortalPage() {
   return (
-    <AuthProvider>
-      <AdminPortalContent />
-    </AuthProvider>
+    <AdminAuthProvider>
+      <ProtectedAdminPortal />
+    </AdminAuthProvider>
   )
 }

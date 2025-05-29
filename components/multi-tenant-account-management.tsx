@@ -1,47 +1,56 @@
 "use client"
-
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
 import { CardWrapper } from "@/components/ui/card-wrapper"
+import { Button } from "@/components/ui/button"
+import { useMultiTenantAuth } from "@/providers/multi-tenant-auth-provider"
 import {
   User,
   Mail,
-  MapPin,
+  Building,
   Shield,
-  Key,
   Bell,
-  Clock,
+  Palette,
+  Save,
+  RefreshCw,
   Smartphone,
   Monitor,
-  Edit,
-  Save,
-  Check,
-  AlertCircle,
-  Building,
+  Globe,
+  Key,
+  History,
   Settings,
-  Palette,
-  Users,
-  Eye,
+  AlertCircle,
+  CheckCircle,
 } from "lucide-react"
 import Image from "next/image"
-import { useMultiTenantAuth } from "@/providers/multi-tenant-auth-provider"
 
 export function MultiTenantAccountManagement() {
-  const {
-    user,
-    currentTenant,
-    isAdmin,
-    isGlobalAdmin,
-    updateProfile,
-    updatePreferences,
-    updateSecuritySettings,
-    switchTenant,
-  } = useMultiTenantAuth()
-
-  const [activeSection, setActiveSection] = useState<"profile" | "security" | "preferences" | "admin">("profile")
+  const { user, currentTenant, updateProfile, updatePreferences, updateSecuritySettings } = useMultiTenantAuth()
+  const [activeSection, setActiveSection] = useState<"profile" | "security" | "preferences" | "activity">("profile")
   const [isEditing, setIsEditing] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
+  const [isSaving, setIsSaving] = useState(false)
+
+  const [profileData, setProfileData] = useState({
+    name: user?.name || "",
+    email: user?.email || "",
+    department: user?.department || "",
+    phone: "",
+    title: "",
+  })
+
+  const [securityData, setSecurityData] = useState({
+    twoFactorEnabled: user?.securitySettings?.twoFactorEnabled || false,
+    passwordLastChanged: user?.securitySettings?.passwordLastChanged || "",
+    sessionTimeout: user?.securitySettings?.sessionTimeout || 480,
+    trustedDevices: user?.securitySettings?.trustedDevices || [],
+  })
+
+  const [preferencesData, setPreferencesData] = useState({
+    theme: user?.preferences?.theme || "dark",
+    notifications: user?.preferences?.notifications || { email: true, sms: false, push: true },
+    defaultTicketView: user?.preferences?.defaultTicketView || "all",
+    language: user?.preferences?.language || "en-US",
+    timezone: user?.preferences?.timezone || "America/New_York",
+  })
 
   if (!user || !currentTenant) {
     return (
@@ -54,378 +63,296 @@ export function MultiTenantAccountManagement() {
   }
 
   const handleSaveProfile = async () => {
-    setIsLoading(true)
-    setMessage(null)
-
-    const success = await updateProfile(user)
-
-    setIsLoading(false)
-    setIsEditing(false)
-    setMessage({
-      type: success ? "success" : "error",
-      text: success ? "Profile updated successfully!" : "Failed to update profile",
-    })
-
-    // Clear message after 3 seconds
-    setTimeout(() => setMessage(null), 3000)
-  }
-
-  const handleUpdatePreferences = async (newPreferences: any) => {
-    setIsLoading(true)
-    setMessage(null)
-
-    const success = await updatePreferences(newPreferences)
-
-    setIsLoading(false)
-    setMessage({
-      type: success ? "success" : "error",
-      text: success ? "Preferences updated successfully!" : "Failed to update preferences",
-    })
-
-    setTimeout(() => setMessage(null), 3000)
-  }
-
-  const handleToggle2FA = async () => {
-    if (!user.securitySettings) return
-
-    setIsLoading(true)
-    setMessage(null)
-
-    const newSettings = {
-      ...user.securitySettings,
-      twoFactorEnabled: !user.securitySettings.twoFactorEnabled,
+    setIsSaving(true)
+    const success = await updateProfile(profileData)
+    if (success) {
+      setIsEditing(false)
     }
-
-    const success = await updateSecuritySettings(newSettings)
-
-    setIsLoading(false)
-    setMessage({
-      type: success ? "success" : "error",
-      text: success
-        ? `Two-factor authentication ${newSettings.twoFactorEnabled ? "enabled" : "disabled"} successfully!`
-        : "Failed to update security settings",
-    })
-
-    setTimeout(() => setMessage(null), 3000)
+    setIsSaving(false)
   }
 
-  const sections = [
-    { id: "profile", label: "Profile", icon: <User size={16} /> },
-    { id: "security", label: "Security", icon: <Shield size={16} /> },
-    { id: "preferences", label: "Preferences", icon: <Settings size={16} /> },
-    ...(isAdmin ? [{ id: "admin", label: "Admin", icon: <Users size={16} /> }] : []),
-  ]
+  const handleSavePreferences = async () => {
+    setIsSaving(true)
+    const success = await updatePreferences(preferencesData)
+    setIsSaving(false)
+  }
+
+  const handleSaveSecurity = async () => {
+    setIsSaving(true)
+    const success = await updateSecuritySettings(securityData)
+    setIsSaving(false)
+  }
+
+  const toggleTwoFactor = async () => {
+    if (!securityData.twoFactorEnabled) {
+      // Simulate 2FA setup process
+      alert("Two-factor authentication setup would be initiated here")
+    }
+    setSecurityData({ ...securityData, twoFactorEnabled: !securityData.twoFactorEnabled })
+  }
 
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Account Management</h2>
+          <h2 className="text-2xl font-bold mb-2">Account Management</h2>
           <p className="text-gray-400">Manage your profile, security settings, and preferences</p>
         </div>
-
-        {/* Tenant Info */}
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2 bg-primary/10 border border-primary/20 rounded-lg px-3 py-2">
-            <Building className="text-primary" size={16} />
-            <div className="text-sm">
-              <div className="text-primary font-medium">{currentTenant.branding.companyName}</div>
-              <div className="text-gray-400">{currentTenant.domain}</div>
-            </div>
+        <div className="flex items-center gap-3">
+          <div className="text-right">
+            <div className="text-sm text-gray-400">Organization</div>
+            <div className="font-medium">{currentTenant.branding.companyName}</div>
           </div>
-
-          {user.authMethod === "azure" && (
-            <div className="flex items-center gap-2 bg-blue-500/10 border border-blue-500/20 rounded-lg px-3 py-2">
-              <div className="w-6 h-6 bg-blue-500 rounded-sm flex items-center justify-center">
-                <span className="text-white text-xs font-bold">M</span>
-              </div>
-              <span className="text-blue-400 text-sm">Microsoft 365</span>
-            </div>
-          )}
-
-          {isGlobalAdmin && (
-            <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
-              <Shield className="text-red-400" size={16} />
-              <span className="text-red-400 text-sm">Global Admin</span>
-            </div>
-          )}
+          <div className="w-3 h-3 rounded-full" style={{ backgroundColor: currentTenant.branding.primaryColor }}></div>
         </div>
       </div>
 
-      {/* Global Message */}
-      {message && (
-        <div
-          className={`p-4 rounded-lg border flex items-center gap-3 ${
-            message.type === "success"
-              ? "bg-green-500/10 border-green-500/20 text-green-400"
-              : "bg-red-500/10 border-red-500/20 text-red-400"
-          }`}
-        >
-          {message.type === "success" ? <Check size={20} /> : <AlertCircle size={20} />}
-          <span>{message.text}</span>
+      {/* User Overview Card */}
+      <CardWrapper className="bg-primary/10 border-primary/20">
+        <div className="flex items-start gap-4">
+          <Image
+            src={user.picture || "/placeholder.svg?height=80&width=80&text=" + user.name.charAt(0)}
+            alt={user.name}
+            width={80}
+            height={80}
+            className="rounded-full"
+          />
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              <h3 className="text-xl font-semibold">{user.name}</h3>
+              <span
+                className={`px-2 py-1 rounded text-xs ${
+                  user.role === "admin" ? "bg-red-500/20 text-red-400" : "bg-blue-500/20 text-blue-400"
+                }`}
+              >
+                {user.role === "admin" ? "Administrator" : "User"}
+              </span>
+              {user.isGlobalAdmin && (
+                <span className="px-2 py-1 rounded text-xs bg-purple-500/20 text-purple-400">Global Admin</span>
+              )}
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div className="flex items-center gap-2">
+                <Mail size={16} className="text-gray-400" />
+                <span>{user.email}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Building size={16} className="text-gray-400" />
+                <span>{user.department}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Shield size={16} className="text-gray-400" />
+                <span>{user.authMethod === "azure" ? "Microsoft 365" : "Local Authentication"}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Globe size={16} className="text-gray-400" />
+                <span>{currentTenant.domain}</span>
+              </div>
+            </div>
+          </div>
         </div>
-      )}
+      </CardWrapper>
 
       {/* Navigation Tabs */}
       <div className="flex space-x-1 bg-card/50 rounded-lg p-1">
-        {sections.map((section) => (
+        {[
+          { id: "profile", label: "Profile", icon: <User size={16} /> },
+          { id: "security", label: "Security", icon: <Shield size={16} /> },
+          { id: "preferences", label: "Preferences", icon: <Settings size={16} /> },
+          { id: "activity", label: "Activity", icon: <History size={16} /> },
+        ].map((tab) => (
           <button
-            key={section.id}
-            onClick={() => setActiveSection(section.id as any)}
+            key={tab.id}
+            onClick={() => setActiveSection(tab.id as any)}
             className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-              activeSection === section.id ? "bg-primary text-white" : "text-gray-400 hover:text-white hover:bg-white/5"
+              activeSection === tab.id
+                ? "bg-primary text-white shadow-lg"
+                : "text-gray-400 hover:text-white hover:bg-white/10"
             }`}
           >
-            {section.icon}
-            {section.label}
+            {tab.icon}
+            {tab.label}
           </button>
         ))}
       </div>
 
       {/* Profile Section */}
       {activeSection === "profile" && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Profile Picture & Basic Info */}
-          <CardWrapper className="lg:col-span-1">
-            <div className="text-center">
-              <div className="relative inline-block mb-4">
-                <Image
-                  src={user.picture || "/placeholder.svg?height=100&width=100&text=" + user.name.charAt(0)}
-                  alt="Profile"
-                  width={100}
-                  height={100}
-                  className="rounded-full border-4 border-primary/20"
-                />
-                {user.authMethod === "azure" && (
-                  <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center border-2 border-black">
-                    <span className="text-white text-xs font-bold">M</span>
-                  </div>
-                )}
-              </div>
-              <h3 className="text-xl font-semibold mb-1">{user.name}</h3>
-              <p className="text-gray-400 mb-2">{user.department}</p>
-              <p className="text-sm text-gray-500">
-                {user.role === "admin" ? "Administrator" : "User"} • {currentTenant.branding.companyName}
-              </p>
-
-              {user.authMethod === "azure" && (
-                <div className="mt-4 p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                  <p className="text-blue-400 text-sm">
-                    This account is managed by Microsoft 365. Some settings may be controlled by your organization.
-                  </p>
-                </div>
+        <CardWrapper>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-semibold">Profile Information</h3>
+            <Button
+              onClick={() => (isEditing ? handleSaveProfile() : setIsEditing(true))}
+              disabled={isSaving}
+              className={isEditing ? "bg-primary hover:bg-primary/90" : ""}
+              variant={isEditing ? "default" : "outline"}
+            >
+              {isSaving ? (
+                <RefreshCw size={16} className="mr-2 animate-spin" />
+              ) : isEditing ? (
+                <Save size={16} className="mr-2" />
+              ) : (
+                <User size={16} className="mr-2" />
               )}
-            </div>
-          </CardWrapper>
+              {isSaving ? "Saving..." : isEditing ? "Save Changes" : "Edit Profile"}
+            </Button>
+          </div>
 
-          {/* Profile Details */}
-          <CardWrapper className="lg:col-span-2">
-            <div className="flex items-center justify-between mb-6">
-              <h3 className="text-lg font-semibold">Profile Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Full Name</label>
+              <input
+                type="text"
+                value={profileData.name}
+                onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
+                disabled={!isEditing}
+                className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary disabled:opacity-50"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Email Address</label>
+              <input
+                type="email"
+                value={profileData.email}
+                disabled
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-gray-400 cursor-not-allowed"
+              />
+              <p className="text-xs text-gray-500 mt-1">Email cannot be changed (managed by organization)</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Department</label>
+              <input
+                type="text"
+                value={profileData.department}
+                onChange={(e) => setProfileData({ ...profileData, department: e.target.value })}
+                disabled={!isEditing}
+                className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary disabled:opacity-50"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Job Title</label>
+              <input
+                type="text"
+                value={profileData.title}
+                onChange={(e) => setProfileData({ ...profileData, title: e.target.value })}
+                disabled={!isEditing}
+                placeholder="Your job title"
+                className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary disabled:opacity-50"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">Phone Number</label>
+              <input
+                type="tel"
+                value={profileData.phone}
+                onChange={(e) => setProfileData({ ...profileData, phone: e.target.value })}
+                disabled={!isEditing}
+                placeholder="Your phone number"
+                className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary disabled:opacity-50"
+              />
+            </div>
+          </div>
+        </CardWrapper>
+      )}
+
+      {/* Security Section */}
+      {activeSection === "security" && (
+        <div className="space-y-6">
+          {/* Two-Factor Authentication */}
+          <CardWrapper>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Two-Factor Authentication</h3>
+                <p className="text-gray-400 text-sm">Add an extra layer of security to your account with 2FA</p>
+              </div>
               <Button
-                onClick={() => (isEditing ? handleSaveProfile() : setIsEditing(true))}
-                disabled={isLoading}
-                className="bg-primary hover:bg-primary/90"
+                onClick={toggleTwoFactor}
+                variant={securityData.twoFactorEnabled ? "outline" : "default"}
+                className={securityData.twoFactorEnabled ? "text-green-400 border-green-400" : ""}
               >
-                {isLoading ? (
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                ) : isEditing ? (
+                {securityData.twoFactorEnabled ? (
                   <>
-                    <Save size={16} className="mr-2" />
-                    Save Changes
+                    <CheckCircle size={16} className="mr-2" />
+                    Enabled
                   </>
                 ) : (
                   <>
-                    <Edit size={16} className="mr-2" />
-                    Edit Profile
+                    <Shield size={16} className="mr-2" />
+                    Enable 2FA
                   </>
                 )}
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium mb-2">Full Name</label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    value={user.name}
-                    onChange={(e) => updateProfile({ ...user, name: e.target.value })}
-                    className="w-full bg-black border border-primary/20 rounded-lg p-3 text-white focus:outline-none focus:border-primary"
-                  />
-                ) : (
-                  <div className="flex items-center gap-2 p-3 bg-gray-800/50 rounded-lg">
-                    <User size={16} className="text-gray-400" />
-                    <span>{user.name}</span>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Email Address</label>
-                <div className="flex items-center gap-2 p-3 bg-gray-800/50 rounded-lg">
-                  <Mail size={16} className="text-gray-400" />
-                  <span>{user.email}</span>
-                  {user.authMethod === "azure" && (
-                    <span className="text-xs bg-blue-500/20 text-blue-400 px-2 py-1 rounded">M365</span>
-                  )}
+            {securityData.twoFactorEnabled && (
+              <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle className="text-green-400" size={16} />
+                  <span className="text-green-400 font-medium">Two-factor authentication is enabled</span>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  {user.authMethod === "azure" ? "Managed by Microsoft 365" : "Contact support to change email"}
+                <p className="text-sm text-gray-400">
+                  Your account is protected with two-factor authentication. You'll need your authenticator app to sign
+                  in.
                 </p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Department</label>
-                {isEditing ? (
-                  <select
-                    value={user.department}
-                    onChange={(e) => updateProfile({ ...user, department: e.target.value })}
-                    className="w-full bg-black border border-primary/20 rounded-lg p-3 text-white focus:outline-none focus:border-primary"
-                  >
-                    <option value="IT Department">IT Department</option>
-                    <option value="Marketing">Marketing</option>
-                    <option value="Sales">Sales</option>
-                    <option value="HR">Human Resources</option>
-                    <option value="Finance">Finance</option>
-                    <option value="Operations">Operations</option>
-                  </select>
-                ) : (
-                  <div className="flex items-center gap-2 p-3 bg-gray-800/50 rounded-lg">
-                    <MapPin size={16} className="text-gray-400" />
-                    <span>{user.department}</span>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Role</label>
-                <div className="flex items-center gap-2 p-3 bg-gray-800/50 rounded-lg">
-                  <Shield size={16} className="text-gray-400" />
-                  <span className="capitalize">{user.role}</span>
-                  {isGlobalAdmin && (
-                    <span className="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded">Global</span>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {isEditing && (
-              <div className="flex gap-3 mt-6 pt-6 border-t border-gray-700">
-                <Button onClick={handleSaveProfile} disabled={isLoading} className="bg-primary hover:bg-primary/90">
-                  {isLoading ? "Saving..." : "Save Changes"}
-                </Button>
-                <Button onClick={() => setIsEditing(false)} variant="outline" disabled={isLoading}>
-                  Cancel
-                </Button>
               </div>
             )}
           </CardWrapper>
-        </div>
-      )}
 
-      {/* Security Section */}
-      {activeSection === "security" && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Password Management */}
           <CardWrapper>
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <Key size={20} className="text-primary" />
-              Password & Authentication
-            </h3>
-
+            <h3 className="text-lg font-semibold mb-4">Password & Authentication</h3>
             <div className="space-y-4">
-              <div className="p-4 bg-gray-800/50 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium">Password</span>
-                  <span className="text-sm text-gray-400">
-                    Last changed: {user.securitySettings?.passwordLastChanged || "Unknown"}
-                  </span>
+              <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg">
+                <div>
+                  <div className="font-medium">Password</div>
+                  <div className="text-sm text-gray-400">
+                    {user.authMethod === "azure"
+                      ? "Managed by Microsoft 365"
+                      : `Last changed: ${securityData.passwordLastChanged}`}
+                  </div>
                 </div>
-                <p className="text-sm text-gray-400 mb-3">
-                  {user.authMethod === "azure"
-                    ? "Password is managed by Microsoft 365"
-                    : "Keep your account secure with a strong password"}
-                </p>
-                <Button disabled={user.authMethod === "azure"} variant="outline" size="sm">
+                <Button
+                  variant="outline"
+                  disabled={user.authMethod === "azure"}
+                  onClick={() => alert("Password change would redirect to appropriate service")}
+                >
+                  <Key size={16} className="mr-2" />
                   {user.authMethod === "azure" ? "Managed by Microsoft" : "Change Password"}
                 </Button>
               </div>
 
-              <div className="p-4 bg-gray-800/50 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium">Two-Factor Authentication</span>
-                  <div
-                    className={`px-2 py-1 rounded text-xs ${
-                      user.securitySettings?.twoFactorEnabled
-                        ? "bg-green-500/20 text-green-400"
-                        : "bg-red-500/20 text-red-400"
-                    }`}
-                  >
-                    {user.securitySettings?.twoFactorEnabled ? "Enabled" : "Disabled"}
+              <div className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg">
+                <div>
+                  <div className="font-medium">Session Timeout</div>
+                  <div className="text-sm text-gray-400">
+                    Automatically sign out after {securityData.sessionTimeout} minutes of inactivity
                   </div>
                 </div>
-                <p className="text-sm text-gray-400 mb-3">Add an extra layer of security to your account</p>
-                <Button
-                  onClick={handleToggle2FA}
-                  disabled={isLoading || !currentTenant.features.twoFactorAuth}
-                  size="sm"
-                  className={
-                    user.securitySettings?.twoFactorEnabled
-                      ? "bg-red-600 hover:bg-red-700"
-                      : "bg-green-600 hover:bg-green-700"
+                <select
+                  value={securityData.sessionTimeout}
+                  onChange={(e) =>
+                    setSecurityData({ ...securityData, sessionTimeout: Number.parseInt(e.target.value) })
                   }
+                  className="px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
                 >
-                  {isLoading ? "Processing..." : user.securitySettings?.twoFactorEnabled ? "Disable 2FA" : "Enable 2FA"}
-                </Button>
-                {!currentTenant.features.twoFactorAuth && (
-                  <p className="text-xs text-gray-500 mt-2">Not available for this organization</p>
-                )}
+                  <option value={60}>1 hour</option>
+                  <option value={240}>4 hours</option>
+                  <option value={480}>8 hours</option>
+                  <option value={720}>12 hours</option>
+                </select>
               </div>
             </div>
-          </CardWrapper>
 
-          <CardWrapper>
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <Clock size={20} className="text-primary" />
-              Login History
-            </h3>
-
-            <div className="space-y-4 max-h-96 overflow-y-auto">
-              {user.loginHistory?.map((login) => (
-                <div
-                  key={login.id}
-                  className={`p-4 rounded-lg border ${
-                    login.success ? "bg-gray-800/50 border-gray-700" : "bg-red-500/10 border-red-500/20"
-                  }`}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-3 h-3 rounded-full ${login.success ? "bg-green-400" : "bg-red-400"}`} />
-                      <span className="font-medium">{login.success ? "Successful Login" : "Failed Login"}</span>
-                    </div>
-                    <span className="text-sm text-gray-400">{login.timestamp}</span>
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-400">
-                    <div className="flex items-center gap-2">
-                      {login.device.includes("iPhone") ? <Smartphone size={16} /> : <Monitor size={16} />}
-                      <span>{login.device}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <MapPin size={16} />
-                      <span>{login.location}</span>
-                    </div>
-                  </div>
-
-                  {!login.success && (
-                    <div className="mt-3 p-2 bg-red-500/10 border border-red-500/20 rounded text-sm text-red-400">
-                      <AlertCircle size={14} className="inline mr-2" />
-                      If this wasn't you, please contact support immediately.
-                    </div>
-                  )}
-                </div>
-              ))}
+            <div className="mt-6">
+              <Button onClick={handleSaveSecurity} disabled={isSaving} className="bg-primary hover:bg-primary/90">
+                {isSaving ? <RefreshCw size={16} className="mr-2 animate-spin" /> : <Save size={16} className="mr-2" />}
+                {isSaving ? "Saving..." : "Save Security Settings"}
+              </Button>
             </div>
           </CardWrapper>
         </div>
@@ -433,264 +360,208 @@ export function MultiTenantAccountManagement() {
 
       {/* Preferences Section */}
       {activeSection === "preferences" && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="space-y-6">
+          {/* Theme Preferences */}
           <CardWrapper>
-            <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
-              <Bell size={20} className="text-primary" />
-              Notification Preferences
-            </h3>
-
+            <h3 className="text-lg font-semibold mb-4">Appearance</h3>
             <div className="space-y-4">
-              {user.preferences &&
-                Object.entries(user.preferences.notifications).map(([key, value]) => (
-                  <div key={key} className="flex items-center justify-between p-4 bg-gray-800/50 rounded-lg">
-                    <div>
-                      <h4 className="font-medium capitalize">{key} Notifications</h4>
-                      <p className="text-sm text-gray-400">
-                        {key === "email" && "Receive notifications via email"}
-                        {key === "sms" && "Get urgent alerts via SMS"}
-                        {key === "push" && "Browser push notifications"}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => {
-                        const newNotifications = { ...user.preferences!.notifications, [key]: !value }
-                        handleUpdatePreferences({ ...user.preferences!, notifications: newNotifications })
-                      }}
-                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                        value ? "bg-primary" : "bg-gray-600"
-                      }`}
-                    >
-                      <span
-                        className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                          value ? "translate-x-6" : "translate-x-1"
-                        }`}
-                      />
-                    </button>
-                  </div>
-                ))}
-            </div>
-          </CardWrapper>
-
-          <CardWrapper>
-            <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
-              <Palette size={20} className="text-primary" />
-              Display Preferences
-            </h3>
-
-            <div className="space-y-6">
               <div>
-                <label className="block text-sm font-medium mb-3">Theme</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Theme</label>
                 <div className="grid grid-cols-3 gap-3">
-                  {["light", "dark", "auto"].map((theme) => (
+                  {[
+                    { value: "light", label: "Light", icon: <Monitor size={16} /> },
+                    { value: "dark", label: "Dark", icon: <Monitor size={16} /> },
+                    { value: "auto", label: "Auto", icon: <Palette size={16} /> },
+                  ].map((theme) => (
                     <button
-                      key={theme}
-                      onClick={() => {
-                        if (user.preferences) {
-                          handleUpdatePreferences({ ...user.preferences, theme: theme as any })
-                        }
-                      }}
-                      className={`p-3 rounded-lg border text-sm font-medium transition-colors ${
-                        user.preferences?.theme === theme
-                          ? "bg-primary/20 border-primary text-primary"
-                          : "bg-gray-800/50 border-gray-700 text-gray-400 hover:text-white"
+                      key={theme.value}
+                      onClick={() => setPreferencesData({ ...preferencesData, theme: theme.value as any })}
+                      className={`flex items-center gap-2 p-3 rounded-lg border transition-colors ${
+                        preferencesData.theme === theme.value
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-gray-600 hover:border-gray-500"
                       }`}
                     >
-                      {theme.charAt(0).toUpperCase() + theme.slice(1)}
+                      {theme.icon}
+                      {theme.label}
                     </button>
                   ))}
                 </div>
               </div>
+            </div>
+          </CardWrapper>
 
-              <div>
-                <label className="block text-sm font-medium mb-3">Default Ticket View</label>
-                <select
-                  value={user.preferences?.defaultTicketView || "all"}
-                  onChange={(e) => {
-                    if (user.preferences) {
-                      handleUpdatePreferences({ ...user.preferences, defaultTicketView: e.target.value as any })
+          {/* Notification Preferences */}
+          <CardWrapper>
+            <h3 className="text-lg font-semibold mb-4">Notifications</h3>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Mail size={20} className="text-gray-400" />
+                  <div>
+                    <div className="font-medium">Email Notifications</div>
+                    <div className="text-sm text-gray-400">Receive updates via email</div>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={preferencesData.notifications.email}
+                    onChange={(e) =>
+                      setPreferencesData({
+                        ...preferencesData,
+                        notifications: { ...preferencesData.notifications, email: e.target.checked },
+                      })
                     }
-                  }}
-                  className="w-full bg-black border border-primary/20 rounded-lg p-3 text-white focus:outline-none focus:border-primary"
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                </label>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Smartphone size={20} className="text-gray-400" />
+                  <div>
+                    <div className="font-medium">SMS Notifications</div>
+                    <div className="text-sm text-gray-400">Receive updates via text message</div>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={preferencesData.notifications.sms}
+                    onChange={(e) =>
+                      setPreferencesData({
+                        ...preferencesData,
+                        notifications: { ...preferencesData.notifications, sms: e.target.checked },
+                      })
+                    }
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                </label>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Bell size={20} className="text-gray-400" />
+                  <div>
+                    <div className="font-medium">Push Notifications</div>
+                    <div className="text-sm text-gray-400">Receive browser notifications</div>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={preferencesData.notifications.push}
+                    onChange={(e) =>
+                      setPreferencesData({
+                        ...preferencesData,
+                        notifications: { ...preferencesData.notifications, push: e.target.checked },
+                      })
+                    }
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-600 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                </label>
+              </div>
+            </div>
+          </CardWrapper>
+
+          {/* Portal Preferences */}
+          <CardWrapper>
+            <h3 className="text-lg font-semibold mb-4">Portal Settings</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Default Ticket View</label>
+                <select
+                  value={preferencesData.defaultTicketView}
+                  onChange={(e) => setPreferencesData({ ...preferencesData, defaultTicketView: e.target.value as any })}
+                  className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
                 >
                   <option value="all">All Tickets</option>
-                  <option value="open">Open Tickets Only</option>
+                  <option value="open">Open Tickets</option>
                   <option value="assigned">Assigned to Me</option>
                 </select>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-3">Timezone</label>
+                <label className="block text-sm font-medium text-gray-300 mb-2">Timezone</label>
                 <select
-                  value={user.preferences?.timezone || "America/New_York"}
-                  onChange={(e) => {
-                    if (user.preferences) {
-                      handleUpdatePreferences({ ...user.preferences, timezone: e.target.value })
-                    }
-                  }}
-                  className="w-full bg-black border border-primary/20 rounded-lg p-3 text-white focus:outline-none focus:border-primary"
+                  value={preferencesData.timezone}
+                  onChange={(e) => setPreferencesData({ ...preferencesData, timezone: e.target.value })}
+                  className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
                 >
                   <option value="America/New_York">Eastern Time (ET)</option>
                   <option value="America/Chicago">Central Time (CT)</option>
                   <option value="America/Denver">Mountain Time (MT)</option>
                   <option value="America/Los_Angeles">Pacific Time (PT)</option>
+                  <option value="UTC">UTC</option>
                 </select>
               </div>
+            </div>
+
+            <div className="mt-6">
+              <Button onClick={handleSavePreferences} disabled={isSaving} className="bg-primary hover:bg-primary/90">
+                {isSaving ? <RefreshCw size={16} className="mr-2 animate-spin" /> : <Save size={16} className="mr-2" />}
+                {isSaving ? "Saving..." : "Save Preferences"}
+              </Button>
             </div>
           </CardWrapper>
         </div>
       )}
 
-      {/* Admin Section */}
-      {activeSection === "admin" && isAdmin && (
+      {/* Activity Section */}
+      {activeSection === "activity" && (
         <div className="space-y-6">
+          {/* Login History */}
           <CardWrapper>
-            <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
-              <Users size={20} className="text-primary" />
-              Administrative Controls
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <div className="p-4 bg-primary/10 border border-primary/20 rounded-lg">
-                <h4 className="font-semibold text-primary mb-2">Tenant Information</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Organization:</span>
-                    <span>{currentTenant.branding.companyName}</span>
+            <h3 className="text-lg font-semibold mb-4">Recent Login Activity</h3>
+            <div className="space-y-3">
+              {user.loginHistory?.map((entry) => (
+                <div key={entry.id} className="flex items-center justify-between p-3 bg-gray-800/50 rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-3 h-3 rounded-full ${entry.success ? "bg-green-400" : "bg-red-400"}`}></div>
+                    <div>
+                      <div className="font-medium">{entry.device}</div>
+                      <div className="text-sm text-gray-400">{entry.location}</div>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Domain:</span>
-                    <span>{currentTenant.domain}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Tenant ID:</span>
-                    <span className="font-mono text-xs">{currentTenant.id}</span>
+                  <div className="text-right">
+                    <div className="text-sm">{entry.timestamp}</div>
+                    <div className="text-xs text-gray-400">{entry.ipAddress}</div>
                   </div>
                 </div>
-              </div>
-
-              <div className="p-4 bg-gray-800/50 rounded-lg">
-                <h4 className="font-semibold mb-2">Features</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span>Two-Factor Auth</span>
-                    <span className={currentTenant.features.twoFactorAuth ? "text-green-400" : "text-red-400"}>
-                      {currentTenant.features.twoFactorAuth ? "Enabled" : "Disabled"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Password Reset</span>
-                    <span className={currentTenant.features.passwordReset ? "text-green-400" : "text-red-400"}>
-                      {currentTenant.features.passwordReset ? "Enabled" : "Disabled"}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Admin Override</span>
-                    <span className={currentTenant.features.adminOverride ? "text-green-400" : "text-red-400"}>
-                      {currentTenant.features.adminOverride ? "Enabled" : "Disabled"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="p-4 bg-gray-800/50 rounded-lg">
-                <h4 className="font-semibold mb-2">Settings</h4>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Session Timeout:</span>
-                    <span>{currentTenant.settings.sessionTimeout} min</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Max Login Attempts:</span>
-                    <span>{currentTenant.settings.maxLoginAttempts}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Min Password Length:</span>
-                    <span>{currentTenant.settings.passwordPolicy.minLength}</span>
-                  </div>
-                </div>
-              </div>
+              ))}
             </div>
-
-            {isGlobalAdmin && (
-              <div className="mt-6 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
-                <h4 className="font-semibold text-red-400 mb-3">Global Admin Actions</h4>
-                <p className="text-sm text-gray-400 mb-4">
-                  As a global administrator, you can access cross-tenant functionality and manage multiple
-                  organizations.
-                </p>
-                <div className="flex gap-3">
-                  <Button size="sm" variant="outline" className="border-red-500/20 text-red-400 hover:bg-red-500/10">
-                    <Eye size={14} className="mr-2" />
-                    View All Tenants
-                  </Button>
-                  <Button size="sm" variant="outline" className="border-red-500/20 text-red-400 hover:bg-red-500/10">
-                    <Users size={14} className="mr-2" />
-                    Manage Users
-                  </Button>
-                  <Button size="sm" variant="outline" className="border-red-500/20 text-red-400 hover:bg-red-500/10">
-                    <Settings size={14} className="mr-2" />
-                    System Settings
-                  </Button>
-                </div>
-              </div>
-            )}
           </CardWrapper>
 
+          {/* Account Summary */}
           <CardWrapper>
-            <h3 className="text-lg font-semibold mb-6 flex items-center gap-2">
-              <Shield size={20} className="text-primary" />
-              Security & Compliance
-            </h3>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="font-semibold mb-3">Recent Admin Actions</h4>
-                <div className="space-y-3">
-                  <div className="p-3 bg-gray-800/50 rounded-lg">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium">User Role Updated</span>
-                      <span className="text-xs text-gray-400">2 hours ago</span>
-                    </div>
-                    <p className="text-xs text-gray-400">Changed user@example.com to admin role</p>
-                  </div>
-                  <div className="p-3 bg-gray-800/50 rounded-lg">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium">Security Settings Modified</span>
-                      <span className="text-xs text-gray-400">1 day ago</span>
-                    </div>
-                    <p className="text-xs text-gray-400">Updated session timeout to 8 hours</p>
-                  </div>
-                  <div className="p-3 bg-gray-800/50 rounded-lg">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-sm font-medium">Tenant Configuration Updated</span>
-                      <span className="text-xs text-gray-400">3 days ago</span>
-                    </div>
-                    <p className="text-xs text-gray-400">Modified branding settings</p>
-                  </div>
+            <h3 className="text-lg font-semibold mb-4">Account Summary</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="text-center p-4 bg-gray-800/50 rounded-lg">
+                <div className="text-2xl font-bold text-primary mb-1">
+                  {user.loginHistory?.filter((entry) => entry.success).length || 0}
                 </div>
+                <div className="text-sm text-gray-400">Successful Logins</div>
               </div>
-
-              <div>
-                <h4 className="font-semibold mb-3">Compliance Status</h4>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
-                    <span className="text-sm">Data Encryption</span>
-                    <span className="text-green-400 text-sm">✓ Active</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
-                    <span className="text-sm">Audit Logging</span>
-                    <span className="text-green-400 text-sm">✓ Active</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
-                    <span className="text-sm">Access Controls</span>
-                    <span className="text-green-400 text-sm">✓ Active</span>
-                  </div>
-                  <div className="flex items-center justify-between p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                    <span className="text-sm">Backup Verification</span>
-                    <span className="text-yellow-400 text-sm">⚠ Pending</span>
-                  </div>
+              <div className="text-center p-4 bg-gray-800/50 rounded-lg">
+                <div className="text-2xl font-bold text-yellow-400 mb-1">
+                  {user.securitySettings?.twoFactorEnabled ? "Yes" : "No"}
                 </div>
+                <div className="text-sm text-gray-400">2FA Enabled</div>
+              </div>
+              <div className="text-center p-4 bg-gray-800/50 rounded-lg">
+                <div className="text-2xl font-bold text-blue-400 mb-1">{currentTenant.domain}</div>
+                <div className="text-sm text-gray-400">Organization</div>
+              </div>
+              <div className="text-center p-4 bg-gray-800/50 rounded-lg">
+                <div className="text-2xl font-bold text-green-400 mb-1">
+                  {user.authMethod === "azure" ? "SSO" : "Local"}
+                </div>
+                <div className="text-sm text-gray-400">Auth Method</div>
               </div>
             </div>
           </CardWrapper>
