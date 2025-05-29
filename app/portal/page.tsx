@@ -866,7 +866,7 @@ function ClientPortalContent() {
                   </div>
                   <div className="text-2xl font-bold text-purple-400 mb-1">98%</div>
                   <div className="text-sm text-gray-400">Satisfaction Rate</div>
-                </div>
+                </CardWrapper>
               </div>
 
               {/* Microsoft 365 Service Health */}
