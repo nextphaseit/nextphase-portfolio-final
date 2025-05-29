@@ -49,7 +49,7 @@ export function Navbar() {
               Testimonials
             </Link>
             <Link href="/portal" className="text-white hover:text-primary transition-colors">
-              Client Portal
+              Service Desk Portal
             </Link>
 
             {/* Admin Portal - Only for authenticated admin users */}
@@ -64,7 +64,7 @@ export function Navbar() {
               <div className="relative">
                 <Button
                   onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                  className="flex items-center gap-2 bg-primary hover:bg-primary/90"
+                  className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white hover:text-white"
                 >
                   <Image
                     src={user.picture || "/placeholder.svg?height=24&width=24&text=DC"}
@@ -115,7 +115,7 @@ export function Navbar() {
               </div>
             ) : (
               <Link href="/login" className="text-white hover:text-primary transition-colors">
-                {isLoading ? "Loading..." : "Staff Login"}
+                {isLoading ? "Loading..." : "Admin Portal"}
               </Link>
             )}
 
@@ -123,7 +123,7 @@ export function Navbar() {
             <div className="relative">
               <Button
                 onClick={() => setIsContactOpen(!isContactOpen)}
-                className="flex items-center gap-2 bg-primary hover:bg-primary/90"
+                className="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white hover:text-white"
                 data-contact-trigger
               >
                 Contact <ChevronDown size={16} />
@@ -174,7 +174,7 @@ export function Navbar() {
                         <Users size={18} className="text-purple-600" />
                       </div>
                       <div>
-                        <div className="font-medium text-gray-800">Client Portal</div>
+                        <div className="font-medium text-gray-800">Service Desk Portal</div>
                         <div className="text-sm text-gray-500">Access your account</div>
                       </div>
                     </Link>
@@ -263,7 +263,7 @@ export function Navbar() {
                 className="text-white hover:text-primary transition-colors"
                 onClick={() => setIsOpen(false)}
               >
-                Client Portal
+                Service Desk Portal
               </Link>
 
               {/* Admin Portal - Mobile */}
@@ -319,7 +319,7 @@ export function Navbar() {
                   className="text-white hover:text-primary transition-colors"
                   onClick={() => setIsOpen(false)}
                 >
-                  Staff Login
+                  Admin Portal
                 </Link>
               )}
 
@@ -364,7 +364,7 @@ export function Navbar() {
                     <Users size={16} />
                   </div>
                   <div>
-                    <div className="font-medium">Client Portal</div>
+                    <div className="font-medium">Service Desk Portal</div>
                     <div className="text-xs text-gray-400">Access account</div>
                   </div>
                 </Link>
