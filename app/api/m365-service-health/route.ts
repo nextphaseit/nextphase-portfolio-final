@@ -191,6 +191,19 @@ const enhancedFallbackData = [
     classification: "advisory",
     severity: "low",
   },
+  {
+    id: "DEMO_002",
+    title: "API Configuration Required",
+    service: "Microsoft 365 Admin Center",
+    status: "advisory",
+    description:
+      "To display real-time Microsoft 365 service health data, the Microsoft Graph API requires ServiceHealth.Read.All permissions. Contact your administrator to configure these permissions.",
+    startTime: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+    lastUpdated: new Date().toISOString(),
+    impactedFeatures: ["Real-time service health monitoring"],
+    classification: "advisory",
+    severity: "medium",
+  },
 ]
 
 export async function GET(request: NextRequest) {
@@ -239,7 +252,11 @@ export async function GET(request: NextRequest) {
     let isPermissionError = false
 
     if (error instanceof Error) {
-      if (error.message.includes("UnknownError") || error.message.includes("Forbidden")) {
+      if (
+        error.message.includes("UnknownError") ||
+        error.message.includes("Forbidden") ||
+        error.message.includes("403")
+      ) {
         errorMessage = "Microsoft Graph API permissions need to be configured"
         isPermissionError = true
       } else if (error.message.includes("invalid_client")) {

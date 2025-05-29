@@ -126,7 +126,11 @@ export function M365ServiceHealth({ className = "", maxItems = 5, showHeader = t
         const data = await response.json()
 
         if (data.fallback) {
-          if (data.permissionError) {
+          if (
+            data.permissionError ||
+            data.errorDetails?.includes("403") ||
+            data.errorDetails?.includes("UnknownError")
+          ) {
             setError("Microsoft Graph API permissions need to be configured for real-time data")
           } else if (data.errorDetails?.includes("invalid_client")) {
             setError("Microsoft Graph API authentication failed - please check credentials")
@@ -145,8 +149,25 @@ export function M365ServiceHealth({ className = "", maxItems = 5, showHeader = t
       setLastRefresh(new Date())
     } catch (err) {
       console.error("Error fetching service health:", err)
-      setError("Unable to fetch service health data")
-      setServiceHealth([])
+      setError("Microsoft Graph API permissions need configuration - showing demo data")
+
+      // Set demo data when there's an error
+      setServiceHealth([
+        {
+          id: "DEMO_001",
+          title: "Service health monitoring active",
+          service: "Microsoft Graph API",
+          status: "advisory",
+          description:
+            "Service health monitoring is active and ready to display real-time Microsoft 365 service status. Currently showing demonstration data while API permissions are being configured.",
+          startTime: new Date().toISOString(),
+          lastUpdated: new Date().toISOString(),
+          impactedFeatures: ["Service health monitoring"],
+          classification: "advisory",
+          severity: "low",
+        },
+      ])
+      setIsDemo(true)
     } finally {
       setIsLoading(false)
     }
@@ -216,19 +237,35 @@ export function M365ServiceHealth({ className = "", maxItems = 5, showHeader = t
             <AlertTriangle size={16} className="text-yellow-400" />
             <p className="text-yellow-400 text-sm">{error}</p>
           </div>
-          {error.includes("permissions") && (
-            <div className="mt-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => window.open("/debug/graph", "_blank")}
-                className="text-xs"
-              >
-                <Settings size={12} className="mr-1" />
-                Check API Setup
-              </Button>
-            </div>
-          )}
+          <div className="mt-2 text-xs text-gray-400">
+            <p>The Microsoft Graph API requires specific permissions to access service health data.</p>
+            <p>Contact your administrator to configure the necessary API permissions.</p>
+          </div>
+          <div className="mt-2">
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => window.open("/debug/graph", "_blank")}
+              className="text-xs mr-2"
+            >
+              <Settings size={12} className="mr-1" />
+              Check API Setup
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() =>
+                window.open(
+                  "https://docs.microsoft.com/en-us/graph/permissions-reference#servicehealth-permissions",
+                  "_blank",
+                )
+              }
+              className="text-xs"
+            >
+              <ExternalLink size={12} className="mr-1" />
+              View Required Permissions
+            </Button>
+          </div>
         </div>
       )}
 
