@@ -1,58 +1,66 @@
 "use client"
+
 import { useState, useEffect } from "react"
+import { signIn, getSession } from "next-auth/react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Shield, AlertCircle, ArrowLeft, Building, Lock } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import { AdminAuthProvider, useAdminAuth } from "@/providers/admin-auth-provider"
 
-function AdminLoginContent() {
+export default function AdminLoginPage() {
   const [error, setError] = useState("")
-  const { loginWithMicrosoft, isLoading, isAuthenticated, error: authError } = useAdminAuth()
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
   const searchParams = useSearchParams()
 
   useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/admin")
-    }
+    // Check if user is already authenticated
+    getSession().then((session) => {
+      if (session?.user?.email?.endsWith("@nextphaseit.org")) {
+        router.push("/admin")
+      }
+    })
 
     // Check for OAuth errors
     const oauthError = searchParams.get("error")
     if (oauthError) {
       switch (oauthError) {
-        case "oauth_failed":
-          setError("Microsoft authentication failed. Please try again.")
-          break
-        case "unauthorized_domain":
+        case "AccessDenied":
           setError("Access denied. Only NextPhase IT personnel can access this admin portal.")
           break
-        case "token_failed":
-          setError("Authentication token error. Please try again.")
+        case "Configuration":
+          setError("Authentication configuration error. Please contact support.")
           break
-        case "profile_failed":
-          setError("Unable to retrieve profile information. Please try again.")
-          break
-        case "callback_failed":
-          setError("Authentication callback failed. Please try again.")
+        case "Verification":
+          setError("Unable to verify your account. Please try again.")
           break
         default:
           setError("Authentication error occurred. Please try again.")
       }
     }
-
-    // Set auth error if present
-    if (authError) {
-      setError(authError)
-    }
-  }, [isAuthenticated, router, searchParams, authError])
+  }, [router, searchParams])
 
   const handleMicrosoftLogin = async () => {
     setError("")
-    const success = await loginWithMicrosoft()
-    if (!success && !authError) {
-      setError("Microsoft authentication failed. Please try again.")
+    setIsLoading(true)
+
+    try {
+      const result = await signIn("microsoft", {
+        callbackUrl: "/admin",
+        redirect: false,
+      })
+
+      if (result?.error) {
+        setError("Microsoft authentication failed. Please try again.")
+      } else if (result?.url) {
+        router.push(result.url)
+      }
+    } catch (error) {
+      console.error("Login error:", error)
+      setError("Authentication failed. Please try again.")
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -233,13 +241,5 @@ function AdminLoginContent() {
         </div>
       </div>
     </div>
-  )
-}
-
-export default function AdminLoginPage() {
-  return (
-    <AdminAuthProvider>
-      <AdminLoginContent />
-    </AdminAuthProvider>
   )
 }
