@@ -7,18 +7,9 @@ import { Providers } from "./providers"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "NextPhase IT - Transform Your Business",
-  description:
-    "Empowering small businesses with enterprise-level technology solutions. From web development to cloud infrastructure, we deliver secure, scalable, and efficient IT solutions that drive growth.",
-  keywords: "IT services, web development, cloud infrastructure, business technology, NextPhase IT",
-  authors: [{ name: "NextPhase IT" }],
-  openGraph: {
-    title: "NextPhase IT - Transform Your Business",
-    description: "Empowering small businesses with enterprise-level technology solutions.",
-    url: "https://nextphaseit.org",
-    siteName: "NextPhase IT",
-    type: "website",
-  },
+  title: "NextPhase IT - Professional IT Services",
+  description: "Professional IT services, support, and solutions for businesses",
+  keywords: "IT services, technical support, business solutions, NextPhase IT",
     generator: 'v0.dev'
 }
 

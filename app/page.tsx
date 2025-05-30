@@ -1,91 +1,206 @@
+"use client"
+
+import { useSession } from "next-auth/react"
 import { Navbar } from "@/components/navbar"
+import { Button } from "@/components/ui/button"
 import { Services } from "@/components/services"
 import { Stats } from "@/components/stats"
-import { Projects } from "@/components/projects"
 import { Testimonials } from "@/components/testimonials"
 import { ContactForm } from "@/components/contact-form"
+import { Projects } from "@/components/projects"
+import { Skills } from "@/components/skills"
 import { Chatbot } from "@/components/chatbot"
-import Link from "next/link"
-import { Button } from "@/components/ui/button"
-import { Ticket, UserPlus } from "lucide-react"
+import { ArrowRight, CheckCircle, Star, Users } from "lucide-react"
 import Image from "next/image"
+import Link from "next/link"
 
 export default function HomePage() {
+  const { data: session, status } = useSession()
+
+  if (status === "loading") {
+    return (
+      <main className="min-h-screen bg-black text-white flex items-center justify-center">
+        <p>Loading...</p>
+      </main>
+    )
+  }
+
+  if (status === "unauthenticated" || status === "authenticated") {
+    return (
+      <main className="min-h-screen bg-black text-white">
+        <Navbar />
+
+        {/* Hero Section */}
+        <section className="relative overflow-hidden">
+          {/* Background gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-secondary/20" />
+
+          <div className="container mx-auto px-4 pt-32 pb-20 relative">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+              <div className="space-y-8">
+                <div className="space-y-4">
+                  <h1 className="text-4xl md:text-6xl font-bold leading-tight">
+                    Professional
+                    <span className="text-primary block">IT Services</span>
+                    for Your Business
+                  </h1>
+                  <p className="text-xl text-gray-400 leading-relaxed">
+                    Comprehensive technology solutions, expert support, and strategic consulting to help your business
+                    thrive in the digital age.
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button size="lg" className="bg-primary hover:bg-primary/90" asChild>
+                    <Link href="/about">
+                      Get Started
+                      <ArrowRight className="ml-2" size={20} />
+                    </Link>
+                  </Button>
+                  <Button size="lg" variant="outline" asChild>
+                    <Link href="/pricing">View Pricing</Link>
+                  </Button>
+                </div>
+
+                {/* Trust indicators */}
+                <div className="flex items-center gap-6 pt-8">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="text-green-400" size={20} />
+                    <span className="text-sm">24/7 Support</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Star className="text-yellow-400" size={20} />
+                    <span className="text-sm">5-Star Rated</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Users className="text-blue-400" size={20} />
+                    <span className="text-sm">500+ Clients</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="relative">
+                <div className="relative z-10">
+                  <Image
+                    src="/images/about-img.png"
+                    alt="Professional IT Services"
+                    width={600}
+                    height={400}
+                    className="w-full h-auto rounded-lg shadow-2xl"
+                    priority
+                  />
+                </div>
+                {/* Decorative elements */}
+                <div className="absolute -top-4 -right-4 w-24 h-24 bg-primary/20 rounded-full blur-xl" />
+                <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-secondary/20 rounded-full blur-xl" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Services Section */}
+        <Services />
+
+        {/* Stats Section */}
+        <Stats />
+
+        {/* Projects Section */}
+        <Projects />
+
+        {/* Skills Section */}
+        <Skills />
+
+        {/* Testimonials Section */}
+        <Testimonials />
+
+        {/* Contact Section */}
+        <ContactForm />
+
+        {/* Chatbot */}
+        <Chatbot />
+
+        {/* Footer */}
+        <footer className="bg-card mt-20">
+          <div className="container mx-auto px-4 py-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div>
+                <h3 className="text-xl font-bold mb-4">NextPhase IT</h3>
+                <p className="text-gray-400 mb-4">
+                  Professional IT services and solutions for businesses of all sizes.
+                </p>
+                <div className="flex space-x-4">{/* Social media links would go here */}</div>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-4">Services</h4>
+                <ul className="space-y-2 text-gray-400">
+                  <li>
+                    <Link href="/services" className="hover:text-primary transition-colors">
+                      IT Support
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/services" className="hover:text-primary transition-colors">
+                      Cloud Solutions
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/services" className="hover:text-primary transition-colors">
+                      Cybersecurity
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/services" className="hover:text-primary transition-colors">
+                      Consulting
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-4">Company</h4>
+                <ul className="space-y-2 text-gray-400">
+                  <li>
+                    <Link href="/about" className="hover:text-primary transition-colors">
+                      About Us
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/testimonials" className="hover:text-primary transition-colors">
+                      Testimonials
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/pricing" className="hover:text-primary transition-colors">
+                      Pricing
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/contact" className="hover:text-primary transition-colors">
+                      Contact
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-4">Contact</h4>
+                <ul className="space-y-2 text-gray-400">
+                  <li>support@nextphaseit.org</li>
+                  <li>(984) 310-9533</li>
+                  <li>Charlotte, NC</li>
+                </ul>
+              </div>
+            </div>
+            <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+              <p>&copy; 2024 NextPhase IT. All rights reserved.</p>
+            </div>
+          </div>
+        </footer>
+      </main>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-black text-white">
-      <Navbar />
-
-      {/* Hero Section */}
-      <section className="relative min-h-screen flex items-center justify-center px-8 py-20">
-        <div className="container mx-auto grid lg:grid-cols-2 gap-12 items-center">
-          <div className="space-y-8">
-            <h1 className="text-4xl md:text-6xl font-bold leading-tight">
-              Transform Your Business with <span className="text-primary">NextPhase IT</span>
-            </h1>
-            <p className="text-xl text-gray-300 leading-relaxed">
-              Empowering small businesses with enterprise-level technology solutions. From web development to cloud
-              infrastructure, we deliver secure, scalable, and efficient IT solutions that drive growth.
-            </p>
-
-            {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Button asChild size="lg" className="bg-primary hover:bg-primary/90">
-                <Link href="/portal" className="flex items-center gap-2">
-                  <Ticket size={20} />
-                  Submit a Ticket
-                </Link>
-              </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link href="/about#new-client-form" className="flex items-center gap-2">
-                  <UserPlus size={20} />
-                  New Client Form
-                </Link>
-              </Button>
-            </div>
-
-            {/* Contact Info */}
-            <div className="flex flex-col sm:flex-row gap-6 text-sm text-gray-400">
-              <div className="flex items-center gap-2">
-                <span>📞</span>
-                <span>(984) 310-8533</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span>✉️</span>
-                <span>info@nextphaseit.org</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="relative">
-            <Image
-              src="/images/nextphase-logo.png"
-              alt="NextPhase IT Logo"
-              width={600}
-              height={400}
-              className="w-full h-auto"
-              priority
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* Services Section */}
-      <Services />
-
-      {/* Stats Section */}
-      <Stats />
-
-      {/* Projects Section */}
-      <Projects />
-
-      {/* Testimonials Section */}
-      <Testimonials />
-
-      {/* Contact Section */}
-      <ContactForm />
-
-      {/* Chatbot */}
-      <Chatbot />
-    </div>
+    <main className="min-h-screen bg-black text-white flex items-center justify-center">
+      <p>Error: Authentication failed.</p>
+    </main>
   )
 }
