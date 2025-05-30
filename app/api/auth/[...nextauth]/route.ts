@@ -3,19 +3,32 @@ import AzureADProvider from "next-auth/providers/azure-ad"
 import CredentialsProvider from "next-auth/providers/credentials"
 import type { NextAuthOptions } from "next-auth"
 
-const authOptions: NextAuthOptions = {
+// Check for required environment variables
+const requiredEnvVars = ["NEXTAUTH_SECRET"]
+const missingVars = requiredEnvVars.filter((varName) => !process.env[varName])
+
+if (missingVars.length > 0) {
+  console.error(`Missing required environment variables: ${missingVars.join(", ")}`)
+}
+
+export const authOptions: NextAuthOptions = {
   providers: [
-    AzureADProvider({
-      clientId: process.env.MICROSOFT_CLIENT_ID!,
-      clientSecret: process.env.MICROSOFT_CLIENT_SECRET!,
-      tenantId: process.env.MICROSOFT_TENANT_ID!,
-      authorization: {
-        params: {
-          scope: "openid profile email User.Read",
-          prompt: "select_account",
-        },
-      },
-    }),
+    // Only include Azure AD if credentials are available
+    ...(process.env.MICROSOFT_CLIENT_ID && process.env.MICROSOFT_CLIENT_SECRET
+      ? [
+          AzureADProvider({
+            clientId: process.env.MICROSOFT_CLIENT_ID,
+            clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
+            tenantId: process.env.MICROSOFT_TENANT_ID || "common",
+            authorization: {
+              params: {
+                scope: "openid profile email User.Read",
+                prompt: "select_account",
+              },
+            },
+          }),
+        ]
+      : []),
     CredentialsProvider({
       name: "Credentials",
       credentials: {
@@ -41,7 +54,7 @@ const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   pages: {
     signIn: "/auth/signin",
-    error: "/auth/error",
+    error: "/auth/error", // This points to the client-side error page
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -59,29 +72,59 @@ const authOptions: NextAuthOptions = {
       return session
     },
   },
+  logger: {
+    error(code, metadata) {
+      console.error(`[next-auth] [${code}]`, metadata)
+    },
+    warn(code) {
+      console.warn(`[next-auth] [${code}]`)
+    },
+    debug(code, metadata) {
+      if (process.env.NODE_ENV === "development") {
+        console.debug(`[next-auth] [${code}]`, metadata)
+      }
+    },
+  },
+  debug: process.env.NODE_ENV === "development",
 }
 
-// 🚨 Wrap with error logging
-export const GET = async (req: Request) => {
+// Wrap handlers with error handling
+export async function GET(req: Request) {
   try {
     return await NextAuth(req, authOptions)
   } catch (error: any) {
-    console.error("❌ AUTH GET ERROR:", error.message || error)
-    return new Response(JSON.stringify({ error: "Internal Auth Error", detail: error.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    })
+    console.error("NextAuth GET Error:", error.message || error)
+    return new Response(
+      JSON.stringify({
+        error: "Internal Authentication Error",
+        message: error.message || "An unexpected error occurred during authentication",
+      }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    )
   }
 }
 
-export const POST = async (req: Request) => {
+export async function POST(req: Request) {
   try {
     return await NextAuth(req, authOptions)
   } catch (error: any) {
-    console.error("❌ AUTH POST ERROR:", error.message || error)
-    return new Response(JSON.stringify({ error: "Internal Auth Error", detail: error.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    })
+    console.error("NextAuth POST Error:", error.message || error)
+    return new Response(
+      JSON.stringify({
+        error: "Internal Authentication Error",
+        message: error.message || "An unexpected error occurred during authentication",
+      }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    )
   }
 }
