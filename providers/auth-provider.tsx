@@ -1,248 +1,40 @@
 "use client"
 
 import type React from "react"
-import { createContext, useContext, useState, useEffect, type ReactNode } from "react"
-import { PKCEHelper } from "@/lib/pkce"
 
-interface User {
-  id: string
-  name: string
-  email: string
-  picture?: string
-  given_name?: string
-  role: "admin" | "staff"
-  department?: string
-  authMethod?: "exchange" | "local"
-}
+import { SessionProvider, useSession, signOut } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { type ReactNode, createContext, useContext } from "react"
 
-interface AuthContextType {
-  user: User | null
-  isLoading: boolean
-  login: (email: string, password: string) => Promise<boolean>
-  loginWithMicrosoft: () => Promise<boolean>
-  logout: () => void
-  isAuthenticated: boolean
+// Create a context for additional auth functionality
+const AuthContext = createContext<{
   isAdmin: boolean
-}
-
-const AuthContext = createContext<AuthContextType | undefined>(undefined)
-
-// Authorized NextPhase IT staff members (fallback for local auth)
-const AUTHORIZED_USERS = [
-  {
-    id: "admin-adrian",
-    name: "Adrian Knight",
-    email: "adrian.knight@nextphaseit.org",
-    given_name: "Adrian",
-    role: "admin" as const,
-    department: "IT Operations",
-    picture: "/placeholder.svg?height=40&width=40&text=AK",
-    authMethod: "local" as const,
-  },
-  {
-    id: "staff-demo",
-    name: "Demo Staff",
-    email: "staff@nextphaseit.org",
-    given_name: "Demo",
-    role: "staff" as const,
-    department: "Technical Support",
-    picture: "/placeholder.svg?height=40&width=40&text=DS",
-    authMethod: "local" as const,
-  },
-]
-
-// Microsoft Exchange authorized domains and users
-const EXCHANGE_AUTHORIZED_DOMAINS = ["nextphaseit.org"]
-const EXCHANGE_ADMIN_EMAILS = ["adrian.knight@nextphaseit.org"]
+  isAuthenticated: boolean
+  isLoading: boolean
+  logout: () => Promise<void>
+}>({
+  isAdmin: false,
+  isAuthenticated: false,
+  isLoading: true,
+  logout: async () => {},
+})
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const { data: session, status } = useSession()
+  const router = useRouter()
 
-  useEffect(() => {
-    // Check for existing session
-    const savedUser = localStorage.getItem("nextphase_admin_user")
-    if (savedUser) {
-      try {
-        const userData = JSON.parse(savedUser)
-        // Verify user is still authorized (for local auth) or valid (for Exchange auth)
-        if (userData.authMethod === "exchange" || AUTHORIZED_USERS.find((u) => u.email === userData.email)) {
-          setUser(userData)
-        } else {
-          localStorage.removeItem("nextphase_admin_user")
-        }
-      } catch (error) {
-        localStorage.removeItem("nextphase_admin_user")
-      }
-    }
-    setIsLoading(false)
-  }, [])
+  const isLoading = status === "loading"
+  const isAuthenticated = status === "authenticated"
+  const isAdmin = session?.user?.role === "admin"
 
-  // Microsoft Exchange authentication
-  const authenticateWithExchange = async (email: string, password: string): Promise<User | null> => {
-    try {
-      // Check if email is from authorized domain
-      const domain = email.split("@")[1]
-      if (!EXCHANGE_AUTHORIZED_DOMAINS.includes(domain)) {
-        return null
-      }
-
-      // Use Microsoft Graph API or Exchange Web Services for authentication
-      const response = await fetch("/api/auth/exchange", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      })
-
-      if (response.ok) {
-        const userData = await response.json()
-
-        // Determine role based on email
-        const role = EXCHANGE_ADMIN_EMAILS.includes(email) ? "admin" : "staff"
-
-        return {
-          id: `exchange-${userData.id || email.split("@")[0]}`,
-          name: userData.displayName || userData.name || email.split("@")[0],
-          email: email,
-          given_name: userData.givenName || userData.displayName?.split(" ")[0] || "User",
-          role: role,
-          department: userData.department || "NextPhase IT",
-          picture: userData.photo || "/placeholder.svg?height=40&width=40&text=" + (userData.givenName?.[0] || "U"),
-          authMethod: "exchange",
-        }
-      }
-    } catch (error) {
-      console.error("Exchange authentication error:", error)
-    }
-    return null
+  const logout = async () => {
+    await signOut({ callbackUrl: "/" })
   }
 
-  const login = async (email: string, password: string): Promise<boolean> => {
-    setIsLoading(true)
-
-    try {
-      // First try Microsoft Exchange authentication
-      const exchangeUser = await authenticateWithExchange(email, password)
-      if (exchangeUser) {
-        setUser(exchangeUser)
-        localStorage.setItem("nextphase_admin_user", JSON.stringify(exchangeUser))
-        setIsLoading(false)
-        return true
-      }
-
-      // Fallback to local authentication
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-      const authorizedUser = AUTHORIZED_USERS.find((u) => u.email === email)
-
-      if (
-        authorizedUser &&
-        ((email === "adrian.knight@nextphaseit.org" && password === "admin123") ||
-          (email === "staff@nextphaseit.org" && password === "staff123"))
-      ) {
-        setUser(authorizedUser)
-        localStorage.setItem("nextphase_admin_user", JSON.stringify(authorizedUser))
-        setIsLoading(false)
-        return true
-      }
-    } catch (error) {
-      console.error("Authentication error:", error)
-    }
-
-    setIsLoading(false)
-    return false
-  }
-
-  // Microsoft OAuth login with PKCE support
-  const loginWithMicrosoft = async (): Promise<boolean> => {
-    setIsLoading(true)
-
-    try {
-      // Redirect to Microsoft OAuth
-      const clientId = process.env.NEXT_PUBLIC_MICROSOFT_CLIENT_ID
-      if (!clientId) {
-        console.error("Microsoft Client ID not configured")
-        setIsLoading(false)
-        return false
-      }
-
-      // Generate PKCE parameters
-      const codeVerifier = PKCEHelper.generateCodeVerifier()
-      const codeChallenge = await PKCEHelper.generateCodeChallenge(codeVerifier)
-      const state = Math.random().toString(36).substring(7)
-
-      // Store PKCE data for the callback
-      PKCEHelper.storePKCEData(codeVerifier, state)
-
-      // Get the current origin and normalize it
-      const currentOrigin = window.location.origin
-
-      // Normalize the domain - use the exact domain that's configured in Azure
-      let normalizedOrigin = currentOrigin
-      if (currentOrigin.includes("nextphaseit.org")) {
-        // Use the www version to match Azure configuration
-        normalizedOrigin = "https://www.nextphaseit.org"
-      }
-
-      console.log("OAuth Config with PKCE:", {
-        clientId,
-        redirectUri: `${normalizedOrigin}/api/auth/microsoft/callback`,
-        currentOrigin,
-        normalizedOrigin,
-        codeChallenge: codeChallenge.substring(0, 10) + "...", // Log partial for security
-        state,
-      })
-
-      // Build OAuth URL with PKCE parameters
-      const authUrl = new URL("https://login.microsoftonline.com/common/oauth2/v2.0/authorize")
-      authUrl.searchParams.set("client_id", clientId)
-      authUrl.searchParams.set("response_type", "code")
-      authUrl.searchParams.set("redirect_uri", `${normalizedOrigin}/api/auth/microsoft/callback`)
-      authUrl.searchParams.set("scope", "openid profile email User.Read")
-      authUrl.searchParams.set("response_mode", "query")
-      authUrl.searchParams.set("state", state)
-      authUrl.searchParams.set("code_challenge", codeChallenge)
-      authUrl.searchParams.set("code_challenge_method", "S256")
-      authUrl.searchParams.set("prompt", "select_account")
-
-      console.log("Redirecting to Microsoft OAuth...")
-      window.location.href = authUrl.toString()
-      return true
-    } catch (error) {
-      console.error("Microsoft OAuth error:", error)
-      setIsLoading(false)
-      return false
-    }
-  }
-
-  const logout = () => {
-    setUser(null)
-    localStorage.removeItem("nextphase_admin_user")
-    PKCEHelper.clearPKCEData()
-    // Clear any temporary cookies
-    if (typeof window !== "undefined") {
-      document.cookie = "nextphase_temp_user=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;"
-    }
-  }
-
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isLoading,
-        login,
-        loginWithMicrosoft,
-        logout,
-        isAuthenticated: !!user,
-        isAdmin: user?.role === "admin",
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  )
+  return <AuthContext.Provider value={{ isAdmin, isAuthenticated, isLoading, logout }}>{children}</AuthContext.Provider>
 }
 
+// Custom hook to use auth context
 export function useAuth() {
   const context = useContext(AuthContext)
   if (context === undefined) {
@@ -251,27 +43,12 @@ export function useAuth() {
   return context
 }
 
-// Safe hook that can be used outside of AuthProvider
-export function useAuthSafe() {
-  const context = useContext(AuthContext)
-  if (context === undefined) {
-    return {
-      user: null,
-      isLoading: false,
-      login: async () => false,
-      loginWithMicrosoft: async () => false,
-      logout: () => {},
-      isAuthenticated: false,
-      isAdmin: false,
-    }
-  }
-  return context
-}
-
-// Higher-order component for protected routes
+// Higher-order component for protected client components
 export function withAuth<T extends object>(Component: React.ComponentType<T>) {
-  return function AuthenticatedComponent(props: T) {
+  return function ProtectedComponent(props: T) {
     const { isAuthenticated, isLoading } = useAuth()
+    const { data: session } = useSession()
+    const router = useRouter()
 
     if (isLoading) {
       return (
@@ -285,7 +62,7 @@ export function withAuth<T extends object>(Component: React.ComponentType<T>) {
     }
 
     if (!isAuthenticated) {
-      window.location.href = "/login"
+      router.push("/auth/signin")
       return null
     }
 
@@ -293,10 +70,11 @@ export function withAuth<T extends object>(Component: React.ComponentType<T>) {
   }
 }
 
-// Higher-order component for admin-only routes
+// Higher-order component for admin-only client components
 export function withAdminAuth<T extends object>(Component: React.ComponentType<T>) {
-  return function AdminAuthenticatedComponent(props: T) {
+  return function AdminProtectedComponent(props: T) {
     const { isAuthenticated, isAdmin, isLoading } = useAuth()
+    const router = useRouter()
 
     if (isLoading) {
       return (
@@ -310,24 +88,24 @@ export function withAdminAuth<T extends object>(Component: React.ComponentType<T
     }
 
     if (!isAuthenticated) {
-      window.location.href = "/login"
+      router.push("/auth/signin")
       return null
     }
 
     if (!isAdmin) {
-      return (
-        <div className="min-h-screen bg-black text-white flex items-center justify-center">
-          <div className="text-center max-w-md">
-            <div className="text-red-500 mb-4">Access Denied</div>
-            <p className="text-gray-400 mb-6">You don't have permission to access this page.</p>
-            <button onClick={() => (window.location.href = "/dashboard")} className="text-primary hover:underline">
-              Return to Dashboard
-            </button>
-          </div>
-        </div>
-      )
+      router.push("/auth/error?error=AccessDenied")
+      return null
     }
 
     return <Component {...props} />
   }
+}
+
+// Root SessionProvider wrapper
+export function NextAuthProvider({ children }: { children: ReactNode }) {
+  return (
+    <SessionProvider>
+      <AuthProvider>{children}</AuthProvider>
+    </SessionProvider>
+  )
 }

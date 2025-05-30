@@ -1,45 +1,56 @@
-import { withAuth } from "next-auth/middleware"
 import { NextResponse } from "next/server"
+import type { NextRequest } from "next/server"
+import { getToken } from "next-auth/jwt"
 
-export default withAuth(
-  function middleware(req) {
-    // Add any custom middleware logic here
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // Public paths that don't require authentication
+  const publicPaths = [
+    "/",
+    "/about",
+    "/pricing",
+    "/testimonials",
+    "/auth/signin",
+    "/auth/error",
+    "/api/auth",
+    "/login",
+    "/favicon.ico",
+    "/_next",
+  ]
+
+  // Check if the path is public
+  const isPublicPath = publicPaths.some((path) => pathname.startsWith(path) || pathname === path)
+
+  if (isPublicPath) {
     return NextResponse.next()
-  },
-  {
-    callbacks: {
-      authorized: ({ token, req }) => {
-        // Define which routes require authentication
-        const { pathname } = req.nextUrl
+  }
 
-        // Public routes that don't require authentication
-        const publicRoutes = ["/", "/about", "/pricing", "/testimonials", "/auth/signin", "/auth/error", "/api/auth"]
+  // Check if the user is authenticated
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+  })
 
-        // Check if the current path is public
-        const isPublicRoute = publicRoutes.some((route) => pathname.startsWith(route))
+  // If the user is not authenticated, redirect to the login page
+  if (!token) {
+    const url = new URL("/auth/signin", request.url)
+    url.searchParams.set("callbackUrl", encodeURI(request.url))
+    return NextResponse.redirect(url)
+  }
 
-        // Allow access to public routes
-        if (isPublicRoute) {
-          return true
-        }
+  // For admin routes, check if the user has admin privileges
+  if (pathname.startsWith("/admin") && token.role !== "admin") {
+    return NextResponse.redirect(new URL("/auth/error?error=AccessDenied", request.url))
+  }
 
-        // Require authentication for protected routes
-        return !!token
-      },
-    },
-  },
-)
+  return NextResponse.next()
+}
 
+// Configure which routes use this middleware
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - api/auth (NextAuth.js routes)
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
-    "/((?!api/auth|_next/static|_next/image|favicon.ico|images|placeholder.svg).*)",
+    // Match all paths except static files, api routes, and public paths
+    "/((?!_next/static|_next/image|favicon.ico|images|placeholder.svg).*)",
   ],
 }

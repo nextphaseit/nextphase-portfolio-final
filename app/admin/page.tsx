@@ -12,10 +12,11 @@ import AdminTenantManagement from "@/components/admin-tenant-management"
 import AdminAuditModule from "@/components/admin-audit-module"
 import AdminClientIntakeModule from "@/components/admin-client-intake-module"
 import { BarChart3, Settings, FileText, Shield, LogOut, Building, Activity } from "lucide-react"
-import { signOut } from "next-auth/react"
+import { useAuth } from "@/providers/auth-provider"
 
 export default function AdminPortal() {
   const { data: session, status } = useSession()
+  const { isAdmin, logout } = useAuth()
   const router = useRouter()
   const [activeTab, setActiveTab] = useState("dashboard")
 
@@ -32,6 +33,12 @@ export default function AdminPortal() {
       router.push("/auth/error?error=AccessDenied")
       return
     }
+
+    // Check if user is admin
+    if (session?.user?.role !== "admin") {
+      router.push("/auth/error?error=AccessDenied")
+      return
+    }
   }, [session, status, router])
 
   if (status === "loading") {
@@ -45,7 +52,7 @@ export default function AdminPortal() {
     )
   }
 
-  if (!session || !session.user?.email?.endsWith("@nextphaseit.org")) {
+  if (!session || !session.user?.email?.endsWith("@nextphaseit.org") || !isAdmin) {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="text-center">
@@ -78,12 +85,7 @@ export default function AdminPortal() {
                 <p className="text-sm font-medium">{session.user.name}</p>
                 <p className="text-xs text-gray-400">{session.user.email}</p>
               </div>
-              <Button
-                onClick={() => signOut({ callbackUrl: "/" })}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2"
-              >
+              <Button onClick={() => logout()} variant="outline" size="sm" className="flex items-center gap-2">
                 <LogOut size={16} />
                 Sign Out
               </Button>
