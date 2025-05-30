@@ -11,7 +11,6 @@ import { Projects } from "@/components/projects"
 import { Skills } from "@/components/skills"
 import { Chatbot } from "@/components/chatbot"
 import { ArrowRight, CheckCircle, Star, Users } from "lucide-react"
-import Image from "next/image"
 import Link from "next/link"
 
 export default function HomePage() {
@@ -36,8 +35,8 @@ export default function HomePage() {
           <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-secondary/20" />
 
           <div className="container mx-auto px-4 pt-32 pb-20 relative">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-              <div className="space-y-8">
+            <div className="grid grid-cols-1 gap-12 items-center">
+              <div className="space-y-8 text-center">
                 <div className="space-y-4">
                   <h1 className="text-4xl md:text-6xl font-bold leading-tight">
                     Professional
@@ -50,7 +49,7 @@ export default function HomePage() {
                   </p>
                 </div>
 
-                <div className="flex flex-col sm:flex-row gap-4">
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button size="lg" className="bg-primary hover:bg-primary/90" asChild>
                     <Link href="/about">
                       Get Started
@@ -63,7 +62,7 @@ export default function HomePage() {
                 </div>
 
                 {/* Trust indicators */}
-                <div className="flex items-center gap-6 pt-8">
+                <div className="flex items-center gap-6 pt-8 justify-center">
                   <div className="flex items-center gap-2">
                     <CheckCircle className="text-green-400" size={20} />
                     <span className="text-sm">24/7 Support</span>
@@ -77,22 +76,6 @@ export default function HomePage() {
                     <span className="text-sm">500+ Clients</span>
                   </div>
                 </div>
-              </div>
-
-              <div className="relative">
-                <div className="relative z-10">
-                  <Image
-                    src="/images/about-img.png"
-                    alt="Professional IT Services"
-                    width={600}
-                    height={400}
-                    className="w-full h-auto rounded-lg shadow-2xl"
-                    priority
-                  />
-                </div>
-                {/* Decorative elements */}
-                <div className="absolute -top-4 -right-4 w-24 h-24 bg-primary/20 rounded-full blur-xl" />
-                <div className="absolute -bottom-4 -left-4 w-32 h-32 bg-secondary/20 rounded-full blur-xl" />
               </div>
             </div>
           </div>
