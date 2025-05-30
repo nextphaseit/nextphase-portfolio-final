@@ -543,10 +543,15 @@ export function Chatbot() {
       <div className="fixed bottom-6 right-6 z-50">
         <Button
           onClick={() => setIsOpen(true)}
-          className="w-16 h-16 rounded-full bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 group"
+          className="w-16 h-16 rounded-full bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 group relative"
           size="lg"
         >
-          <MessageCircle size={24} className="group-hover:scale-110 transition-transform text-white" />
+          <MessageCircle
+            size={28}
+            className="group-hover:scale-110 transition-transform text-white"
+            fill="currentColor"
+          />
+          <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
         </Button>
       </div>
     )
@@ -562,7 +567,7 @@ export function Chatbot() {
           }`}
         >
           <div className="flex items-center gap-2">
-            <Bot size={20} className="text-white" />
+            <Bot size={24} className="text-white" fill="currentColor" />
             <div>
               <h3 className="font-semibold text-white">
                 {chatSession.isEscalated ? "NextPhase IT - Technician" : "NextPhase IT Assistant"}
