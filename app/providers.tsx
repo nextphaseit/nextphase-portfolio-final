@@ -2,20 +2,25 @@
 
 import { SessionProvider } from "next-auth/react"
 import type { ReactNode } from "react"
+import { usePathname } from "next/navigation"
 
 interface ProvidersProps {
   children: ReactNode
 }
 
 export function Providers({ children }: ProvidersProps) {
-  return (
-    <SessionProvider
-      // Re-fetch session every 5 minutes
-      refetchInterval={5 * 60}
-      // Re-fetch session when window is focused
-      refetchOnWindowFocus={true}
-    >
-      {children}
-    </SessionProvider>
-  )
+  const pathname = usePathname()
+
+  // Only use SessionProvider for admin and auth routes
+  const needsAuth = pathname?.startsWith("/admin") || pathname?.startsWith("/auth")
+
+  if (needsAuth) {
+    return (
+      <SessionProvider refetchInterval={5 * 60} refetchOnWindowFocus={true}>
+        {children}
+      </SessionProvider>
+    )
+  }
+
+  return <>{children}</>
 }
