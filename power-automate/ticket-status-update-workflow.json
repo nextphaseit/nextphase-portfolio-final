@@ -1,0 +1,191 @@
+{
+  "definition": {
+    "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {},
+    "triggers": {
+      "manual": {
+        "type": "Request",
+        "kind": "Http",
+        "inputs": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "action": {
+                "type": "string"
+              },
+              "ticketId": {
+                "type": "string"
+              },
+              "newStatus": {
+                "type": "string"
+              },
+              "updatedBy": {
+                "type": "string"
+              },
+              "notes": {
+                "type": "string"
+              },
+              "isInternal": {
+                "type": "boolean"
+              },
+              "timestamp": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "actions": {
+      "Condition_Check_Action_Type": {
+        "runAfter": {},
+        "type": "If",
+        "expression": {
+          "equals": ["@triggerBody()?['action']", "status_update"]
+        },
+        "actions": {
+          "Update_SharePoint_Item": {
+            "runAfter": {},
+            "type": "ApiConnection",
+            "inputs": {
+              "host": {
+                "connection": {
+                  "name": "@parameters('$connections')['sharepointonline']['connectionId']"
+                }
+              },
+              "method": "patch",
+              "path": "/datasets/@{encodeURIComponent(encodeURIComponent('YOUR_SHAREPOINT_SITE'))}/tables/@{encodeURIComponent(encodeURIComponent('Support Tickets'))}/items/@{encodeURIComponent(encodeURIComponent(triggerBody()?['ticketId']))}",
+              "body": {
+                "Status": "@triggerBody()?['newStatus']",
+                "LastUpdated": "@triggerBody()?['timestamp']",
+                "UpdatedBy": "@triggerBody()?['updatedBy']",
+                "StatusHistory": "@{concat(body('Get_Current_Item')?['StatusHistory'], '; ', triggerBody()?['timestamp'], ' - Status changed to ', triggerBody()?['newStatus'], ' by ', triggerBody()?['updatedBy'])}"
+              }
+            }
+          },
+          "Get_Current_Item": {
+            "runAfter": {},
+            "type": "ApiConnection",
+            "inputs": {
+              "host": {
+                "connection": {
+                  "name": "@parameters('$connections')['sharepointonline']['connectionId']"
+                }
+              },
+              "method": "get",
+              "path": "/datasets/@{encodeURIComponent(encodeURIComponent('YOUR_SHAREPOINT_SITE'))}/tables/@{encodeURIComponent(encodeURIComponent('Support Tickets'))}/items/@{encodeURIComponent(encodeURIComponent(triggerBody()?['ticketId']))}"
+            }
+          },
+          "Add_Status_Update_Log": {
+            "runAfter": {
+              "Update_SharePoint_Item": ["Succeeded"]
+            },
+            "type": "ApiConnection",
+            "inputs": {
+              "host": {
+                "connection": {
+                  "name": "@parameters('$connections')['sharepointonline']['connectionId']"
+                }
+              },
+              "method": "post",
+              "path": "/datasets/@{encodeURIComponent(encodeURIComponent('YOUR_SHAREPOINT_SITE'))}/tables/@{encodeURIComponent(encodeURIComponent('Ticket Status Log'))}/items",
+              "body": {
+                "TicketID": "@triggerBody()?['ticketId']",
+                "PreviousStatus": "@body('Get_Current_Item')?['Status']",
+                "NewStatus": "@triggerBody()?['newStatus']",
+                "UpdatedBy": "@triggerBody()?['updatedBy']",
+                "UpdateTimestamp": "@triggerBody()?['timestamp']",
+                "Notes": "@triggerBody()?['notes']",
+                "IsInternal": "@triggerBody()?['isInternal']"
+              }
+            }
+          },
+          "Condition_Send_Notification": {
+            "runAfter": {
+              "Add_Status_Update_Log": ["Succeeded"]
+            },
+            "type": "If",
+            "expression": {
+              "equals": ["@triggerBody()?['isInternal']", false]
+            },
+            "actions": {
+              "Send_Teams_Notification": {
+                "type": "ApiConnection",
+                "inputs": {
+                  "host": {
+                    "connection": {
+                      "name": "@parameters('$connections')['teams']['connectionId']"
+                    }
+                  },
+                  "method": "post",
+                  "path": "/v1.0/teams/@{encodeURIComponent('YOUR_TEAM_ID')}/channels/@{encodeURIComponent('YOUR_CHANNEL_ID')}/messages",
+                  "body": {
+                    "body": {
+                      "contentType": "html",
+                      "content": "<h3>🔄 Ticket Status Update</h3><p><strong>Ticket #:</strong> @{triggerBody()?['ticketId']}</p><p><strong>Status:</strong> @{triggerBody()?['newStatus']}</p><p><strong>Updated by:</strong> @{triggerBody()?['updatedBy']}</p><p><a href='https://nextphaseit.org/admin'>View in Admin Portal</a></p>"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "Condition_Priority_Status": {
+            "runAfter": {
+              "Condition_Send_Notification": ["Succeeded"]
+            },
+            "type": "If",
+            "expression": {
+              "or": [
+                { "equals": ["@triggerBody()?['newStatus']", "resolved"] },
+                { "equals": ["@triggerBody()?['newStatus']", "closed"] }
+              ]
+            },
+            "actions": {
+              "Send_Completion_Email": {
+                "type": "ApiConnection",
+                "inputs": {
+                  "host": {
+                    "connection": {
+                      "name": "@parameters('$connections')['office365']['connectionId']"
+                    }
+                  },
+                  "method": "post",
+                  "path": "/v2/Mail",
+                  "body": {
+                    "To": "@body('Get_Current_Item')?['ClientEmail']",
+                    "Subject": "Ticket #@{triggerBody()?['ticketId']} - @{triggerBody()?['newStatus']}",
+                    "Body": "<h2>Ticket Update</h2><p>Your support ticket #@{triggerBody()?['ticketId']} has been marked as @{triggerBody()?['newStatus']}.</p><p>@{if(equals(triggerBody()?['newStatus'], 'resolved'), 'Please review the resolution and let us know if you need any additional assistance.', 'Thank you for using NextPhase IT support services.')}</p><p><a href='https://nextphaseit.org/portal'>View in Portal</a></p>",
+                    "Importance": "Normal"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "outputs": {}
+  },
+  "parameters": {
+    "$connections": {
+      "value": {
+        "sharepointonline": {
+          "connectionId": "/subscriptions/YOUR_SUBSCRIPTION/resourceGroups/YOUR_RG/providers/Microsoft.Web/connections/sharepointonline",
+          "connectionName": "sharepointonline",
+          "id": "/subscriptions/YOUR_SUBSCRIPTION/providers/Microsoft.Web/locations/YOUR_LOCATION/managedApis/sharepointonline"
+        },
+        "office365": {
+          "connectionId": "/subscriptions/YOUR_SUBSCRIPTION/resourceGroups/YOUR_RG/providers/Microsoft.Web/connections/office365",
+          "connectionName": "office365",
+          "id": "/subscriptions/YOUR_SUBSCRIPTION/providers/Microsoft.Web/locations/YOUR_LOCATION/managedApis/office365"
+        },
+        "teams": {
+          "connectionId": "/subscriptions/YOUR_SUBSCRIPTION/resourceGroups/YOUR_RG/providers/Microsoft.Web/connections/teams",
+          "connectionName": "teams",
+          "id": "/subscriptions/YOUR_SUBSCRIPTION/providers/Microsoft.Web/locations/YOUR_LOCATION/managedApis/teams"
+        }
+      }
+    }
+  }
+}

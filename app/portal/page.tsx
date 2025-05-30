@@ -31,6 +31,10 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
+import { ToastProvider } from "@/components/ui/toast"
+import { TicketStatusBadge, TicketStatusTimeline } from "@/components/ticket-status"
+import { AdminTicketControls } from "@/components/admin-ticket-controls"
+import { useTicketPolling } from "@/hooks/use-ticket-polling"
 
 interface TicketProps {
   id: string
@@ -287,6 +291,7 @@ function TicketCard({ ticket, onViewDetails }: { ticket: TicketProps; onViewDeta
 }
 
 function TicketDetailsModal({ ticket, onClose }: { ticket: TicketProps | null; onClose: () => void }) {
+  const { user } = useMultiTenantAuth()
   const [newResponse, setNewResponse] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -360,6 +365,33 @@ function TicketDetailsModal({ ticket, onClose }: { ticket: TicketProps | null; o
               <p className="whitespace-pre-wrap">{ticket.description}</p>
             </div>
           </div>
+
+          {/* Status Timeline */}
+          <div className="mb-6">
+            <TicketStatusTimeline
+              currentStatus={ticket.status}
+              statusHistory={[
+                { status: "open", timestamp: ticket.created, updatedBy: "System" },
+                { status: ticket.status, timestamp: ticket.lastUpdate, updatedBy: "Support Team" },
+              ]}
+            />
+          </div>
+
+          {/* Admin Controls (if user is admin) */}
+          {user?.role === "admin" && (
+            <div className="mb-6">
+              <AdminTicketControls
+                ticketId={ticket.id}
+                currentStatus={ticket.status}
+                onStatusChange={(newStatus) => {
+                  // Update local state
+                  //setSelectedTicket(prev => prev ? {...prev, status: newStatus} : null)
+                  // Refresh polling data
+                  //refresh()
+                }}
+              />
+            </div>
+          )}
 
           {/* Responses/Updates */}
           <div className="mb-6">
@@ -532,7 +564,7 @@ function ServiceDeskPortalContent() {
   const [resourceFilter, setResourceFilter] = useState<string>("all")
   const [resourceSearch, setResourceSearch] = useState("")
 
-  // Sample data - in production, this would be tenant-specific
+  // Add real-time polling for ticket updates
   const tickets: TicketProps[] = [
     {
       id: "TK-001234",
@@ -633,6 +665,18 @@ function ServiceDeskPortalContent() {
     },
   ]
 
+  const ticketIds = tickets.map((t) => t.id)
+  const {
+    updates,
+    isPolling,
+    error: pollingError,
+    refresh,
+  } = useTicketPolling({
+    ticketIds,
+    interval: 30000,
+    enabled: activeTab === "tickets" || activeTab === "overview",
+  })
+
   const alerts = [
     {
       id: "ALERT-001",
@@ -725,486 +769,535 @@ function ServiceDeskPortalContent() {
   }
 
   return (
-    <main
-      className="min-h-screen bg-black text-white relative"
-      style={
-        {
-          "--primary": currentTenant.branding.primaryColor,
-          "--secondary": currentTenant.branding.secondaryColor,
-        } as React.CSSProperties
-      }
-    >
-      {/* Background Logo */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-5">
-          <Image
-            src={currentTenant.branding.logo || "/placeholder.svg"}
-            alt=""
-            width={800}
-            height={600}
-            className="w-auto h-96 object-contain"
-          />
+    <ToastProvider>
+      <main
+        className="min-h-screen bg-black text-white relative"
+        style={
+          {
+            "--primary": currentTenant.branding.primaryColor,
+            "--secondary": currentTenant.branding.secondaryColor,
+          } as React.CSSProperties
+        }
+      >
+        {/* Background Logo */}
+        <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-5">
+            <Image
+              src={currentTenant.branding.logo || "/placeholder.svg"}
+              alt=""
+              width={800}
+              height={600}
+              className="w-auto h-96 object-contain"
+            />
+          </div>
         </div>
-      </div>
 
-      {/* Content */}
-      <div className="relative z-10">
-        <Navbar />
+        {/* Content */}
+        <div className="relative z-10">
+          <Navbar />
 
-        {/* Header */}
-        <section className="container mx-auto px-4 pt-32 pb-16">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <Building className="text-primary" size={24} />
-                <h1 className="text-3xl font-bold">{currentTenant.branding.companyName} Service Desk</h1>
-              </div>
-              <p className="text-gray-400">Welcome back, {user.name}</p>
-            </div>
-            <div className="flex items-center gap-4 mt-4 md:mt-0">
-              <div className="text-right">
-                <div className="text-sm text-gray-400">{user.role === "admin" ? "Administrator" : "User"}</div>
-                <div className="text-sm text-primary">{user.email}</div>
-              </div>
-              <Button onClick={logout} variant="outline" size="sm">
-                Sign Out
-              </Button>
-            </div>
-          </div>
-
-          {/* Navigation Tabs */}
-          <div className="flex flex-wrap space-x-1 bg-card/50 rounded-lg p-1 mb-8 overflow-x-auto">
-            {[
-              { id: "overview", label: "Overview", icon: <CheckCircle size={16} /> },
-              { id: "tickets", label: "Support Tickets", icon: <Ticket size={16} /> },
-              { id: "resources", label: "Resources", icon: <FileText size={16} /> },
-              { id: "account", label: "Account", icon: <User size={16} /> },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
-                  activeTab === tab.id
-                    ? "bg-primary text-white shadow-lg"
-                    : "text-gray-400 hover:text-white hover:bg-white/10"
-                }`}
-              >
-                {tab.icon}
-                <span className="hidden sm:inline">{tab.label}</span>
-                <span className="sm:hidden">{tab.label.split(" ")[0]}</span>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        {/* Tab Content */}
-        <section className="container mx-auto px-4 pb-16">
-          {/* Overview Tab */}
-          {activeTab === "overview" && (
-            <div className="space-y-8">
-              {/* Quick Stats */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <CardWrapper className="text-center">
-                  <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Ticket className="text-blue-400" size={24} />
-                  </div>
-                  <div className="text-2xl font-bold text-blue-400 mb-1">
-                    {tickets.filter((t) => t.status !== "closed").length}
-                  </div>
-                  <div className="text-sm text-gray-400">Open Tickets</div>
-                </CardWrapper>
-
-                <CardWrapper className="text-center">
-                  <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <AlertCircle className="text-purple-400" size={24} />
-                  </div>
-                  <div className="text-2xl font-bold text-purple-400 mb-1">
-                    {alerts.filter((a) => a.status === "active").length}
-                  </div>
-                  <div className="text-sm text-gray-400">Active Alerts</div>
-                </CardWrapper>
-
-                <CardWrapper className="text-center">
-                  <div className="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <Clock className="text-yellow-400" size={24} />
-                  </div>
-                  <div className="text-2xl font-bold text-yellow-400 mb-1">2-4</div>
-                  <div className="text-sm text-gray-400">Hours Avg Response</div>
-                </CardWrapper>
-
-                <CardWrapper className="text-center">
-                  <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                    <CheckCircle className="text-purple-400" size={24} />
-                  </div>
-                  <div className="text-2xl font-bold text-purple-400 mb-1">98%</div>
-                  <div className="text-sm text-gray-400">Satisfaction Rate</div>
-                </CardWrapper>
-              </div>
-
-              {/* Microsoft 365 Service Health */}
+          {/* Header */}
+          <section className="container mx-auto px-4 pt-32 pb-16">
+            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
               <div>
-                <M365ServiceHealth maxItems={3} />
+                <div className="flex items-center gap-3 mb-2">
+                  <Building className="text-primary" size={24} />
+                  <h1 className="text-3xl font-bold">{currentTenant.branding.companyName} Service Desk</h1>
+                </div>
+                <p className="text-gray-400">Welcome back, {user.name}</p>
               </div>
-
-              {/* Welcome Message */}
-              <CardWrapper className="bg-primary/10 border-primary/20">
-                <div className="flex items-start gap-4">
-                  <Image
-                    src={user.picture || "/placeholder.svg?height=60&width=60&text=" + user.name.charAt(0)}
-                    alt={user.name}
-                    width={60}
-                    height={60}
-                    className="rounded-full"
-                  />
-                  <div>
-                    <h3 className="text-lg font-semibold text-primary mb-2">
-                      Welcome to {currentTenant.branding.companyName} Service Desk
-                    </h3>
-                    <p className="text-gray-400 mb-4">
-                      You're logged in as {user.name} ({user.role}). This portal provides secure access to support
-                      tickets, resources, and account management for {currentTenant.branding.companyName}.
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded">
-                        {currentTenant.domain}
-                      </span>
-                      <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">
-                        {user.authMethod === "azure" ? "Microsoft 365" : "Local Auth"}
-                      </span>
-                      {user.role === "admin" && (
-                        <span className="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded">Administrator</span>
-                      )}
-                    </div>
-                  </div>
+              <div className="flex items-center gap-4 mt-4 md:mt-0">
+                <div className="text-right">
+                  <div className="text-sm text-gray-400">{user.role === "admin" ? "Administrator" : "User"}</div>
+                  <div className="text-sm text-primary">{user.email}</div>
                 </div>
-              </CardWrapper>
-            </div>
-          )}
-
-          {/* Account Tab */}
-          {activeTab === "account" && (
-            <div>
-              <MultiTenantAccountManagement />
-            </div>
-          )}
-
-          {/* Tickets Tab */}
-          {activeTab === "tickets" && (
-            <div className="space-y-8">
-              {/* Header with New Ticket Button */}
-              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
-                <div>
-                  <h2 className="text-2xl font-bold mb-2">Support Tickets</h2>
-                  <p className="text-gray-400">Manage your support requests and track their progress</p>
-                </div>
-                <Button onClick={() => setShowNewTicket(true)} className="bg-primary hover:bg-primary/90">
-                  <Plus size={16} className="mr-2" />
-                  New Ticket
+                <Button onClick={logout} variant="outline" size="sm">
+                  Sign Out
                 </Button>
               </div>
-
-              {/* Filters and Search */}
-              <CardWrapper>
-                <div className="flex flex-wrap gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
-                    <select
-                      value={ticketFilter}
-                      onChange={(e) => setTicketFilter(e.target.value as any)}
-                      className="px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
-                    >
-                      <option value="all">All Tickets</option>
-                      <option value="open">Open</option>
-                      <option value="in-progress">In Progress</option>
-                      <option value="resolved">Resolved</option>
-                      <option value="closed">Closed</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Sort By</label>
-                    <select
-                      value={ticketSort}
-                      onChange={(e) => setTicketSort(e.target.value as any)}
-                      className="px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
-                    >
-                      <option value="newest">Newest First</option>
-                      <option value="oldest">Oldest First</option>
-                      <option value="priority">Priority</option>
-                    </select>
-                  </div>
-
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Search</label>
-                    <input
-                      type="text"
-                      value={ticketSearch}
-                      onChange={(e) => setTicketSearch(e.target.value)}
-                      placeholder="Search tickets..."
-                      className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary"
-                    />
-                  </div>
-                </div>
-              </CardWrapper>
-
-              {/* Tickets Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredTickets.length > 0 ? (
-                  filteredTickets.map((ticket) => (
-                    <TicketCard key={ticket.id} ticket={ticket} onViewDetails={setSelectedTicket} />
-                  ))
-                ) : (
-                  <div className="col-span-full text-center py-12">
-                    <Ticket size={64} className="mx-auto mb-4 text-gray-600" />
-                    <h3 className="text-xl font-semibold mb-2">No tickets found</h3>
-                    <p className="text-gray-400 mb-6">
-                      {ticketFilter === "all"
-                        ? "You haven't submitted any tickets yet."
-                        : `No tickets with status "${ticketFilter}" found.`}
-                    </p>
-                    <Button onClick={() => setShowNewTicket(true)} className="bg-primary hover:bg-primary/90">
-                      Submit Your First Ticket
-                    </Button>
-                  </div>
-                )}
-              </div>
             </div>
-          )}
 
-          {/* Resources Tab */}
-          {activeTab === "resources" && (
-            <div className="space-y-8">
-              {/* Header */}
-              <div>
-                <h2 className="text-2xl font-bold mb-2">Knowledge Base & Resources</h2>
-                <p className="text-gray-400">Access guides, documentation, and helpful resources</p>
-              </div>
+            {/* Navigation Tabs */}
+            <div className="flex flex-wrap space-x-1 bg-card/50 rounded-lg p-1 mb-8 overflow-x-auto">
+              {[
+                { id: "overview", label: "Overview", icon: <CheckCircle size={16} /> },
+                { id: "tickets", label: "Support Tickets", icon: <Ticket size={16} /> },
+                { id: "resources", label: "Resources", icon: <FileText size={16} /> },
+                { id: "account", label: "Account", icon: <User size={16} /> },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap ${
+                    activeTab === tab.id
+                      ? "bg-primary text-white shadow-lg"
+                      : "text-gray-400 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  {tab.icon}
+                  <span className="hidden sm:inline">{tab.label}</span>
+                  <span className="sm:hidden">{tab.label.split(" ")[0]}</span>
+                </button>
+              ))}
+            </div>
+          </section>
 
-              {/* Search and Filter */}
-              <CardWrapper>
-                <div className="flex flex-wrap gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Category</label>
-                    <select
-                      value={resourceFilter}
-                      onChange={(e) => setResourceFilter(e.target.value)}
-                      className="px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
-                    >
-                      {Object.entries(resourceCategories).map(([key, label]) => (
-                        <option key={key} value={key}>
-                          {label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="flex-1">
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Search Resources</label>
-                    <input
-                      type="text"
-                      value={resourceSearch}
-                      onChange={(e) => setResourceSearch(e.target.value)}
-                      placeholder="Search guides, documents..."
-                      className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary"
-                    />
-                  </div>
-                </div>
-              </CardWrapper>
-
-              {/* Resources Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredResources.map((resource) => (
-                  <CardWrapper key={resource.id} className="hover:border-primary/40 transition-colors">
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{getFileIcon(resource.type)}</span>
-                        <div>
-                          <h3 className="font-semibold">{resource.title}</h3>
-                          <p className="text-sm text-gray-400">
-                            {resource.type} • {resource.size}
-                          </p>
-                        </div>
-                      </div>
-                      <span
-                        className={`px-2 py-1 rounded text-xs ${
-                          resource.isAccessible ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
-                        }`}
-                      >
-                        {resource.isAccessible ? "Available" : "Restricted"}
-                      </span>
+          {/* Tab Content */}
+          <section className="container mx-auto px-4 pb-16">
+            {/* Overview Tab */}
+            {activeTab === "overview" && (
+              <div className="space-y-8">
+                {/* Quick Stats */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <CardWrapper className="text-center">
+                    <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Ticket className="text-blue-400" size={24} />
                     </div>
-
-                    <p className="text-gray-400 text-sm mb-4">{resource.description}</p>
-
-                    <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
-                      <span>Updated {resource.updated}</span>
-                      <span className="capitalize">{resource.category}</span>
+                    <div className="text-2xl font-bold text-blue-400 mb-1">
+                      {tickets.filter((t) => t.status !== "closed").length}
                     </div>
-
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleSharePointDownload(resource)}
-                        disabled={!resource.isAccessible}
-                        className="flex-1"
-                      >
-                        <Download size={12} className="mr-1" />
-                        Download
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handleSharePointPreview(resource)}
-                        disabled={!resource.isAccessible}
-                      >
-                        <Eye size={12} className="mr-1" />
-                        Preview
-                      </Button>
-                    </div>
+                    <div className="text-sm text-gray-400">Open Tickets</div>
                   </CardWrapper>
-                ))}
-              </div>
-            </div>
-          )}
 
-          {/* New Ticket Modal */}
-          {showNewTicket && (
-            <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-              <div className="bg-card rounded-lg w-full max-w-2xl border border-primary/20">
-                <div className="bg-primary/10 p-6 border-b border-primary/20">
-                  <div className="flex items-center justify-between">
-                    <h2 className="text-2xl font-bold">Submit New Ticket</h2>
-                    <Button variant="ghost" onClick={() => setShowNewTicket(false)}>
-                      ✕
-                    </Button>
-                  </div>
+                  <CardWrapper className="text-center">
+                    <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <AlertCircle className="text-purple-400" size={24} />
+                    </div>
+                    <div className="text-2xl font-bold text-purple-400 mb-1">
+                      {alerts.filter((a) => a.status === "active").length}
+                    </div>
+                    <div className="text-sm text-gray-400">Active Alerts</div>
+                  </CardWrapper>
+
+                  <CardWrapper className="text-center">
+                    <div className="w-12 h-12 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <Clock className="text-yellow-400" size={24} />
+                    </div>
+                    <div className="text-2xl font-bold text-yellow-400 mb-1">2-4</div>
+                    <div className="text-sm text-gray-400">Hours Avg Response</div>
+                  </CardWrapper>
+
+                  <CardWrapper className="text-center">
+                    <div className="w-12 h-12 bg-purple-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                      <CheckCircle className="text-purple-400" size={24} />
+                    </div>
+                    <div className="text-2xl font-bold text-purple-400 mb-1">98%</div>
+                    <div className="text-sm text-gray-400">Satisfaction Rate</div>
+                  </CardWrapper>
                 </div>
 
-                <form className="p-6 space-y-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Subject *</label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="Brief description of your issue"
-                      className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary"
-                    />
-                  </div>
+                {/* Microsoft 365 Service Health */}
+                <div>
+                  <M365ServiceHealth maxItems={3} />
+                </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Welcome Message */}
+                <CardWrapper className="bg-primary/10 border-primary/20">
+                  <div className="flex items-start gap-4">
+                    <Image
+                      src={user.picture || "/placeholder.svg?height=60&width=60&text=" + user.name.charAt(0)}
+                      alt={user.name}
+                      width={60}
+                      height={60}
+                      className="rounded-full"
+                    />
                     <div>
-                      <label className="block text-sm font-medium text-gray-300 mb-2">Priority</label>
-                      <select className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary">
-                        <option value="low">Low</option>
-                        <option value="medium">Medium</option>
-                        <option value="high">High</option>
-                        <option value="urgent">Urgent</option>
+                      <h3 className="text-lg font-semibold text-primary mb-2">
+                        Welcome to {currentTenant.branding.companyName} Service Desk
+                      </h3>
+                      <p className="text-gray-400 mb-4">
+                        You're logged in as {user.name} ({user.role}). This portal provides secure access to support
+                        tickets, resources, and account management for {currentTenant.branding.companyName}.
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        <span className="text-xs bg-primary/20 text-primary px-2 py-1 rounded">
+                          {currentTenant.domain}
+                        </span>
+                        <span className="text-xs bg-gray-700 text-gray-300 px-2 py-1 rounded">
+                          {user.authMethod === "azure" ? "Microsoft 365" : "Local Auth"}
+                        </span>
+                        {user.role === "admin" && (
+                          <span className="text-xs bg-red-500/20 text-red-400 px-2 py-1 rounded">Administrator</span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </CardWrapper>
+              </div>
+            )}
+
+            {/* Account Tab */}
+            {activeTab === "account" && (
+              <div>
+                <MultiTenantAccountManagement />
+              </div>
+            )}
+
+            {/* Tickets Tab */}
+            {activeTab === "tickets" && (
+              <div className="space-y-8">
+                {/* Header with New Ticket Button */}
+                <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                  <div>
+                    <h2 className="text-2xl font-bold mb-2">Support Tickets</h2>
+                    <p className="text-gray-400">Manage your support requests and track their progress</p>
+                  </div>
+                  <Button onClick={() => setShowNewTicket(true)} className="bg-primary hover:bg-primary/90">
+                    <Plus size={16} className="mr-2" />
+                    New Ticket
+                  </Button>
+                </div>
+
+                {/* Filters and Search */}
+                <CardWrapper>
+                  <div className="flex flex-wrap gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Status</label>
+                      <select
+                        value={ticketFilter}
+                        onChange={(e) => setTicketFilter(e.target.value as any)}
+                        className="px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
+                      >
+                        <option value="all">All Tickets</option>
+                        <option value="open">Open</option>
+                        <option value="in-progress">In Progress</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="closed">Closed</option>
                       </select>
                     </div>
 
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Sort By</label>
+                      <select
+                        value={ticketSort}
+                        onChange={(e) => setTicketSort(e.target.value as any)}
+                        className="px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
+                      >
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="priority">Priority</option>
+                      </select>
+                    </div>
+
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Search</label>
+                      <input
+                        type="text"
+                        value={ticketSearch}
+                        onChange={(e) => setTicketSearch(e.target.value)}
+                        placeholder="Search tickets..."
+                        className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary"
+                      />
+                    </div>
+                  </div>
+                </CardWrapper>
+
+                {/* Tickets Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredTickets.length > 0 ? (
+                    filteredTickets.map((ticket) => {
+                      const realtimeUpdate = updates[ticket.id]
+                      const currentStatus = realtimeUpdate?.status || ticket.status
+                      const lastUpdate = realtimeUpdate?.lastUpdate || ticket.lastUpdate
+
+                      return (
+                        <CardWrapper
+                          key={ticket.id}
+                          className="hover:border-primary/40 transition-colors cursor-pointer"
+                          onClick={() => setSelectedTicket({ ...ticket, status: currentStatus, lastUpdate })}
+                        >
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <Ticket className="text-primary" size={20} />
+                              <h3 className="font-semibold">#{ticket.id}</h3>
+                              {isPolling && <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />}
+                            </div>
+                            <TicketStatusBadge status={currentStatus} />
+                          </div>
+
+                          <h4 className="font-medium mb-2">{ticket.title}</h4>
+                          <p className="text-gray-400 text-sm mb-3 line-clamp-2">{ticket.description}</p>
+
+                          <div className="flex items-center justify-between text-xs text-gray-500 mb-3">
+                            <span className={priorityColors[ticket.priority]}>
+                              {ticket.priority.toUpperCase()} Priority
+                            </span>
+                            <span>Updated {lastUpdate}</span>
+                          </div>
+
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2 text-xs text-gray-500">
+                              <Calendar size={12} />
+                              <span>Created {ticket.created}</span>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setSelectedTicket({ ...ticket, status: currentStatus, lastUpdate })
+                              }}
+                            >
+                              <Eye size={12} className="mr-1" />
+                              View Details
+                            </Button>
+                          </div>
+                        </CardWrapper>
+                      )
+                    })
+                  ) : (
+                    <div className="col-span-full text-center py-12">
+                      <Ticket size={64} className="mx-auto mb-4 text-gray-600" />
+                      <h3 className="text-xl font-semibold mb-2">No tickets found</h3>
+                      <p className="text-gray-400 mb-6">
+                        {ticketFilter === "all"
+                          ? "You haven't submitted any tickets yet."
+                          : `No tickets with status "${ticketFilter}" found.`}
+                      </p>
+                      <Button onClick={() => setShowNewTicket(true)} className="bg-primary hover:bg-primary/90">
+                        Submit Your First Ticket
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Resources Tab */}
+            {activeTab === "resources" && (
+              <div className="space-y-8">
+                {/* Header */}
+                <div>
+                  <h2 className="text-2xl font-bold mb-2">Knowledge Base & Resources</h2>
+                  <p className="text-gray-400">Access guides, documentation, and helpful resources</p>
+                </div>
+
+                {/* Search and Filter */}
+                <CardWrapper>
+                  <div className="flex flex-wrap gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-300 mb-2">Category</label>
-                      <select className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary">
-                        <option value="email">Email Issues</option>
-                        <option value="network">Network Problems</option>
-                        <option value="software">Software Support</option>
-                        <option value="hardware">Hardware Issues</option>
-                        <option value="security">Security Concerns</option>
-                        <option value="other">Other</option>
+                      <select
+                        value={resourceFilter}
+                        onChange={(e) => setResourceFilter(e.target.value)}
+                        className="px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary"
+                      >
+                        {Object.entries(resourceCategories).map(([key, label]) => (
+                          <option key={key} value={key}>
+                            {label}
+                          </option>
+                        ))}
                       </select>
+                    </div>
+
+                    <div className="flex-1">
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Search Resources</label>
+                      <input
+                        type="text"
+                        value={resourceSearch}
+                        onChange={(e) => setResourceSearch(e.target.value)}
+                        placeholder="Search guides, documents..."
+                        className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary"
+                      />
+                    </div>
+                  </div>
+                </CardWrapper>
+
+                {/* Resources Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredResources.map((resource) => (
+                    <CardWrapper key={resource.id} className="hover:border-primary/40 transition-colors">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">{getFileIcon(resource.type)}</span>
+                          <div>
+                            <h3 className="font-semibold">{resource.title}</h3>
+                            <p className="text-sm text-gray-400">
+                              {resource.type} • {resource.size}
+                            </p>
+                          </div>
+                        </div>
+                        <span
+                          className={`px-2 py-1 rounded text-xs ${
+                            resource.isAccessible ? "bg-green-500/20 text-green-400" : "bg-red-500/20 text-red-400"
+                          }`}
+                        >
+                          {resource.isAccessible ? "Available" : "Restricted"}
+                        </span>
+                      </div>
+
+                      <p className="text-gray-400 text-sm mb-4">{resource.description}</p>
+
+                      <div className="flex items-center justify-between text-xs text-gray-500 mb-4">
+                        <span>Updated {resource.updated}</span>
+                        <span className="capitalize">{resource.category}</span>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleSharePointDownload(resource)}
+                          disabled={!resource.isAccessible}
+                          className="flex-1"
+                        >
+                          <Download size={12} className="mr-1" />
+                          Download
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleSharePointPreview(resource)}
+                          disabled={!resource.isAccessible}
+                        >
+                          <Eye size={12} className="mr-1" />
+                          Preview
+                        </Button>
+                      </div>
+                    </CardWrapper>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* New Ticket Modal */}
+            {showNewTicket && (
+              <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                <div className="bg-card rounded-lg w-full max-w-2xl border border-primary/20">
+                  <div className="bg-primary/10 p-6 border-b border-primary/20">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-2xl font-bold">Submit New Ticket</h2>
+                      <Button variant="ghost" onClick={() => setShowNewTicket(false)}>
+                        ✕
+                      </Button>
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2">Description *</label>
-                    <textarea
-                      required
-                      rows={6}
-                      placeholder="Please provide detailed information about your issue, including any error messages and steps you've already tried..."
-                      className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary resize-vertical"
-                    />
-                  </div>
+                  <form className="p-6 space-y-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Subject *</label>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Brief description of your issue"
+                        className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary"
+                      />
+                    </div>
 
-                  <div className="flex gap-3">
-                    <Button type="submit" className="bg-primary hover:bg-primary/90">
-                      Submit Ticket
-                    </Button>
-                    <Button type="button" variant="outline" onClick={() => setShowNewTicket(false)}>
-                      Cancel
-                    </Button>
-                  </div>
-                </form>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Priority</label>
+                        <select className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary">
+                          <option value="low">Low</option>
+                          <option value="medium">Medium</option>
+                          <option value="high">High</option>
+                          <option value="urgent">Urgent</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Category</label>
+                        <select className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white focus:outline-none focus:border-primary">
+                          <option value="email">Email Issues</option>
+                          <option value="network">Network Problems</option>
+                          <option value="software">Software Support</option>
+                          <option value="hardware">Hardware Issues</option>
+                          <option value="security">Security Concerns</option>
+                          <option value="other">Other</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-300 mb-2">Description *</label>
+                      <textarea
+                        required
+                        rows={6}
+                        placeholder="Please provide detailed information about your issue, including any error messages and steps you've already tried..."
+                        className="w-full px-3 py-2 bg-black border border-primary/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary resize-vertical"
+                      />
+                    </div>
+
+                    <div className="flex gap-3">
+                      <Button type="submit" className="bg-primary hover:bg-primary/90">
+                        Submit Ticket
+                      </Button>
+                      <Button type="button" variant="outline" onClick={() => setShowNewTicket(false)}>
+                        Cancel
+                      </Button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+
+            {/* Ticket Details Modal */}
+            <TicketDetailsModal ticket={selectedTicket} onClose={() => setSelectedTicket(null)} />
+
+            {/* Other tabs would be implemented similarly with tenant-specific data */}
+          </section>
+
+          {/* Footer */}
+          <footer className="bg-card mt-20">
+            <div className="container mx-auto px-4 py-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div>
+                  <h3 className="text-xl font-bold mb-4">{currentTenant.branding.companyName}</h3>
+                  <p className="text-gray-400">
+                    Secure multi-tenant service desk portal with organization-specific branding and data isolation.
+                  </p>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-4">Portal</h4>
+                  <ul className="space-y-2 text-gray-400">
+                    <li>
+                      <button onClick={() => setActiveTab("overview")} className="hover:text-primary transition-colors">
+                        Dashboard
+                      </button>
+                    </li>
+                    <li>
+                      <button onClick={() => setActiveTab("tickets")} className="hover:text-primary transition-colors">
+                        Support Tickets
+                      </button>
+                    </li>
+                    <li>
+                      <button onClick={() => setActiveTab("account")} className="hover:text-primary transition-colors">
+                        Account Management
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-4">Support</h4>
+                  <ul className="space-y-2 text-gray-400">
+                    <li>
+                      <a href="mailto:support@nextphaseit.org" className="hover:text-primary transition-colors">
+                        Email Support
+                      </a>
+                    </li>
+                    <li>
+                      <a href="tel:+19843109533" className="hover:text-primary transition-colors">
+                        Phone Support
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-4">Organization</h4>
+                  <ul className="space-y-2 text-gray-400">
+                    <li>{currentTenant.domain}</li>
+                    <li>Tenant ID: {currentTenant.id}</li>
+                    <li>Multi-Tenant Portal</li>
+                  </ul>
+                </div>
+              </div>
+              <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+                <p>© 2024 {currentTenant.branding.companyName}. All rights reserved.</p>
               </div>
             </div>
-          )}
-
-          {/* Ticket Details Modal */}
-          <TicketDetailsModal ticket={selectedTicket} onClose={() => setSelectedTicket(null)} />
-
-          {/* Other tabs would be implemented similarly with tenant-specific data */}
-        </section>
-
-        {/* Footer */}
-        <footer className="bg-card mt-20">
-          <div className="container mx-auto px-4 py-12">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              <div>
-                <h3 className="text-xl font-bold mb-4">{currentTenant.branding.companyName}</h3>
-                <p className="text-gray-400">
-                  Secure multi-tenant service desk portal with organization-specific branding and data isolation.
-                </p>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">Portal</h4>
-                <ul className="space-y-2 text-gray-400">
-                  <li>
-                    <button onClick={() => setActiveTab("overview")} className="hover:text-primary transition-colors">
-                      Dashboard
-                    </button>
-                  </li>
-                  <li>
-                    <button onClick={() => setActiveTab("tickets")} className="hover:text-primary transition-colors">
-                      Support Tickets
-                    </button>
-                  </li>
-                  <li>
-                    <button onClick={() => setActiveTab("account")} className="hover:text-primary transition-colors">
-                      Account Management
-                    </button>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">Support</h4>
-                <ul className="space-y-2 text-gray-400">
-                  <li>
-                    <a href="mailto:support@nextphaseit.org" className="hover:text-primary transition-colors">
-                      Email Support
-                    </a>
-                  </li>
-                  <li>
-                    <a href="tel:+19843109533" className="hover:text-primary transition-colors">
-                      Phone Support
-                    </a>
-                  </li>
-                </ul>
-              </div>
-              <div>
-                <h4 className="font-semibold mb-4">Organization</h4>
-                <ul className="space-y-2 text-gray-400">
-                  <li>{currentTenant.domain}</li>
-                  <li>Tenant ID: {currentTenant.id}</li>
-                  <li>Multi-Tenant Portal</li>
-                </ul>
-              </div>
-            </div>
-            <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
-              <p>© 2024 {currentTenant.branding.companyName}. All rights reserved.</p>
-            </div>
-          </div>
-        </footer>
-      </div>
-    </main>
+          </footer>
+        </div>
+      </main>
+    </ToastProvider>
   )
 }
 
