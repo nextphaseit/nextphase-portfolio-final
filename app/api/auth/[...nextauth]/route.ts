@@ -3,22 +3,21 @@ import type { NextAuthOptions } from "next-auth"
 import AzureADProvider from "next-auth/providers/azure-ad"
 import CredentialsProvider from "next-auth/providers/credentials"
 
-// Validate required environment variables
+// Required environment variable check
 const requiredEnvVars = {
   NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
   NEXTAUTH_URL: process.env.NEXTAUTH_URL,
 }
 
-// Check for missing environment variables
 const missingEnvVars = Object.entries(requiredEnvVars)
-  .filter(([key, value]) => !value)
+  .filter(([_, value]) => !value)
   .map(([key]) => key)
 
 if (missingEnvVars.length > 0) {
   console.error("Missing required environment variables:", missingEnvVars)
 }
 
-// Define authorized users for local authentication
+// Authorized users for credentials login
 const AUTHORIZED_USERS = [
   {
     id: "admin-adrian",
@@ -40,18 +39,17 @@ const AUTHORIZED_USERS = [
   },
 ]
 
-// Microsoft Exchange authorized domains
+// Domains allowed for Microsoft sign-in
 const EXCHANGE_AUTHORIZED_DOMAINS = ["nextphaseit.org"]
 const EXCHANGE_ADMIN_EMAILS = ["adrian.knight@nextphaseit.org"]
 
 export const authOptions: NextAuthOptions = {
   providers: [
-    // Only include Azure AD provider if credentials are available
     ...(process.env.MICROSOFT_CLIENT_ID && process.env.MICROSOFT_CLIENT_SECRET
       ? [
           AzureADProvider({
-            clientId: process.env.MICROSOFT_CLIENT_ID,
-            clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
+            clientId: process.env.MICROSOFT_CLIENT_ID!,
+            clientSecret: process.env.MICROSOFT_CLIENT_SECRET!,
             tenantId: process.env.MICROSOFT_TENANT_ID || "common",
             authorization: {
               params: {
@@ -62,49 +60,40 @@ export const authOptions: NextAuthOptions = {
           }),
         ]
       : []),
-
-    // Credentials provider for local development
     CredentialsProvider({
       id: "credentials",
       name: "NextPhase IT Credentials",
       credentials: {
-        email: {
-          label: "Email",
-          type: "email",
-          placeholder: "Enter your email",
-        },
-        password: {
-          label: "Password",
-          type: "password",
-          placeholder: "Enter your password",
-        },
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
         try {
-          if (!credentials?.email || !credentials?.password) {
+          const { email, password } = credentials ?? {}
+
+          if (!email || !password) {
             return null
           }
 
-          // Check if user is authorized NextPhase IT staff
-          const authorizedUser = AUTHORIZED_USERS.find((u) => u.email === credentials.email)
+          const user = AUTHORIZED_USERS.find((u) => u.email === email)
 
           if (
-            authorizedUser &&
-            ((credentials.email === "adrian.knight@nextphaseit.org" && credentials.password === "admin123") ||
-              (credentials.email === "staff@nextphaseit.org" && credentials.password === "staff123"))
+            user &&
+            ((email === "adrian.knight@nextphaseit.org" && password === "admin123") ||
+              (email === "staff@nextphaseit.org" && password === "staff123"))
           ) {
             return {
-              id: authorizedUser.id,
-              name: authorizedUser.name,
-              email: authorizedUser.email,
-              image: authorizedUser.picture,
-              role: authorizedUser.role,
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              image: user.picture,
+              role: user.role,
             }
           }
 
           return null
         } catch (error) {
-          console.error("Credentials authorization error:", error)
+          console.error("Authorization error:", error)
           return null
         }
       },
@@ -113,46 +102,28 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user, account }) {
       try {
-        // Initial sign in
         if (account && user) {
-          // For Azure AD provider
-          if (account.provider === "azure-ad") {
-            const email = user.email || token.email
-            const domain = email?.split("@")[1]
+          const email = user.email || token.email
+          const domain = email?.split("@")[1]
+          const isAdmin = EXCHANGE_ADMIN_EMAILS.includes(email ?? "")
 
-            // Check if email domain is authorized
-            if (!domain || !EXCHANGE_AUTHORIZED_DOMAINS.includes(domain)) {
-              throw new Error("Unauthorized domain")
-            }
-
-            // Determine role based on email
-            const isAdmin = EXCHANGE_ADMIN_EMAILS.includes(email || "")
-
-            return {
-              ...token,
-              id: user.id,
-              name: user.name,
-              email: email,
-              picture: user.image,
-              role: isAdmin ? "admin" : "staff",
-              authMethod: "azure-ad",
-            }
-          }
-
-          // For credentials provider
-          if (account.provider === "credentials") {
-            return {
-              ...token,
-              id: user.id,
-              name: user.name,
-              email: user.email,
-              picture: user.image,
-              role: (user as any).role || "staff",
-              authMethod: "credentials",
-            }
+          return {
+            ...token,
+            id: user.id,
+            name: user.name,
+            email,
+            picture: user.image,
+            role:
+              account.provider === "credentials"
+                ? (user as any).role || "staff"
+                : domain && EXCHANGE_AUTHORIZED_DOMAINS.includes(domain)
+                  ? isAdmin
+                    ? "admin"
+                    : "staff"
+                  : "unauthorized",
+            authMethod: account.provider,
           }
         }
-
         return token
       } catch (error) {
         console.error("JWT callback error:", error)
@@ -161,7 +132,7 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       try {
-        if (token && session.user) {
+        if (session.user && token) {
           session.user.id = token.id as string
           session.user.name = token.name as string
           session.user.email = token.email as string
@@ -177,7 +148,18 @@ export const authOptions: NextAuthOptions = {
     },
     async signIn({ user, account, profile }) {
       try {
-        // Allow all sign-ins for now, domain checking is done in JWT callback
+        // For Azure AD, check domain authorization
+        if (account?.provider === "azure-ad") {
+          const email = user?.email || profile?.email
+          const domain = email?.split("@")[1]
+
+          if (!domain || !EXCHANGE_AUTHORIZED_DOMAINS.includes(domain)) {
+            console.log(`Access denied for domain: ${domain}`)
+            return false
+          }
+        }
+
+        // JWT callback handles the rest of the authorization logic
         return true
       } catch (error) {
         console.error("SignIn callback error:", error)
@@ -197,42 +179,20 @@ export const authOptions: NextAuthOptions = {
       }
     },
   },
-  pages: {
-    signIn: "/auth/signin",
-    error: "/auth/error",
-  },
   session: {
     strategy: "jwt",
     maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+  pages: {
+    signIn: "/auth/signin",
+    error: "/auth/error",
   },
   secret: process.env.NEXTAUTH_SECRET,
   debug: process.env.NODE_ENV === "development",
 }
 
-// Create the handler with proper error handling
+// Create the NextAuth handler
 const handler = NextAuth(authOptions)
 
-// Wrap the handler to catch any errors and return proper JSON responses
-const wrappedHandler = async (req: Request, context: any) => {
-  try {
-    return await handler(req, context)
-  } catch (error) {
-    console.error("NextAuth handler error:", error)
-
-    // Return a proper JSON error response
-    return new Response(
-      JSON.stringify({
-        error: "Authentication error",
-        message: "An error occurred during authentication",
-      }),
-      {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      },
-    )
-  }
-}
-
-export { wrappedHandler as GET, wrappedHandler as POST }
+// Export the handler for both GET and POST requests
+export { handler as GET, handler as POST }
