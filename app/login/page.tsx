@@ -2,321 +2,202 @@
 
 import type React from "react"
 
-import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Eye, EyeOff, Mail, Lock, ArrowLeft, Shield, AlertCircle } from "lucide-react"
-import Image from "next/image"
+import { useState } from "react"
 import Link from "next/link"
-import { AuthProvider, useAuth } from "@/providers/auth-provider"
+import Image from "next/image"
+import { useRouter } from "next/navigation"
 
-function LoginContent() {
-  const [showPassword, setShowPassword] = useState(false)
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    rememberMe: false,
-  })
+export default function Login() {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
-
-  const { login, loginWithMicrosoft, isLoading, isAuthenticated } = useAuth()
   const router = useRouter()
-  const searchParams = useSearchParams()
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/dashboard")
-    }
-
-    // Check for OAuth errors
-    const oauthError = searchParams.get("error")
-    if (oauthError) {
-      switch (oauthError) {
-        case "oauth_failed":
-          setError("Microsoft authentication failed. Please try again.")
-          break
-        case "unauthorized_domain":
-          setError("Access denied. Only NextPhase IT staff members can access this portal.")
-          break
-        case "token_failed":
-          setError("Authentication token error. Please try again.")
-          break
-        case "profile_failed":
-          setError("Unable to retrieve profile information. Please try again.")
-          break
-        case "callback_failed":
-          setError("Authentication callback failed. Please try again.")
-          break
-        default:
-          setError("Authentication error occurred. Please try again.")
-      }
-    }
-  }, [isAuthenticated, router, searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    setIsLoading(true)
     setError("")
 
-    const success = await login(formData.email, formData.password)
-
-    if (success) {
-      router.push("/dashboard")
-    } else {
-      setError("Invalid credentials or unauthorized access. Contact IT administrator.")
-    }
-  }
-
-  const handleMicrosoftLogin = async () => {
-    setError("")
-    const success = await loginWithMicrosoft()
-    if (!success) {
-      setError("Microsoft authentication failed. Please try again.")
+    try {
+      // In a real app, this would call your authentication API
+      // For now, we'll just simulate a login
+      await new Promise((resolve) => setTimeout(resolve, 1000))
+      router.push("/portal")
+    } catch (err) {
+      setError("Invalid email or password")
+    } finally {
+      setIsLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-black text-white flex">
-      {/* Left Side - Login Form */}
-      <div className="flex-1 flex items-center justify-center p-8">
-        <div className="w-full max-w-md">
-          {/* Back to Home Link */}
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-gray-400 hover:text-primary transition-colors mb-8"
-          >
-            <ArrowLeft size={20} />
-            Back to Home
+    <div className="min-h-screen flex flex-col bg-background">
+      {/* Header */}
+      <header className="bg-background-600 py-4 px-6 shadow-md">
+        <div className="container mx-auto">
+          <Link href="/" className="flex items-center">
+            <Image src="/logo.png" alt="NextPhase IT" width={40} height={40} className="mr-3" />
+            <h1 className="text-xl font-bold text-white">NextPhase IT</h1>
           </Link>
+        </div>
+      </header>
 
-          {/* Logo */}
-          <div className="text-center mb-8">
-            <Image
-              src="/images/nextphase-logo.png"
-              alt="NextPhase IT"
-              width={200}
-              height={60}
-              className="h-16 w-auto mx-auto mb-4"
-            />
-            <div className="flex items-center justify-center gap-2 mb-2">
-              <Shield className="text-primary" size={24} />
-              <h1 className="text-2xl font-bold text-white">Admin Portal</h1>
+      {/* Login Form */}
+      <div className="flex-grow flex items-center justify-center px-4">
+        <div className="w-full max-w-md">
+          <div className="card border-t-4 border-t-primary">
+            <div className="text-center mb-8">
+              <h2 className="text-2xl font-bold text-white">Client Login</h2>
+              <p className="text-gray-400 mt-2">Access the NextPhase IT Service Desk</p>
             </div>
-            <p className="text-gray-400">NextPhase IT Staff Access Only</p>
-          </div>
 
-          {/* Access Notice */}
-          <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mb-6">
-            <h3 className="text-primary font-semibold mb-2">
-              <Shield className="inline mr-2" size={16} />
-              Authorized Personnel Only
-            </h3>
-            <p className="text-sm text-gray-300">This portal is restricted to NextPhase IT staff members.</p>
-          </div>
-
-          {/* Microsoft Login Button */}
-          <div className="mb-6">
-            <Button
-              onClick={handleMicrosoftLogin}
-              disabled={isLoading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 text-base font-medium mb-4"
-            >
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Signing in...
-                </div>
-              ) : (
-                <>
-                  <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M11.4 24H0V12.6h11.4V24zM24 24H12.6V12.6H24V24zM11.4 11.4H0V0h11.4v11.4zM24 11.4H12.6V0H24v11.4z" />
-                  </svg>
-                  Sign in with Microsoft
-                </>
-              )}
-            </Button>
-
-            {/* Divider */}
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-600"></div>
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/50 text-red-500 px-4 py-3 rounded-lg mb-6">
+                {error}
               </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-black text-gray-400">Or sign in with email</span>
-              </div>
-            </div>
-          </div>
+            )}
 
-          {/* Error Message */}
-          {error && (
-            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6">
-              <div className="flex items-center gap-2">
-                <AlertCircle className="text-red-400" size={16} />
-                <p className="text-red-400 text-sm">{error}</p>
-              </div>
-            </div>
-          )}
-
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Email Field */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-2">
-                NextPhase IT Email
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                </div>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
+                  Email Address
+                </label>
                 <input
                   id="email"
                   type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="input-field"
+                  placeholder="you@example.com"
                   required
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full pl-10 pr-4 py-3 bg-card border border-primary/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                  placeholder="your.name@nextphaseit.org"
                 />
               </div>
-            </div>
 
-            {/* Password Field */}
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-300">
+                    Password
+                  </label>
+                  <Link href="/reset-password" className="text-xs text-primary hover:text-primary-400">
+                    Forgot password?
+                  </Link>
                 </div>
                 <input
                   id="password"
-                  type={showPassword ? "text" : "password"}
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="input-field"
+                  placeholder="••••••••"
                   required
-                  value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full pl-10 pr-12 py-3 bg-card border border-primary/20 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
-                  placeholder="Enter your password"
                 />
+              </div>
+
+              <div>
                 <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-primary transition-colors"
+                  type="submit"
+                  className="btn-primary w-full flex justify-center items-center"
+                  disabled={isLoading}
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {isLoading ? (
+                    <>
+                      <svg
+                        className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
+                      </svg>
+                      Signing in...
+                    </>
+                  ) : (
+                    "Sign in"
+                  )}
                 </button>
               </div>
-            </div>
+            </form>
 
-            {/* Remember Me */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  type="checkbox"
-                  checked={formData.rememberMe}
-                  onChange={(e) => setFormData({ ...formData, rememberMe: e.target.checked })}
-                  className="h-4 w-4 text-primary bg-card border-primary/20 rounded focus:ring-primary focus:ring-2"
-                />
-                <label htmlFor="remember-me" className="ml-2 text-sm text-gray-300">
-                  Keep me signed in
-                </label>
-              </div>
-              <a
-                href="mailto:adrian.knight@nextphaseit.org"
-                className="text-sm text-primary hover:text-primary/80 transition-colors"
-              >
-                Need access?
-              </a>
-            </div>
-
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="w-full bg-primary hover:bg-primary/90 text-white py-3 text-base font-medium"
-            >
-              {isLoading ? (
-                <div className="flex items-center gap-2">
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Signing in...
+            <div className="mt-8">
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-600"></div>
                 </div>
-              ) : (
-                <>
-                  <Shield size={16} className="mr-2" />
-                  Access Admin Portal
-                </>
-              )}
-            </Button>
-          </form>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-background-600 text-gray-400">Or continue with</span>
+                </div>
+              </div>
 
-          {/* Support Link */}
-          <div className="mt-8 text-center">
-            <p className="text-xs text-gray-500">
-              Technical issues?{" "}
-              <a
-                href="mailto:adrian.knight@nextphaseit.org"
-                className="text-primary hover:text-primary/80 transition-colors"
-              >
-                Contact Adrian Knight
-              </a>
-            </p>
-          </div>
-        </div>
-      </div>
+              <div className="mt-6 grid grid-cols-2 gap-3">
+                <a
+                  href="/api/auth/login"
+                  className="flex justify-center items-center px-4 py-2 border border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-300 hover:bg-background-500"
+                >
+                  <svg className="h-5 w-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M21.8055 10.0415H21V10H12V14H17.6515C16.827 16.3285 14.6115 18 12 18C8.6865 18 6 15.3135 6 12C6 8.6865 8.6865 6 12 6C13.5295 6 14.921 6.577 15.9805 7.5195L18.809 4.691C17.023 3.0265 14.634 2 12 2C6.4775 2 2 6.4775 2 12C2 17.5225 6.4775 22 12 22C17.5225 22 22 17.5225 22 12C22 11.3295 21.931 10.675 21.8055 10.0415Z"
+                      fill="#FFC107"
+                    />
+                    <path
+                      d="M3.15295 7.3455L6.43845 9.755C7.32745 7.554 9.48045 6 12 6C13.5295 6 14.921 6.577 15.9805 7.5195L18.809 4.691C17.023 3.0265 14.634 2 12 2C8.15895 2 4.82795 4.1685 3.15295 7.3455Z"
+                      fill="#FF3D00"
+                    />
+                    <path
+                      d="M12 22C14.583 22 16.93 21.0115 18.7045 19.404L15.6095 16.785C14.5718 17.5742 13.3038 18.001 12 18C9.39903 18 7.19053 16.3415 6.35853 14.027L3.09753 16.5395C4.75253 19.778 8.11353 22 12 22Z"
+                      fill="#4CAF50"
+                    />
+                    <path
+                      d="M21.8055 10.0415H21V10H12V14H17.6515C17.2571 15.1082 16.5467 16.0766 15.608 16.7855L15.6095 16.7845L18.7045 19.4035C18.4855 19.6025 22 17 22 12C22 11.3295 21.931 10.675 21.8055 10.0415Z"
+                      fill="#1976D2"
+                    />
+                  </svg>
+                  Google
+                </a>
 
-      {/* Right Side - Branding */}
-      <div className="hidden lg:flex flex-1 bg-gradient-to-br from-primary to-primary/80 items-center justify-center p-8 relative overflow-hidden">
-        {/* Background Pattern */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-1/4 left-1/4 w-32 h-32 bg-white rounded-full blur-3xl"></div>
-          <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-white rounded-full blur-3xl"></div>
-          <div className="absolute top-3/4 left-1/2 w-24 h-24 bg-white rounded-full blur-2xl"></div>
-        </div>
-
-        <div className="relative z-10 text-center text-white max-w-md">
-          <div className="mb-8">
-            <Image
-              src="/images/nextphase-logo.png"
-              alt="NextPhase IT"
-              width={300}
-              height={90}
-              className="h-20 w-auto mx-auto mb-6 filter brightness-0 invert"
-            />
-          </div>
-
-          <h2 className="text-3xl font-bold mb-4">Internal Operations Portal</h2>
-          <p className="text-lg opacity-90 mb-8">
-            Manage client support tickets, projects, and administrative tasks for NextPhase IT operations.
-          </p>
-
-          <div className="space-y-4 text-left">
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-white rounded-full"></div>
-              <span>Support ticket management</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-white rounded-full"></div>
-              <span>Client project tracking</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-white rounded-full"></div>
-              <span>Microsoft 365 integration</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 bg-white rounded-full"></div>
-              <span>Administrative controls</span>
+                <a
+                  href="/api/auth/login"
+                  className="flex justify-center items-center px-4 py-2 border border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-300 hover:bg-background-500"
+                >
+                  <svg
+                    className="h-5 w-5 mr-2"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path d="M11.5 4.5V19.5H12.5V4.5H11.5Z" />
+                    <path d="M4.5 11.5H19.5V12.5H4.5V11.5Z" />
+                    <path d="M17 8.5L19.5 4.5H18.5L16.5 7.5L17 8.5Z" />
+                    <path d="M17 15.5L19.5 19.5H18.5L16.5 16.5L17 15.5Z" />
+                    <path d="M7 8.5L4.5 4.5H5.5L7.5 7.5L7 8.5Z" />
+                    <path d="M7 15.5L4.5 19.5H5.5L7.5 16.5L7 15.5Z" />
+                  </svg>
+                  Microsoft
+                </a>
+              </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="bg-background-700 py-4 px-6">
+        <div className="container mx-auto text-center text-sm text-gray-400">
+          © 2023 NextPhase IT. All rights reserved.
+        </div>
+      </footer>
     </div>
-  )
-}
-
-export default function LoginPage() {
-  return (
-    <AuthProvider>
-      <LoginContent />
-    </AuthProvider>
   )
 }
