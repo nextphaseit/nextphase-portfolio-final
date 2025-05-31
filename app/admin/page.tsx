@@ -11,16 +11,23 @@ import AdminSettingsModule from "@/components/admin-settings-module"
 import AdminTenantManagement from "@/components/admin-tenant-management"
 import AdminAuditModule from "@/components/admin-audit-module"
 import AdminClientIntakeModule from "@/components/admin-client-intake-module"
-import { BarChart3, Settings, FileText, Shield, LogOut, Building, Activity } from "lucide-react"
-import { useAuth } from "@/providers/auth-provider"
+import HelpdeskDashboard from "@/components/helpdesk-dashboard"
+import { BarChart3, Settings, FileText, Shield, LogOut, Building, Activity, Headphones } from "lucide-react"
+import { signOut } from "next-auth/react"
 
 export default function AdminPortal() {
   const { data: session, status } = useSession()
-  const { isAdmin, logout } = useAuth()
   const router = useRouter()
   const [activeTab, setActiveTab] = useState("dashboard")
+  const [isClient, setIsClient] = useState(false)
 
   useEffect(() => {
+    setIsClient(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isClient) return
+
     if (status === "loading") return // Still loading
 
     if (status === "unauthenticated") {
@@ -39,9 +46,9 @@ export default function AdminPortal() {
       router.push("/auth/error?error=AccessDenied")
       return
     }
-  }, [session, status, router])
+  }, [session, status, router, isClient])
 
-  if (status === "loading") {
+  if (!isClient || status === "loading") {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="text-center">
@@ -52,7 +59,7 @@ export default function AdminPortal() {
     )
   }
 
-  if (!session || !session.user?.email?.endsWith("@nextphaseit.org") || !isAdmin) {
+  if (!session || !session.user?.email?.endsWith("@nextphaseit.org") || session.user?.role !== "admin") {
     return (
       <div className="min-h-screen bg-black text-white flex items-center justify-center">
         <div className="text-center">
@@ -85,7 +92,12 @@ export default function AdminPortal() {
                 <p className="text-sm font-medium">{session.user.name}</p>
                 <p className="text-xs text-gray-400">{session.user.email}</p>
               </div>
-              <Button onClick={() => logout()} variant="outline" size="sm" className="flex items-center gap-2">
+              <Button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
                 <LogOut size={16} />
                 Sign Out
               </Button>
@@ -97,10 +109,14 @@ export default function AdminPortal() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="grid w-full grid-cols-6 bg-gray-800">
+          <TabsList className="grid w-full grid-cols-7 bg-gray-800">
             <TabsTrigger value="dashboard" className="flex items-center gap-2">
               <BarChart3 size={16} />
               Dashboard
+            </TabsTrigger>
+            <TabsTrigger value="helpdesk" className="flex items-center gap-2">
+              <Headphones size={16} />
+              Help Desk
             </TabsTrigger>
             <TabsTrigger value="reports" className="flex items-center gap-2">
               <Activity size={16} />
@@ -164,6 +180,10 @@ export default function AdminPortal() {
               </Card>
             </div>
             <AdminReportsModule />
+          </TabsContent>
+
+          <TabsContent value="helpdesk">
+            <HelpdeskDashboard />
           </TabsContent>
 
           <TabsContent value="reports">
