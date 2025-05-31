@@ -2,7 +2,7 @@
 
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { AlertCircle, ArrowLeft, Shield } from "lucide-react"
+import { AlertCircle, ArrowLeft, Shield, RefreshCw } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
 
@@ -128,13 +128,16 @@ export default function AuthErrorPage() {
         <div className="space-y-4">
           {errorDetails.canRetry && (
             <Button asChild className="w-full bg-primary hover:bg-primary/90">
-              <Link href="/auth/signin">Try Again</Link>
+              <Link href="/auth/signin" className="flex items-center gap-2">
+                <RefreshCw size={16} />
+                Try Again
+              </Link>
             </Button>
           )}
 
           <Button asChild variant="outline" className="w-full">
-            <Link href="/">
-              <ArrowLeft size={16} className="mr-2" />
+            <Link href="/" className="flex items-center gap-2">
+              <ArrowLeft size={16} />
               Go to Main Site
             </Link>
           </Button>

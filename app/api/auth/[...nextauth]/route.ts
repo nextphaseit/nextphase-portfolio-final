@@ -21,18 +21,22 @@ if (missingEnvVars.length > 0) {
 // NextAuth configuration options
 export const authOptions: NextAuthOptions = {
   providers: [
-    // Microsoft Azure AD Provider
-    AzureADProvider({
-      clientId: process.env.MICROSOFT_CLIENT_ID!,
-      clientSecret: process.env.MICROSOFT_CLIENT_SECRET!,
-      tenantId: process.env.MICROSOFT_TENANT_ID || "common",
-      authorization: {
-        params: {
-          scope: "openid profile email User.Read",
-          prompt: "select_account",
-        },
-      },
-    }),
+    // Microsoft Azure AD Provider (only if credentials are available)
+    ...(process.env.MICROSOFT_CLIENT_ID && process.env.MICROSOFT_CLIENT_SECRET
+      ? [
+          AzureADProvider({
+            clientId: process.env.MICROSOFT_CLIENT_ID,
+            clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
+            tenantId: process.env.MICROSOFT_TENANT_ID || "common",
+            authorization: {
+              params: {
+                scope: "openid profile email User.Read",
+                prompt: "select_account",
+              },
+            },
+          }),
+        ]
+      : []),
 
     // Credentials Provider for development
     CredentialsProvider({
@@ -53,11 +57,13 @@ export const authOptions: NextAuthOptions = {
         try {
           // Check if credentials are provided
           if (!credentials?.email || !credentials?.password) {
+            console.log("Missing credentials")
             return null
           }
 
           // Check for admin credentials
           if (credentials.email === "adrian.knight@nextphaseit.org" && credentials.password === "admin123") {
+            console.log("Admin login successful")
             return {
               id: "admin-adrian",
               name: "Adrian Knight",
@@ -67,7 +73,7 @@ export const authOptions: NextAuthOptions = {
             }
           }
 
-          // No match found
+          console.log("Invalid credentials provided")
           return null
         } catch (error) {
           console.error("Credentials authorization error:", error)
@@ -128,6 +134,17 @@ export const authOptions: NextAuthOptions = {
         return session
       }
     },
+
+    async signIn({ user, account, profile }) {
+      try {
+        // Allow all sign-ins for now
+        console.log("Sign-in attempt:", { user: user?.email, provider: account?.provider })
+        return true
+      } catch (error) {
+        console.error("SignIn callback error:", error)
+        return false
+      }
+    },
   },
 
   // Secret for JWT encryption
@@ -135,12 +152,28 @@ export const authOptions: NextAuthOptions = {
 
   // Debug mode for development
   debug: process.env.NODE_ENV === "development",
+
+  // Logger configuration
+  logger: {
+    error(code, metadata) {
+      console.error(`[NextAuth Error] ${code}:`, metadata)
+    },
+    warn(code) {
+      console.warn(`[NextAuth Warning] ${code}`)
+    },
+    debug(code, metadata) {
+      if (process.env.NODE_ENV === "development") {
+        console.debug(`[NextAuth Debug] ${code}:`, metadata)
+      }
+    },
+  },
 }
 
 // Handler for GET requests with error handling
 export async function GET(req: Request) {
   try {
-    return await NextAuth(req, authOptions)
+    const handler = NextAuth(authOptions)
+    return await handler(req)
   } catch (error: any) {
     console.error("NextAuth GET Error:", error.message || error)
 
@@ -149,6 +182,7 @@ export async function GET(req: Request) {
       JSON.stringify({
         error: "Authentication Error",
         detail: error.message || "An unexpected error occurred during authentication",
+        timestamp: new Date().toISOString(),
       }),
       {
         status: 500,
@@ -163,7 +197,8 @@ export async function GET(req: Request) {
 // Handler for POST requests with error handling
 export async function POST(req: Request) {
   try {
-    return await NextAuth(req, authOptions)
+    const handler = NextAuth(authOptions)
+    return await handler(req)
   } catch (error: any) {
     console.error("NextAuth POST Error:", error.message || error)
 
@@ -172,6 +207,7 @@ export async function POST(req: Request) {
       JSON.stringify({
         error: "Authentication Error",
         detail: error.message || "An unexpected error occurred during authentication",
+        timestamp: new Date().toISOString(),
       }),
       {
         status: 500,
