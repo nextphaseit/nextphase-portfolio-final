@@ -2,26 +2,36 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import { UserProvider } from "@auth0/nextjs-auth0/client"
+import { NextAuthProvider } from "@/providers/auth-provider"
 
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "NextPhase IT Service Desk",
-  description: "Client service desk portal for NextPhase IT",
+  title: "NextPhase IT - Transform Your Business",
+  description:
+    "Empowering small businesses with enterprise-level technology solutions. From web development to cloud infrastructure, we deliver secure, scalable, and efficient IT solutions that drive growth.",
+  keywords: "IT services, web development, cloud infrastructure, business technology, NextPhase IT",
+  authors: [{ name: "NextPhase IT" }],
+  openGraph: {
+    title: "NextPhase IT - Transform Your Business",
+    description: "Empowering small businesses with enterprise-level technology solutions.",
+    url: "https://nextphaseit.org",
+    siteName: "NextPhase IT",
+    type: "website",
+  },
     generator: 'v0.dev'
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
     <html lang="en">
-      <UserProvider>
-        <body className={inter.className}>{children}</body>
-      </UserProvider>
+      <body className={inter.className}>
+        <NextAuthProvider>{children}</NextAuthProvider>
+      </body>
     </html>
   )
 }

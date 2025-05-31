@@ -72,7 +72,7 @@ const sharePointResources = [
   },
 ]
 
-function TicketCard({ ticket, onViewDetails }: { ticket: TicketProps; onViewDetails: (TicketProps) => void }) {
+function TicketCard({ ticket, onViewDetails }: { ticket: TicketProps; onViewDetails: (ticket: TicketProps) => void }) {
   const statusColors = {
     open: "bg-blue-500/20 text-blue-400 border-blue-500/30",
     "in-progress": "bg-yellow-500/20 text-yellow-400 border-yellow-500/30",
@@ -136,152 +136,6 @@ function TicketCard({ ticket, onViewDetails }: { ticket: TicketProps; onViewDeta
         </Button>
       </div>
     </CardWrapper>
-  )
-}
-
-function PortalDashboard() {
-  return (
-    <div>
-      <h1 className="text-3xl font-bold mb-8">Client Dashboard</h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
-        {/* Quick Actions Card */}
-        <div className="card">
-          <h2 className="text-xl font-semibold mb-4 text-white">Quick Actions</h2>
-          <div className="space-y-4">
-            <Link href="/portal/tickets/new" className="btn-primary w-full block text-center">
-              Submit New Ticket
-            </Link>
-            <Link href="/portal/tickets" className="btn-outline w-full block text-center">
-              View My Tickets
-            </Link>
-            <Link href="/portal/resources" className="btn-outline w-full block text-center">
-              Access Resources
-            </Link>
-          </div>
-        </div>
-
-        {/* Recent Tickets Card */}
-        <div className="card">
-          <h2 className="text-xl font-semibold mb-4 text-white">Recent Tickets</h2>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center p-3 bg-background-500 rounded-lg">
-              <div>
-                <p className="font-medium">Email configuration issue</p>
-                <p className="text-sm text-gray-400">Submitted 2 days ago</p>
-              </div>
-              <span className="status-badge status-in-progress">In Progress</span>
-            </div>
-            <div className="flex justify-between items-center p-3 bg-background-500 rounded-lg">
-              <div>
-                <p className="font-medium">Password reset request</p>
-                <p className="text-sm text-gray-400">Submitted 5 days ago</p>
-              </div>
-              <span className="status-badge status-completed">Completed</span>
-            </div>
-            <Link href="/portal/tickets" className="text-sm text-primary hover:text-primary-400 block text-right mt-2">
-              View all tickets →
-            </Link>
-          </div>
-        </div>
-
-        {/* Resources Card */}
-        <div className="card">
-          <h2 className="text-xl font-semibold mb-4 text-white">Popular Resources</h2>
-          <div className="space-y-3">
-            <Link
-              href="/portal/resources/1"
-              className="flex items-center p-3 bg-background-500 rounded-lg hover:bg-background-400 transition-colors"
-            >
-              <svg
-                className="w-5 h-5 text-primary mr-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                ></path>
-              </svg>
-              <span>Email Setup Guide</span>
-            </Link>
-            <Link
-              href="/portal/resources/2"
-              className="flex items-center p-3 bg-background-500 rounded-lg hover:bg-background-400 transition-colors"
-            >
-              <svg
-                className="w-5 h-5 text-primary mr-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                ></path>
-              </svg>
-              <span>VPN Connection Guide</span>
-            </Link>
-            <Link
-              href="/portal/resources/3"
-              className="flex items-center p-3 bg-background-500 rounded-lg hover:bg-background-400 transition-colors"
-            >
-              <svg
-                className="w-5 h-5 text-primary mr-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                ></path>
-              </svg>
-              <span>Password Policy</span>
-            </Link>
-            <Link
-              href="/portal/resources"
-              className="text-sm text-primary hover:text-primary-400 block text-right mt-2"
-            >
-              View all resources →
-            </Link>
-          </div>
-        </div>
-      </div>
-
-      {/* Announcements */}
-      <div className="card">
-        <h2 className="text-xl font-semibold mb-4 text-white">Announcements</h2>
-        <div className="space-y-4">
-          <div className="border-l-4 border-primary pl-4">
-            <h3 className="font-medium text-white">Scheduled Maintenance</h3>
-            <p className="text-sm text-gray-400 mb-2">Posted on May 15, 2023</p>
-            <p className="text-gray-300">
-              We will be performing scheduled maintenance on our servers this weekend. Services may be intermittently
-              unavailable between 2:00 AM and 5:00 AM EST on Sunday.
-            </p>
-          </div>
-          <div className="border-l-4 border-accent pl-4">
-            <h3 className="font-medium text-white">New Resource Library</h3>
-            <p className="text-sm text-gray-400 mb-2">Posted on May 10, 2023</p>
-            <p className="text-gray-300">
-              We've updated our resource library with new guides and documentation. Check out the Resources section to
-              access the latest materials.
-            </p>
-          </div>
-        </div>
-      </div>
-    </div>
   )
 }
 
@@ -423,7 +277,6 @@ function ServiceDeskPortalContent() {
           {/* Overview Tab */}
           {activeTab === "overview" && (
             <div className="space-y-8">
-              <PortalDashboard />
               {/* Quick Stats */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <CardWrapper className="text-center">
