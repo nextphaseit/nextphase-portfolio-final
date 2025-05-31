@@ -18,6 +18,37 @@ if (missingEnvVars.length > 0) {
   console.error("Missing required environment variables:", missingEnvVars.join(", "))
 }
 
+// Demo accounts for testing
+const DEMO_ACCOUNTS = [
+  {
+    id: "admin-adrian",
+    name: "Adrian Knight",
+    email: "adrian.knight@nextphaseit.org",
+    password: "admin123",
+    role: "admin",
+    department: "IT Operations",
+    image: "/placeholder.svg?height=40&width=40&text=AK",
+  },
+  {
+    id: "demo-admin",
+    name: "Demo Admin",
+    email: "demo@nextphaseit.org",
+    password: "demo123",
+    role: "admin",
+    department: "Administration",
+    image: "/placeholder.svg?height=40&width=40&text=DA",
+  },
+  {
+    id: "staff-support",
+    name: "Support Staff",
+    email: "support@nextphaseit.org",
+    password: "support123",
+    role: "staff",
+    department: "Technical Support",
+    image: "/placeholder.svg?height=40&width=40&text=SS",
+  },
+]
+
 // NextAuth configuration options
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -38,7 +69,7 @@ export const authOptions: NextAuthOptions = {
         ]
       : []),
 
-    // Credentials Provider for development
+    // Credentials Provider for development and demo
     CredentialsProvider({
       name: "NextPhase IT Credentials",
       credentials: {
@@ -61,15 +92,20 @@ export const authOptions: NextAuthOptions = {
             return null
           }
 
-          // Check for admin credentials
-          if (credentials.email === "adrian.knight@nextphaseit.org" && credentials.password === "admin123") {
-            console.log("Admin login successful")
+          // Find matching demo account
+          const demoAccount = DEMO_ACCOUNTS.find(
+            (account) => account.email === credentials.email && account.password === credentials.password,
+          )
+
+          if (demoAccount) {
+            console.log(`Demo login successful for: ${demoAccount.email}`)
             return {
-              id: "admin-adrian",
-              name: "Adrian Knight",
-              email: credentials.email,
-              image: "/placeholder.svg?height=40&width=40&text=AK",
-              role: "admin",
+              id: demoAccount.id,
+              name: demoAccount.name,
+              email: demoAccount.email,
+              image: demoAccount.image,
+              role: demoAccount.role,
+              department: demoAccount.department,
             }
           }
 
@@ -106,6 +142,7 @@ export const authOptions: NextAuthOptions = {
           token.email = user.email
           token.picture = user.image
           token.role = (user as any).role || "user"
+          token.department = (user as any).department
 
           if (account) {
             token.provider = account.provider
@@ -127,6 +164,7 @@ export const authOptions: NextAuthOptions = {
           session.user.email = token.email as string
           session.user.image = token.picture as string
           session.user.role = token.role as string
+          session.user.department = token.department as string
         }
         return session
       } catch (error) {
@@ -137,7 +175,7 @@ export const authOptions: NextAuthOptions = {
 
     async signIn({ user, account, profile }) {
       try {
-        // Allow all sign-ins for now
+        // Allow all sign-ins for demo accounts
         console.log("Sign-in attempt:", { user: user?.email, provider: account?.provider })
         return true
       } catch (error) {
