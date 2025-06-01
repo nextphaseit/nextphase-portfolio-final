@@ -1,5 +1,5 @@
 import NextAuth from "next-auth"
-import MicrosoftProvider from "next-auth/providers/microsoft"
+import AzureADProvider from "next-auth/providers/azure-ad"
 import CredentialsProvider from "next-auth/providers/credentials"
 import type { NextAuthOptions } from "next-auth"
 
@@ -37,8 +37,8 @@ const DEMO_ACCOUNTS = [
 // NextAuth configuration options
 export const authOptions: NextAuthOptions = {
   providers: [
-    // Microsoft Provider with PKCE enabled
-    MicrosoftProvider({
+    // Azure AD Provider with PKCE enabled (correct provider for Microsoft)
+    AzureADProvider({
       clientId: process.env.MICROSOFT_CLIENT_ID!,
       clientSecret: process.env.MICROSOFT_CLIENT_SECRET!,
       tenantId: process.env.MICROSOFT_TENANT_ID || "common",
