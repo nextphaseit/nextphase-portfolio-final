@@ -1,5 +1,5 @@
 import NextAuth from "next-auth"
-import AzureADProvider from "next-auth/providers/azure-ad"
+import MicrosoftProvider from "next-auth/providers/microsoft"
 import CredentialsProvider from "next-auth/providers/credentials"
 import type { NextAuthOptions } from "next-auth"
 
@@ -37,6 +37,19 @@ const DEMO_ACCOUNTS = [
 // NextAuth configuration options
 export const authOptions: NextAuthOptions = {
   providers: [
+    // Microsoft Provider with PKCE enabled
+    MicrosoftProvider({
+      clientId: process.env.MICROSOFT_CLIENT_ID!,
+      clientSecret: process.env.MICROSOFT_CLIENT_SECRET!,
+      tenantId: process.env.MICROSOFT_TENANT_ID || "common",
+      authorization: {
+        params: {
+          scope: "openid email profile",
+          response_type: "code",
+        },
+      },
+    }),
+
     // Credentials Provider for development and demo
     CredentialsProvider({
       name: "credentials",
@@ -76,17 +89,6 @@ export const authOptions: NextAuthOptions = {
         return null
       },
     }),
-
-    // Microsoft Azure AD Provider (only if credentials are available)
-    ...(process.env.MICROSOFT_CLIENT_ID && process.env.MICROSOFT_CLIENT_SECRET
-      ? [
-          AzureADProvider({
-            clientId: process.env.MICROSOFT_CLIENT_ID,
-            clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
-            tenantId: process.env.MICROSOFT_TENANT_ID || "common",
-          }),
-        ]
-      : []),
   ],
 
   // Session configuration
@@ -103,26 +105,48 @@ export const authOptions: NextAuthOptions = {
 
   // Callbacks
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
+      // Add user data to token when signing in
       if (user) {
         token.id = user.id
         token.role = (user as any).role || "user"
         token.department = (user as any).department
+
+        // Add provider information
+        if (account) {
+          token.provider = account.provider
+        }
       }
       return token
     },
 
     async session({ session, token }) {
+      // Add token data to session
       if (session.user) {
         session.user.id = token.id as string
         session.user.role = token.role as string
         session.user.department = token.department as string
+        session.user.provider = token.provider as string
       }
       return session
     },
 
-    async signIn() {
+    async signIn({ user, account, profile }) {
+      // Allow all sign-ins
+      console.log("Sign-in attempt:", {
+        user: user?.email,
+        provider: account?.provider,
+        profile: profile?.email,
+      })
       return true
+    },
+
+    async redirect({ url, baseUrl }) {
+      // Allows relative callback URLs
+      if (url.startsWith("/")) return `${baseUrl}${url}`
+      // Allows callback URLs on the same origin
+      else if (new URL(url).origin === baseUrl) return url
+      return baseUrl
     },
   },
 
@@ -131,6 +155,23 @@ export const authOptions: NextAuthOptions = {
 
   // Debug mode for development
   debug: process.env.NODE_ENV === "development",
+
+  // Events for logging
+  events: {
+    async signIn({ user, account, profile }) {
+      console.log("User signed in:", {
+        user: user.email,
+        provider: account?.provider,
+        timestamp: new Date().toISOString(),
+      })
+    },
+    async signOut({ session }) {
+      console.log("User signed out:", {
+        user: session?.user?.email,
+        timestamp: new Date().toISOString(),
+      })
+    },
+  },
 }
 
 const handler = NextAuth(authOptions)
