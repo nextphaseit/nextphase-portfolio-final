@@ -1,7 +1,23 @@
 import NextAuth from "next-auth"
-import MicrosoftProvider from "next-auth/providers/microsoft"
-import CredentialsProvider from "next-auth/providers/credentials"
 import type { NextAuthOptions } from "next-auth"
+import CredentialsProvider from "next-auth/providers/credentials"
+
+// Try different import approaches for Microsoft provider
+let MicrosoftProvider: any
+try {
+  // Try the standard import
+  MicrosoftProvider = require("next-auth/providers/microsoft").default
+} catch (e) {
+  try {
+    // Try alternative import
+    const providers = require("next-auth/providers")
+    MicrosoftProvider = providers.MicrosoftProvider || providers.Microsoft
+  } catch (e2) {
+    // Fallback to Azure AD configured for Microsoft
+    MicrosoftProvider = require("next-auth/providers/azure-ad").default
+    console.warn("Using AzureAD provider as Microsoft provider fallback")
+  }
+}
 
 // Demo accounts for testing
 const DEMO_ACCOUNTS = [
@@ -48,6 +64,8 @@ export const authOptions: NextAuthOptions = {
           response_type: "code",
         },
       },
+      // Ensure we use Microsoft Identity Platform v2.0 endpoints
+      wellKnown: `https://login.microsoftonline.com/${process.env.MICROSOFT_TENANT_ID || "common"}/v2.0/.well-known/openid_configuration`,
     }),
 
     // Credentials Provider for development and demo
