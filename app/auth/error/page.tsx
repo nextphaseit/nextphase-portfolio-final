@@ -2,15 +2,30 @@
 
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { AlertCircle, ArrowLeft, Shield, RefreshCw } from "lucide-react"
+import { AlertCircle, Shield, RefreshCw, Home } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Image from "next/image"
+import { useEffect, useState } from "react"
+
+interface ErrorDetails {
+  title: string
+  message: string
+  suggestion: string
+  canRetry: boolean
+}
 
 export default function AuthErrorPage() {
   const searchParams = useSearchParams()
   const error = searchParams.get("error")
+  const errorDescription = searchParams.get("error_description")
+  const [errorDetails, setErrorDetails] = useState<ErrorDetails | null>(null)
 
-  const getErrorDetails = (error: string | null) => {
+  useEffect(() => {
+    const details = getErrorDetails(error, errorDescription)
+    setErrorDetails(details)
+  }, [error, errorDescription])
+
+  const getErrorDetails = (error: string | null, description: string | null): ErrorDetails => {
     switch (error) {
       case "AccessDenied":
         return {
@@ -85,17 +100,26 @@ export default function AuthErrorPage() {
       default:
         return {
           title: "Authentication Error",
-          message: "An unexpected error occurred during authentication.",
+          message: description || "An unexpected error occurred during authentication.",
           suggestion: "Please try again or contact support if the problem persists.",
           canRetry: true,
         }
     }
   }
 
-  const errorDetails = getErrorDetails(error)
+  if (!errorDetails) {
+    return (
+      <div className="min-h-screen bg-[#0a192f] text-white flex items-center justify-center p-8">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0070f3] mx-auto"></div>
+          <p className="mt-4 text-gray-300">Loading error details...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center p-8">
+    <div className="min-h-screen bg-[#0a192f] text-white flex items-center justify-center p-8">
       <div className="max-w-md w-full text-center">
         {/* Logo */}
         <div className="mb-8">
@@ -127,7 +151,7 @@ export default function AuthErrorPage() {
         {/* Action Buttons */}
         <div className="space-y-4">
           {errorDetails.canRetry && (
-            <Button asChild className="w-full bg-primary hover:bg-primary/90">
+            <Button asChild className="w-full bg-[#0070f3] hover:bg-[#0070f3]/90">
               <Link href="/auth/signin" className="flex items-center gap-2">
                 <RefreshCw size={16} />
                 Try Again
@@ -135,9 +159,9 @@ export default function AuthErrorPage() {
             </Button>
           )}
 
-          <Button asChild variant="outline" className="w-full">
+          <Button asChild variant="outline" className="w-full border-gray-600 text-gray-300 hover:bg-gray-800">
             <Link href="/" className="flex items-center gap-2">
-              <ArrowLeft size={16} />
+              <Home size={16} />
               Go to Main Site
             </Link>
           </Button>
@@ -149,6 +173,11 @@ export default function AuthErrorPage() {
             <p className="text-xs text-gray-500">
               Error Code: <span className="font-mono text-red-400">{error}</span>
             </p>
+            {errorDescription && (
+              <p className="text-xs text-gray-500 mt-1">
+                Details: <span className="font-mono text-gray-400">{errorDescription}</span>
+              </p>
+            )}
           </div>
         )}
 
@@ -156,7 +185,7 @@ export default function AuthErrorPage() {
         <div className="mt-4">
           <p className="text-xs text-gray-500">
             Need help?{" "}
-            <a href="mailto:admin@nextphaseit.org" className="text-primary hover:text-primary/80 transition-colors">
+            <a href="mailto:admin@nextphaseit.org" className="text-[#0070f3] hover:text-[#0070f3]/80 transition-colors">
               Contact Admin Support
             </a>
           </p>
