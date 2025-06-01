@@ -1,5 +1,5 @@
 import NextAuth from "next-auth"
-import AzureADProvider from "next-auth/providers/azure-ad"
+import MicrosoftProvider from "next-auth/providers/microsoft"
 import CredentialsProvider from "next-auth/providers/credentials"
 import type { NextAuthOptions } from "next-auth"
 
@@ -37,20 +37,17 @@ const DEMO_ACCOUNTS = [
 // NextAuth configuration options
 export const authOptions: NextAuthOptions = {
   providers: [
-    // Azure AD Provider configured for Microsoft Identity Platform v2.0 with PKCE
-    AzureADProvider({
+    // Microsoft Provider with PKCE enabled for Microsoft Identity Platform v2.0
+    MicrosoftProvider({
       clientId: process.env.MICROSOFT_CLIENT_ID!,
       clientSecret: process.env.MICROSOFT_CLIENT_SECRET!,
-      tenantId: process.env.MICROSOFT_TENANT_ID || "common",
+      tenantId: process.env.MICROSOFT_TENANT_ID,
       authorization: {
         params: {
           scope: "openid email profile",
           response_type: "code",
-          // PKCE is automatically enabled by NextAuth.js for Azure AD
         },
       },
-      // Ensure we use the v2.0 endpoints
-      wellKnown: `https://login.microsoftonline.com/${process.env.MICROSOFT_TENANT_ID || "common"}/v2.0/.well-known/openid_configuration`,
     }),
 
     // Credentials Provider for development and demo
