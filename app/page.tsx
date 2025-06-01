@@ -1,149 +1,189 @@
-import Image from "next/image"
-import Link from "next/link"
+"use client"
+
+import { useSession } from "next-auth/react"
+import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { HelpCircle, Shield, Users, ArrowRight, Phone, Mail, Clock } from "lucide-react"
+import { Services } from "@/components/services"
+import { Stats } from "@/components/stats"
+import { Testimonials } from "@/components/testimonials"
+import { ContactForm } from "@/components/contact-form"
+import { Projects } from "@/components/projects"
+import { Skills } from "@/components/skills"
+import { Chatbot } from "@/components/chatbot"
+import { ArrowRight, CheckCircle, Star, Users } from "lucide-react"
+import Link from "next/link"
 
 export default function HomePage() {
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* Header */}
-      <header className="container mx-auto px-4 py-8">
-        <div className="flex justify-center">
-          <Image src="/logo.png" alt="NextPhase IT Logo" width={120} height={120} className="h-20 w-auto" priority />
-        </div>
-      </header>
+  const { data: session, status } = useSession()
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-12">
-        {/* Hero Section */}
-        <div className="text-center mb-16">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">NextPhase IT Help Desk Portal</h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Professional IT support and service management for NextPhase IT employees
-          </p>
-        </div>
-
-        {/* CTA Buttons */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
-          <Button
-            asChild
-            size="lg"
-            className="bg-primary hover:bg-primary/90 text-white px-8 py-4 text-lg glow-on-hover"
-          >
-            <Link href="/client" className="flex items-center gap-2">
-              Service Desk Portal
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-          </Button>
-
-          <Button
-            asChild
-            size="lg"
-            variant="destructive"
-            className="bg-red-600 hover:bg-red-700 text-white px-8 py-4 text-lg glow-on-hover"
-          >
-            <Link href="/admin" className="flex items-center gap-2">
-              Admin Portal
-              <Shield className="w-5 h-5" />
-            </Link>
-          </Button>
-        </div>
-
-        {/* Feature Cards */}
-        <div className="grid md:grid-cols-3 gap-8 mb-16">
-          <Card className="text-center hover:shadow-lg transition-shadow duration-300 border-0 shadow-md">
-            <CardHeader>
-              <div className="mx-auto w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-                <HelpCircle className="w-8 h-8 text-primary" />
-              </div>
-              <CardTitle className="text-xl font-semibold">Support Portal</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-gray-600 mb-4">
-                Submit tickets, track requests, and get help from our IT support team.
-              </CardDescription>
-              <Button asChild variant="outline" className="w-full">
-                <Link href="/client" className="flex items-center justify-center gap-2">
-                  Submit Ticket
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="text-center hover:shadow-lg transition-shadow duration-300 border-0 shadow-md">
-            <CardHeader>
-              <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                <Shield className="w-8 h-8 text-green-600" />
-              </div>
-              <CardTitle className="text-xl font-semibold">Admin Dashboard</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-gray-600 mb-4">
-                Manage tickets, users, and system settings. Authentication required.
-              </CardDescription>
-              <Button asChild variant="outline" className="w-full">
-                <Link href="/admin" className="flex items-center justify-center gap-2">
-                  Sign In
-                  <ArrowRight className="w-4 h-4" />
-                </Link>
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className="text-center hover:shadow-lg transition-shadow duration-300 border-0 shadow-md">
-            <CardHeader>
-              <div className="mx-auto w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mb-4">
-                <Users className="w-8 h-8 text-purple-600" />
-              </div>
-              <CardTitle className="text-xl font-semibold">Contact Support</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <CardDescription className="text-gray-600 mb-4">Need immediate assistance?</CardDescription>
-              <div className="space-y-2 text-sm">
-                <div className="flex items-center justify-center gap-2">
-                  <Phone className="w-4 h-4" />
-                  <span className="font-medium">(984) 310-9533</span>
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <Mail className="w-4 h-4" />
-                  <span>support@nextphaseit.org</span>
-                </div>
-                <div className="flex items-center justify-center gap-2">
-                  <Clock className="w-4 h-4" />
-                  <span>Mon-Fri 8AM-6PM EST</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Access Information */}
-        <div className="text-center text-gray-600 space-y-2">
-          <p className="text-lg">Access professional portals with your NextPhase IT Microsoft account</p>
-          <div className="space-y-1 text-sm">
-            <p>
-              <span className="font-medium">admin@nextphaseit.org</span> → Admin Portal
-            </p>
-            <p>
-              <span className="font-medium">support@nextphaseit.org</span> → Support Portal
-            </p>
-            <p>
-              <span className="font-medium">Other @nextphaseit.org</span> → General Portal
-            </p>
-          </div>
-        </div>
+  if (status === "loading") {
+    return (
+      <main className="min-h-screen bg-black text-white flex items-center justify-center">
+        <p>Loading...</p>
       </main>
+    )
+  }
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-gray-200 mt-20">
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center text-gray-600">
-            <p>&copy; 2025 NextPhase IT. All rights reserved.</p>
+  if (status === "unauthenticated" || status === "authenticated") {
+    return (
+      <main className="min-h-screen bg-black text-white">
+        <Navbar />
+
+        {/* Hero Section */}
+        <section className="relative overflow-hidden">
+          {/* Background gradient */}
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-secondary/20" />
+
+          <div className="container mx-auto px-4 pt-32 pb-20 relative">
+            <div className="grid grid-cols-1 gap-12 items-center">
+              <div className="space-y-8 text-center">
+                <div className="space-y-4">
+                  <h1 className="text-4xl md:text-6xl font-bold leading-tight">
+                    Professional
+                    <span className="text-primary block">IT Services</span>
+                    for Your Business
+                  </h1>
+                  <p className="text-xl text-gray-400 leading-relaxed">
+                    Comprehensive technology solutions, expert support, and strategic consulting to help your business
+                    thrive in the digital age.
+                  </p>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button size="lg" className="bg-primary hover:bg-primary/90" asChild>
+                    <Link href="/about">
+                      Get Started
+                      <ArrowRight className="ml-2" size={20} />
+                    </Link>
+                  </Button>
+                  <Button size="lg" variant="outline" asChild>
+                    <Link href="/pricing">View Pricing</Link>
+                  </Button>
+                </div>
+
+                {/* Trust indicators */}
+                <div className="flex items-center gap-6 pt-8 justify-center">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle className="text-green-400" size={20} />
+                    <span className="text-sm">24/7 Support</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Star className="text-yellow-400" size={20} />
+                    <span className="text-sm">5-Star Rated</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Users className="text-blue-400" size={20} />
+                    <span className="text-sm">500+ Clients</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </footer>
-    </div>
+        </section>
+
+        {/* Services Section */}
+        <Services />
+
+        {/* Stats Section */}
+        <Stats />
+
+        {/* Projects Section */}
+        <Projects />
+
+        {/* Skills Section */}
+        <Skills />
+
+        {/* Testimonials Section */}
+        <Testimonials />
+
+        {/* Contact Section */}
+        <ContactForm />
+
+        {/* Chatbot */}
+        <Chatbot />
+
+        {/* Footer */}
+        <footer className="bg-card mt-20">
+          <div className="container mx-auto px-4 py-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              <div>
+                <h3 className="text-xl font-bold mb-4">NextPhase IT</h3>
+                <p className="text-gray-400 mb-4">
+                  Professional IT services and solutions for businesses of all sizes.
+                </p>
+                <div className="flex space-x-4">{/* Social media links would go here */}</div>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-4">Services</h4>
+                <ul className="space-y-2 text-gray-400">
+                  <li>
+                    <Link href="/services" className="hover:text-primary transition-colors">
+                      IT Support
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/services" className="hover:text-primary transition-colors">
+                      Cloud Solutions
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/services" className="hover:text-primary transition-colors">
+                      Cybersecurity
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/services" className="hover:text-primary transition-colors">
+                      Consulting
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-4">Company</h4>
+                <ul className="space-y-2 text-gray-400">
+                  <li>
+                    <Link href="/about" className="hover:text-primary transition-colors">
+                      About Us
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/testimonials" className="hover:text-primary transition-colors">
+                      Testimonials
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/pricing" className="hover:text-primary transition-colors">
+                      Pricing
+                    </Link>
+                  </li>
+                  <li>
+                    <Link href="/contact" className="hover:text-primary transition-colors">
+                      Contact
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+              <div>
+                <h4 className="font-semibold mb-4">Contact</h4>
+                <ul className="space-y-2 text-gray-400">
+                  <li>support@nextphaseit.org</li>
+                  <li>(984) 310-9533</li>
+                  <li>Charlotte, NC</li>
+                </ul>
+              </div>
+            </div>
+            <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+              <p>&copy; 2024 NextPhase IT. All rights reserved.</p>
+            </div>
+          </div>
+        </footer>
+      </main>
+    )
+  }
+
+  return (
+    <main className="min-h-screen bg-black text-white flex items-center justify-center">
+      <p>Error: Authentication failed.</p>
+    </main>
   )
 }

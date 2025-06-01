@@ -1,332 +1,211 @@
 "use client"
 
-import { useState } from "react"
-import Image from "next/image"
-import Link from "next/link"
+import { useSession } from "next-auth/react"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { ArrowLeft, Search, Filter, MoreHorizontal, Users, Clock, CheckCircle, AlertCircle } from "lucide-react"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import AdminReportsModule from "@/components/admin-reports-module"
+import AdminSettingsModule from "@/components/admin-settings-module"
+import AdminTenantManagement from "@/components/admin-tenant-management"
+import AdminAuditModule from "@/components/admin-audit-module"
+import AdminClientIntakeModule from "@/components/admin-client-intake-module"
+import HelpdeskDashboard from "@/components/helpdesk-dashboard"
+import { BarChart3, Settings, FileText, Shield, LogOut, Building, Activity, Headphones } from "lucide-react"
+import { signOut } from "next-auth/react"
 
 export default function AdminPortal() {
+  const { data: session, status } = useSession()
+  const router = useRouter()
   const [activeTab, setActiveTab] = useState("dashboard")
+  const [isClient, setIsClient] = useState(false)
 
-  const tickets = [
-    {
-      id: "12345",
-      title: "Email Setup Issue",
-      user: "John Doe",
-      status: "In Progress",
-      priority: "High",
-      created: "2024-12-15",
-    },
-    {
-      id: "12344",
-      title: "Software Installation",
-      user: "Jane Smith",
-      status: "Completed",
-      priority: "Medium",
-      created: "2024-12-14",
-    },
-    {
-      id: "12343",
-      title: "Network Connectivity",
-      user: "Bob Johnson",
-      status: "Open",
-      priority: "High",
-      created: "2024-12-14",
-    },
-    {
-      id: "12342",
-      title: "Password Reset",
-      user: "Alice Brown",
-      status: "Closed",
-      priority: "Low",
-      created: "2024-12-13",
-    },
-  ]
+  useEffect(() => {
+    setIsClient(true)
+  }, [])
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "Open":
-        return "bg-blue-100 text-blue-800"
-      case "In Progress":
-        return "bg-yellow-100 text-yellow-800"
-      case "Completed":
-        return "bg-green-100 text-green-800"
-      case "Closed":
-        return "bg-gray-100 text-gray-800"
-      default:
-        return "bg-gray-100 text-gray-800"
+  useEffect(() => {
+    if (!isClient) return
+
+    if (status === "loading") return // Still loading
+
+    if (status === "unauthenticated") {
+      router.push("/auth/signin?callbackUrl=/admin")
+      return
     }
+
+    // Check if user has @nextphaseit.org email
+    if (session?.user?.email && !session.user.email.endsWith("@nextphaseit.org")) {
+      router.push("/auth/error?error=AccessDenied")
+      return
+    }
+
+    // Check if user is admin
+    if (session?.user?.role !== "admin") {
+      router.push("/auth/error?error=AccessDenied")
+      return
+    }
+  }, [session, status, router, isClient])
+
+  if (!isClient || status === "loading") {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p>Loading admin portal...</p>
+        </div>
+      </div>
+    )
   }
 
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case "High":
-        return "bg-red-100 text-red-800"
-      case "Medium":
-        return "bg-yellow-100 text-yellow-800"
-      case "Low":
-        return "bg-green-100 text-green-800"
-      default:
-        return "bg-gray-100 text-gray-800"
-    }
+  if (!session || !session.user?.email?.endsWith("@nextphaseit.org") || session.user?.role !== "admin") {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <Shield className="text-red-500 mx-auto mb-4" size={48} />
+          <h1 className="text-2xl font-bold mb-2">Access Denied</h1>
+          <p className="text-gray-400 mb-4">You don't have permission to access this admin portal.</p>
+          <Button onClick={() => router.push("/")} variant="outline">
+            Return to Home
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
+    <div className="min-h-screen bg-black text-white">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b">
+      <header className="border-b border-gray-800 bg-gray-900/50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Button asChild variant="ghost" size="sm">
-                <Link href="/" className="flex items-center gap-2">
-                  <ArrowLeft className="w-4 h-4" />
-                  Back to Portal
-                </Link>
-              </Button>
-              <Image src="/logo.png" alt="NextPhase IT Logo" width={40} height={40} className="h-10 w-auto" />
-              <h1 className="text-xl font-semibold">Admin Portal</h1>
+              <Shield className="text-red-500" size={32} />
+              <div>
+                <h1 className="text-2xl font-bold">NextPhase IT Admin Portal</h1>
+                <p className="text-sm text-gray-400">Administrative Dashboard</p>
+              </div>
             </div>
             <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-600">admin@nextphaseit.org</span>
-              <Button variant="outline">Sign Out</Button>
+              <div className="text-right">
+                <p className="text-sm font-medium">{session.user.name}</p>
+                <p className="text-xs text-gray-400">{session.user.email}</p>
+              </div>
+              <Button
+                onClick={() => signOut({ callbackUrl: "/" })}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <LogOut size={16} />
+                Sign Out
+              </Button>
             </div>
           </div>
         </div>
       </header>
 
-      {/* Navigation Tabs */}
-      <div className="bg-white border-b">
-        <div className="container mx-auto px-4">
-          <nav className="flex space-x-8">
-            {[
-              { id: "dashboard", label: "Dashboard" },
-              { id: "tickets", label: "Ticket Manager" },
-              { id: "users", label: "User Management" },
-              { id: "settings", label: "Settings" },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`py-4 px-2 border-b-2 font-medium text-sm ${
-                  activeTab === tab.id
-                    ? "border-primary text-primary"
-                    : "border-transparent text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-        </div>
-      </div>
-
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
-        {activeTab === "dashboard" && (
-          <div className="space-y-8">
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Total Tickets</p>
-                      <p className="text-3xl font-bold">47</p>
-                    </div>
-                    <div className="h-12 w-12 bg-blue-100 rounded-full flex items-center justify-center">
-                      <AlertCircle className="h-6 w-6 text-blue-600" />
-                    </div>
-                  </div>
-                  <p className="text-xs text-green-600 mt-2">+12% from last week</p>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-7 bg-gray-800">
+            <TabsTrigger value="dashboard" className="flex items-center gap-2">
+              <BarChart3 size={16} />
+              Dashboard
+            </TabsTrigger>
+            <TabsTrigger value="helpdesk" className="flex items-center gap-2">
+              <Headphones size={16} />
+              Help Desk
+            </TabsTrigger>
+            <TabsTrigger value="reports" className="flex items-center gap-2">
+              <Activity size={16} />
+              Reports
+            </TabsTrigger>
+            <TabsTrigger value="tenants" className="flex items-center gap-2">
+              <Building size={16} />
+              Tenants
+            </TabsTrigger>
+            <TabsTrigger value="intake" className="flex items-center gap-2">
+              <FileText size={16} />
+              Intake
+            </TabsTrigger>
+            <TabsTrigger value="audit" className="flex items-center gap-2">
+              <Shield size={16} />
+              Audit
+            </TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2">
+              <Settings size={16} />
+              Settings
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="dashboard" className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <Card className="bg-gray-900 border-gray-700">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-400">Total Tenants</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">12</div>
+                  <p className="text-xs text-green-400">+2 this month</p>
                 </CardContent>
               </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Open Tickets</p>
-                      <p className="text-3xl font-bold">12</p>
-                    </div>
-                    <div className="h-12 w-12 bg-yellow-100 rounded-full flex items-center justify-center">
-                      <Clock className="h-6 w-6 text-yellow-600" />
-                    </div>
-                  </div>
-                  <p className="text-xs text-red-600 mt-2">+3 since yesterday</p>
+              <Card className="bg-gray-900 border-gray-700">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-400">Active Tickets</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">47</div>
+                  <p className="text-xs text-yellow-400">8 high priority</p>
                 </CardContent>
               </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Avg Response Time</p>
-                      <p className="text-3xl font-bold">2.4h</p>
-                    </div>
-                    <div className="h-12 w-12 bg-green-100 rounded-full flex items-center justify-center">
-                      <CheckCircle className="h-6 w-6 text-green-600" />
-                    </div>
-                  </div>
-                  <p className="text-xs text-green-600 mt-2">-15% improvement</p>
+              <Card className="bg-gray-900 border-gray-700">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-400">Avg Response Time</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">2.4h</div>
+                  <p className="text-xs text-green-400">-15% from last week</p>
                 </CardContent>
               </Card>
-
-              <Card>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-600">Active Users</p>
-                      <p className="text-3xl font-bold">156</p>
-                    </div>
-                    <div className="h-12 w-12 bg-purple-100 rounded-full flex items-center justify-center">
-                      <Users className="h-6 w-6 text-purple-600" />
-                    </div>
-                  </div>
-                  <p className="text-xs text-green-600 mt-2">+8 new this month</p>
+              <Card className="bg-gray-900 border-gray-700">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-gray-400">Resolution Rate</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">94%</div>
+                  <p className="text-xs text-green-400">+3% this month</p>
                 </CardContent>
               </Card>
             </div>
+            <AdminReportsModule />
+          </TabsContent>
 
-            {/* Recent Activity */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>Latest ticket updates and system events</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {tickets.slice(0, 3).map((ticket) => (
-                    <div key={ticket.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex items-center gap-4">
-                        <div>
-                          <p className="font-medium">
-                            #{ticket.id} - {ticket.title}
-                          </p>
-                          <p className="text-sm text-gray-600">by {ticket.user}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className={getPriorityColor(ticket.priority)}>{ticket.priority}</Badge>
-                        <Badge className={getStatusColor(ticket.status)}>{ticket.status}</Badge>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+          <TabsContent value="helpdesk">
+            <HelpdeskDashboard />
+          </TabsContent>
 
-        {activeTab === "tickets" && (
-          <div className="space-y-6">
-            {/* Filters */}
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="flex-1">
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                      <Input placeholder="Search tickets..." className="pl-10" />
-                    </div>
-                  </div>
-                  <Select>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="open">Open</SelectItem>
-                      <SelectItem value="in-progress">In Progress</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="closed">Closed</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Select>
-                    <SelectTrigger className="w-[180px]">
-                      <SelectValue placeholder="Priority" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Priority</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="low">Low</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <Button variant="outline">
-                    <Filter className="h-4 w-4 mr-2" />
-                    Filter
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+          <TabsContent value="reports">
+            <AdminReportsModule />
+          </TabsContent>
 
-            {/* Tickets Table */}
-            <Card>
-              <CardHeader>
-                <CardTitle>All Tickets</CardTitle>
-                <CardDescription>Manage and track all support tickets</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {tickets.map((ticket) => (
-                    <div
-                      key={ticket.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div>
-                          <p className="font-medium">
-                            #{ticket.id} - {ticket.title}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            {ticket.user} • Created {ticket.created}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Badge className={getPriorityColor(ticket.priority)}>{ticket.priority}</Badge>
-                        <Badge className={getStatusColor(ticket.status)}>{ticket.status}</Badge>
-                        <Button variant="ghost" size="sm">
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
+          <TabsContent value="tenants">
+            <AdminTenantManagement />
+          </TabsContent>
 
-        {activeTab === "users" && (
-          <Card>
-            <CardHeader>
-              <CardTitle>User Management</CardTitle>
-              <CardDescription>Manage user accounts and permissions</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600">User management features coming soon...</p>
-            </CardContent>
-          </Card>
-        )}
+          <TabsContent value="intake">
+            <AdminClientIntakeModule />
+          </TabsContent>
 
-        {activeTab === "settings" && (
-          <Card>
-            <CardHeader>
-              <CardTitle>System Settings</CardTitle>
-              <CardDescription>Configure portal settings and integrations</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600">Settings panel coming soon...</p>
-            </CardContent>
-          </Card>
-        )}
+          <TabsContent value="audit">
+            <AdminAuditModule />
+          </TabsContent>
+
+          <TabsContent value="settings">
+            <AdminSettingsModule />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   )
