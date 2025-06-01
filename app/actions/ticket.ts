@@ -170,7 +170,7 @@ function generateInternalNotificationEmail(ticketData: TicketData & { ticketNumb
             <a href="mailto:${ticketData.clientEmail || "support@nextphaseit.org"}?subject=Re: Support Ticket #${ticketData.ticketNumber} - ${ticketData.subject}&body=Hello ${ticketData.clientName || "there"},%0D%0A%0D%0AThank you for contacting NextPhase IT support. We have received your ticket and are working on it.%0D%0A%0D%0ATicket #: ${ticketData.ticketNumber}%0D%0ASubject: ${ticketData.subject}%0D%0A%0D%0ABest regards,%0D%0ANextPhase IT Support Team" style="background-color: #059669; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; margin-right: 10px; display: inline-block;">
               📧 Reply to Client
             </a>
-            <a href="https://nextphaseit.org/admin" style="background-color: #1E5AA8; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
+            <a href="https://portal.nextphaseit.org/" style="background-color: #1E5AA8; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; font-weight: bold; display: inline-block;">
               📋 View in Admin Portal
             </a>
           </div>
