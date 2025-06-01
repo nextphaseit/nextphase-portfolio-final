@@ -2,8 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
-
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -67,10 +65,10 @@
   }
 
   .glow-on-hover:hover {
-    @apply shadow-glow transform scale-105;
+    @apply shadow-lg transform scale-105;
   }
 
   .glow-accent-hover:hover {
-    @apply shadow-glow-accent;
+    @apply shadow-lg shadow-accent/20;
   }
 }
