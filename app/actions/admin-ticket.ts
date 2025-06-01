@@ -75,7 +75,7 @@ export async function addTicketResponse(ticketId: string, message: string, isInt
             <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 20px 0;">
               <p>${message.replace(/\n/g, "<br>")}</p>
             </div>
-            <p>You can view the full conversation and respond in your <a href="https://nextphaseit.org/portal">client portal</a>.</p>
+            <p>You can view the full conversation and respond in your <a href="https://portal.nextphaseit.org/">client portal</a>.</p>
             <p>Best regards,<br>NextPhase IT Support Team</p>
           </div>
         `,
