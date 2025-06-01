@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { SessionProvider, useSession, signOut } from "next-auth/react"
+import { SessionProvider, useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
 import { type ReactNode, createContext, useContext } from "react"
 
@@ -20,18 +20,7 @@ const AuthContext = createContext<{
 })
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-
-  const isLoading = status === "loading"
-  const isAuthenticated = status === "authenticated"
-  const isAdmin = session?.user?.role === "admin"
-
-  const logout = async () => {
-    await signOut({ callbackUrl: "/" })
-  }
-
-  return <AuthContext.Provider value={{ isAdmin, isAuthenticated, isLoading, logout }}>{children}</AuthContext.Provider>
+  return <SessionProvider>{children}</SessionProvider>
 }
 
 // Custom hook to use auth context
