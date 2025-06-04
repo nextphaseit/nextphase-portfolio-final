@@ -70,9 +70,9 @@ export default function TestimonialsPage() {
         "NextPhase IT completely transformed our tech infrastructure. From email migration to securing our data with compliance in mind, Adrian and his team were responsive, knowledgeable, and truly professional. As a small business owner, I now feel confident knowing our systems are protected and efficient. The ongoing support has been exceptional.",
     },
     {
-      author: "Alexis A.",
+      author: "Trey Sanders.",
       position: "Founder",
-      company: "Strokes of Faith",
+      company: "All about IT",
       image: "/images/about-img.png",
       title: "Custom Booking Website with Automation",
       projectType: "Web Development & Automation",
