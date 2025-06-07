@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect, useRef } from "react"
-import { X, Bot, User, ThumbsUp, ThumbsDown } from "lucide-react"
+import { X, Bot, User, Send, ThumbsUp, ThumbsDown } from "lucide-react"
 import { Button } from "./ui/button"
 import { createSupportTicket } from "@/app/actions/ticket"
 import { usePathname } from "next/navigation"
@@ -55,6 +55,12 @@ export function Chatbot() {
   })
   const messagesEndRef = useRef(null)
 
+  // Hide chatbot on auth pages
+  const shouldHideChatbot =
+    pathname?.startsWith("/auth") ||
+    pathname?.startsWith("/admin/login") ||
+    pathname?.startsWith("/portal/client-login")
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
@@ -63,11 +69,8 @@ export function Chatbot() {
     scrollToBottom()
   }, [messages])
 
-  // Hide chatbot on auth pages
-  const shouldHideChatbot = pathname?.startsWith('/auth') || pathname?.startsWith('/admin/login') || pathname?.startsWith('/portal/client-login');
-
   if (shouldHideChatbot) {
-    return null;
+    return null
   }
 
   useEffect(() => {
@@ -698,4 +701,151 @@ export function Chatbot() {
             <div className="flex justify-start">
               <div className="mr-2">
                 <div
-                  className={`w-6 h-6 rounded-full flex items
+                  className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                    chatSession.isEscalated ? "bg-orange-600" : "bg-primary"
+                  }`}
+                >
+                  <Bot size={12} className="text-white" />
+                </div>
+              </div>
+              <div className="bg-white p-3 rounded-lg border border-gray-200 shadow-sm">
+                <div className="flex space-x-1">
+                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                  <div
+                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                    style={{ animationDelay: "0.1s" }}
+                  ></div>
+                  <div
+                    className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"
+                    style={{ animationDelay: "0.2s" }}
+                  ></div>
+                </div>
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+      </div>
+
+      {/* Ticket Form Modal */}
+      {showTicketForm && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-bold text-gray-800">🎫 Create Support Ticket</h3>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowTicketForm(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <X size={16} />
+              </Button>
+            </div>
+
+            <form onSubmit={handleTicketSubmit} className="space-y-4">
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Your Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={ticketForm.clientName}
+                    onChange={(e) => setTicketForm({ ...ticketForm, clientName: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg p-2 text-sm text-gray-800 focus:outline-none focus:border-primary"
+                    placeholder="Full name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                  <input
+                    type="email"
+                    required
+                    value={ticketForm.clientEmail}
+                    onChange={(e) => setTicketForm({ ...ticketForm, clientEmail: e.target.value })}
+                    className="w-full border border-gray-300 rounded-lg p-2 text-sm text-gray-800 focus:outline-none focus:border-primary"
+                    placeholder="your@email.com"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
+                <input
+                  type="text"
+                  required
+                  value={ticketForm.subject}
+                  onChange={(e) => setTicketForm({ ...ticketForm, subject: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg p-2 text-sm text-gray-800 focus:outline-none focus:border-primary"
+                  placeholder="Brief description of the issue"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                <select
+                  value={ticketForm.priority}
+                  onChange={(e) => setTicketForm({ ...ticketForm, priority: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg p-2 text-sm text-gray-800 focus:outline-none focus:border-primary"
+                >
+                  <option value="low">🟢 Low - General question</option>
+                  <option value="medium">🟡 Medium - Standard issue</option>
+                  <option value="high">🟠 High - Important issue</option>
+                  <option value="urgent">🔴 Urgent - Business critical</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                <textarea
+                  rows={4}
+                  required
+                  value={ticketForm.description}
+                  onChange={(e) => setTicketForm({ ...ticketForm, description: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg p-2 text-sm text-gray-800 focus:outline-none focus:border-primary resize-vertical"
+                  placeholder="Please provide detailed information about your issue, including any error messages, steps to reproduce, and what you've already tried..."
+                />
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-xs text-blue-800">
+                  📧 <strong>Email Confirmation:</strong> You'll receive a confirmation email with your ticket number
+                  and details.
+                </p>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <Button
+                  type="submit"
+                  disabled={isSubmittingTicket}
+                  className="flex-1 bg-primary hover:bg-primary/90 text-white"
+                >
+                  {isSubmittingTicket ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Creating...
+                    </div>
+                  ) : (
+                    <>
+                      <Send size={14} className="mr-2" />
+                      Create Ticket
+                    </>
+                  )}
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowTicketForm(false)}
+                  className="flex-1 text-gray-700 border-gray-300"
+                  disabled={isSubmittingTicket}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
