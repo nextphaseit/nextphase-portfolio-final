@@ -61,7 +61,7 @@ export default function TestimonialsPage() {
         "NextPhase IT completely transformed our tech infrastructure. From email migration to securing our data with compliance in mind, Adrian and his team were responsive, knowledgeable, and truly professional.",
     },
     {
-      author: "Trey Sanders",
+      author: "Alexis A.",
       position: "Founder",
       company: "All about IT",
       image: "/images/about-img.png",
@@ -69,41 +69,7 @@ export default function TestimonialsPage() {
       content:
         "I needed a booking website with integrated payments and automated emails. NextPhase IT delivered exactly what I envisioned—clean design, seamless user experience, and everything works like clockwork.",
     },
-    {
-      author: "Michael Chen",
-      position: "IT Director",
-      company: "Coastal Manufacturing",
-      image: "/placeholder.svg?height=48&width=48&text=MC",
-      rating: 5,
-      content:
-        "Our migration from on-premises Exchange to Microsoft 365 was seamless thanks to NextPhase IT. Zero downtime during the transition, and the ongoing support has been fantastic.",
-    },
-    {
-      author: "Sarah Johnson",
-      position: "Practice Manager",
-      company: "Johnson Medical Group",
-      image: "/placeholder.svg?height=48&width=48&text=SJ",
-      rating: 5,
-      content:
-        "As a medical practice, HIPAA compliance is critical. NextPhase IT implemented a complete security overhaul including encrypted communications and staff training. Highly professional team.",
-    },
-    {
-      author: "David Rodriguez",
-      position: "CEO",
-      company: "Rodriguez Construction",
-      image: "/placeholder.svg?height=48&width=48&text=DR",
-      rating: 4,
-      content:
-        "NextPhase IT developed a custom field management system that connects our office with job sites in real-time. The mobile app works perfectly even in areas with poor connectivity.",
-    },
-    {
-      author: "Lisa Thompson",
-      position: "Marketing Director",
-      company: "Thompson & Associates",
-      image: "/placeholder.svg?height=48&width=48&text=LT",
-      rating: 5,
-      content:
-        "Our new website not only looks amazing but has dramatically improved our online presence. NextPhase IT's approach resulted in a 300% increase in qualified leads within the first quarter.",
+    
     },
   ]
 
