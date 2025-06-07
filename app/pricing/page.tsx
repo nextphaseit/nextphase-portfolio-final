@@ -5,7 +5,6 @@ import { Navbar } from "@/components/navbar"
 import { Button } from "@/components/ui/button"
 import { CardWrapper } from "@/components/ui/card-wrapper"
 import { Chatbot } from "@/components/chatbot"
-import { AuthProvider } from "@/providers/auth-provider"
 import { Cloud, Mail, Globe, Database, Shield, Headphones, Workflow, Users, Star, Check } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -60,7 +59,7 @@ function ServiceCard({ title, pricing, description, icon, features, popular }: S
   )
 }
 
-function PricingContent() {
+export default function PricingPage() {
   const services = [
     {
       title: "Microsoft 365 Setup & Support",
@@ -341,11 +340,6 @@ function PricingContent() {
                       Contact
                     </Link>
                   </li>
-                  <li>
-                    <Link href="/login" className="hover:text-primary transition-colors">
-                      Login
-                    </Link>
-                  </li>
                 </ul>
               </div>
               <div>
@@ -362,6 +356,11 @@ function PricingContent() {
                   <li>support@nextphaseit.org</li>
                   <li>+1 984-310-9533</li>
                   <li>Clayton, NC</li>
+                  <li>
+                    <a href="https://portal.nextphaseit.org" className="hover:text-primary transition-colors">
+                      Client Portal →
+                    </a>
+                  </li>
                 </ul>
               </div>
             </div>
@@ -375,13 +374,5 @@ function PricingContent() {
       {/* Chatbot */}
       <Chatbot />
     </main>
-  )
-}
-
-export default function PricingPage() {
-  return (
-    <AuthProvider>
-      <PricingContent />
-    </AuthProvider>
   )
 }
