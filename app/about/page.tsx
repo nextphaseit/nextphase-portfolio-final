@@ -16,20 +16,20 @@ export default function AboutPage() {
         <div className="bg-gradient-to-r from-primary to-primary-hover text-surface py-20 mt-16">
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">About NextPhase IT</h1>
-            <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
+            <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto leading-relaxed">
               Your trusted technology partner, delivering innovative solutions and expert support to help your business
-              thrive.
+              thrive in the digital age.
             </p>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="container mx-auto px-4 py-16">
+        <div className="container mx-auto px-4 py-20">
           {/* Company Overview */}
-          <section className="mb-20">
+          <section className="mb-24">
             <div className="max-w-4xl mx-auto text-center">
-              <h2 className="text-3xl font-bold mb-8 text-text-primary">Our Story</h2>
-              <p className="text-text-secondary mb-6 text-lg leading-relaxed">
+              <h2 className="text-3xl font-bold mb-10 text-text-primary">Our Story</h2>
+              <p className="text-text-secondary mb-8 text-lg leading-relaxed">
                 NextPhase IT was founded with a simple mission: to make enterprise-level technology accessible to small
                 and medium-sized businesses. We believe that every business, regardless of size, deserves secure,
                 scalable, and efficient IT solutions.
@@ -53,37 +53,37 @@ export default function AboutPage() {
           </section>
 
           {/* Values Section */}
-          <section className="mb-20">
+          <section className="mb-24">
             <h2 className="text-3xl font-bold text-center mb-12 text-text-primary">Our Core Values</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               <div className="bg-blue-50 p-6 rounded-lg shadow-md text-center">
                 <Users className="w-12 h-12 text-primary mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-3 text-text-primary">Client-Focused</h3>
-                <p className="text-text-secondary">
+                <h3 className="text-xl font-semibold mb-4 text-text-primary">Client-Focused</h3>
+                <p className="text-text-secondary leading-relaxed">
                   Every solution is tailored to meet your specific business needs and goals.
                 </p>
               </div>
 
               <div className="bg-blue-50 p-6 rounded-lg shadow-md text-center">
                 <Target className="w-12 h-12 text-primary mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-3 text-text-primary">Results-Driven</h3>
-                <p className="text-text-secondary">
+                <h3 className="text-xl font-semibold mb-4 text-text-primary">Results-Driven</h3>
+                <p className="text-text-secondary leading-relaxed">
                   We measure success by the tangible improvements we bring to your business.
                 </p>
               </div>
 
               <div className="bg-blue-50 p-6 rounded-lg shadow-md text-center">
                 <Award className="w-12 h-12 text-primary mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-3 text-text-primary">Excellence</h3>
-                <p className="text-text-secondary">
+                <h3 className="text-xl font-semibold mb-4 text-text-primary">Excellence</h3>
+                <p className="text-text-secondary leading-relaxed">
                   We maintain the highest standards in everything we do, from code to customer service.
                 </p>
               </div>
 
               <div className="bg-blue-50 p-6 rounded-lg shadow-md text-center">
                 <Heart className="w-12 h-12 text-primary mx-auto mb-4" />
-                <h3 className="text-xl font-semibold mb-3 text-text-primary">Integrity</h3>
-                <p className="text-text-secondary">
+                <h3 className="text-xl font-semibold mb-4 text-text-primary">Integrity</h3>
+                <p className="text-text-secondary leading-relaxed">
                   Honest communication and transparent processes build lasting partnerships.
                 </p>
               </div>
@@ -91,13 +91,13 @@ export default function AboutPage() {
           </section>
 
           {/* Team Section */}
-          <section className="mb-20">
+          <section className="mb-24">
             <h2 className="text-3xl font-bold text-center mb-12 text-text-primary">Meet Our Team</h2>
             <div className="max-w-2xl mx-auto">
-              <div className="bg-surface border border-border-color rounded-lg shadow-md p-6">
+              <div className="bg-surface border border-gray-200 rounded-lg shadow-md p-6">
                 <div className="text-center">
-                  <h3 className="text-2xl font-bold mb-2 text-text-primary">Adrian Knight</h3>
-                  <p className="text-primary mb-4 font-medium">Lead Web & IT Solutions Consultant</p>
+                  <h3 className="text-2xl font-bold mb-3 text-text-primary">Adrian Knight</h3>
+                  <p className="text-primary mb-6 font-medium text-lg">Lead Web & IT Solutions Consultant</p>
                   <p className="text-text-secondary mb-6 leading-relaxed">
                     With over a decade of experience in web development and IT infrastructure, Adrian leads our team in
                     delivering innovative solutions that drive business growth. Specializing in cloud migrations,
@@ -106,7 +106,7 @@ export default function AboutPage() {
                   <div className="flex justify-center">
                     <a
                       href="mailto:adrian.knight@nextphaseit.org"
-                      className="text-primary hover:text-primary-hover transition-colors font-medium"
+                      className="text-primary hover:text-primary-hover transition-colors font-medium text-lg"
                     >
                       adrian.knight@nextphaseit.org
                     </a>
@@ -117,13 +117,13 @@ export default function AboutPage() {
           </section>
 
           {/* NEW CLIENT CONTACT FORM SECTION */}
-          <section id="new-client-form" className="mb-20">
-            <div className="bg-blue-50 border border-border-color rounded-xl p-8 md:p-12">
-              <div className="text-center mb-8">
+          <section id="new-client-form" className="mb-24">
+            <div className="bg-blue-50 border border-border-color rounded-xl p-10">
+              <div className="text-center mb-10">
                 <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-6">
                   <span className="text-4xl">📋</span>
                 </div>
-                <h2 className="text-3xl font-bold mb-4 text-text-primary">Ready to Get Started?</h2>
+                <h2 className="text-3xl font-bold mb-6 text-text-primary">Ready to Get Started?</h2>
                 <p className="text-text-secondary max-w-2xl mx-auto mb-8 text-lg leading-relaxed">
                   Complete our New Client Contact Form to begin your onboarding process. Our team will review your
                   information and contact you within 24 hours to discuss your specific needs.
@@ -151,30 +151,30 @@ export default function AboutPage() {
                 </p>
               </div>
 
-              <div className="bg-surface/50 p-6 rounded-lg mt-8">
-                <h3 className="text-xl font-semibold mb-4 flex items-center text-text-primary">
+              <div className="bg-surface/70 p-6 rounded-lg mt-8">
+                <h3 className="text-xl font-semibold mb-6 flex items-center text-text-primary">
                   <Mail className="w-5 h-5 mr-2 text-primary" />
                   What happens after you submit the form?
                 </h3>
-                <ul className="space-y-3 text-text-secondary">
+                <ul className="space-y-4 text-text-secondary">
                   <li className="flex items-start">
-                    <span className="text-primary mr-2 font-medium">1.</span>
+                    <span className="text-primary mr-3 font-medium">1.</span>
                     You'll receive an immediate confirmation email with a PDF copy of your submission
                   </li>
                   <li className="flex items-start">
-                    <span className="text-primary mr-2 font-medium">2.</span>
+                    <span className="text-primary mr-3 font-medium">2.</span>
                     Your information is securely stored in our client intake system
                   </li>
                   <li className="flex items-start">
-                    <span className="text-primary mr-2 font-medium">3.</span>A NextPhase IT consultant will review your
+                    <span className="text-primary mr-3 font-medium">3.</span>A NextPhase IT consultant will review your
                     information within 24 hours
                   </li>
                   <li className="flex items-start">
-                    <span className="text-primary mr-2 font-medium">4.</span>
+                    <span className="text-primary mr-3 font-medium">4.</span>
                     We'll schedule an initial consultation to discuss your specific needs and goals
                   </li>
                   <li className="flex items-start">
-                    <span className="text-primary mr-2 font-medium">5.</span>
+                    <span className="text-primary mr-3 font-medium">5.</span>
                     You'll receive a customized proposal tailored to your business requirements
                   </li>
                 </ul>
@@ -182,7 +182,7 @@ export default function AboutPage() {
 
               {/* Alternative Options */}
               <div className="mt-8 pt-6 border-t border-border-color">
-                <p className="text-center text-text-secondary mb-4">Prefer other contact methods?</p>
+                <p className="text-center text-text-secondary mb-6">Prefer other contact methods?</p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button
                     size="sm"
@@ -223,35 +223,35 @@ export default function AboutPage() {
           </section>
 
           {/* Why Choose Us */}
-          <section className="mb-20">
+          <section className="mb-24">
             <h2 className="text-3xl font-bold text-center mb-12 text-text-primary">Why Choose NextPhase IT?</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div className="text-center">
-                <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
                   <span className="text-2xl font-bold text-primary">24/7</span>
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-text-primary">Round-the-Clock Support</h3>
-                <p className="text-text-secondary">
+                <h3 className="text-xl font-semibold mb-4 text-text-primary">Round-the-Clock Support</h3>
+                <p className="text-text-secondary leading-relaxed">
                   Our support team is available whenever you need assistance, ensuring your business never stops.
                 </p>
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
                   <span className="text-2xl font-bold text-primary">🔒</span>
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-text-primary">Enterprise Security</h3>
-                <p className="text-text-secondary">
+                <h3 className="text-xl font-semibold mb-4 text-text-primary">Enterprise Security</h3>
+                <p className="text-text-secondary leading-relaxed">
                   Bank-level security protocols protect your data and ensure compliance with industry standards.
                 </p>
               </div>
 
               <div className="text-center">
-                <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-6">
                   <span className="text-2xl font-bold text-primary">⚡</span>
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-text-primary">Rapid Deployment</h3>
-                <p className="text-text-secondary">
+                <h3 className="text-xl font-semibold mb-4 text-text-primary">Rapid Deployment</h3>
+                <p className="text-text-secondary leading-relaxed">
                   Get up and running quickly with our streamlined implementation process and proven methodologies.
                 </p>
               </div>
@@ -291,8 +291,8 @@ export default function AboutPage() {
             {/* Company Info */}
             <div className="lg:col-span-2">
               <h3 className="text-xl font-bold mb-4">NextPhase IT</h3>
-              <p className="text-gray-400 mb-6 max-w-md">
-                Empowering businesses with cutting-edge technology solutions and expert support.
+              <p className="text-gray-400 mb-6 max-w-md leading-relaxed">
+                Professional IT services and solutions for growing businesses.
               </p>
             </div>
 
@@ -325,8 +325,14 @@ export default function AboutPage() {
             </div>
           </div>
 
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+          <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center text-gray-400">
             <p>&copy; 2024 NextPhase IT. All rights reserved.</p>
+            <a
+              href="https://portal.nextphaseit.org"
+              className="text-gray-400 hover:text-white transition-colors text-sm mt-2 md:mt-0"
+            >
+              Client Portal
+            </a>
           </div>
         </div>
       </footer>

@@ -12,23 +12,25 @@ export default function ContactPage() {
         <div className="bg-gradient-to-r from-primary to-primary-hover text-surface py-20 mt-16">
           <div className="container mx-auto px-4 text-center">
             <h1 className="text-4xl md:text-5xl font-bold mb-6">Contact Us</h1>
-            <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto">
-              We're here to help your business with IT solutions. Reach out to us using the information below.
+            <p className="text-xl md:text-2xl text-blue-100 max-w-3xl mx-auto leading-relaxed">
+              We're here to help your business with professional IT solutions. Reach out to us using the information
+              below.
             </p>
           </div>
         </div>
 
-        <div className="container mx-auto px-4 py-16">
+        <div className="container mx-auto px-4 py-20">
           {/* Contact Information */}
-          <div className="grid md:grid-cols-2 gap-16 mb-20">
+          <div className="grid md:grid-cols-2 gap-16 mb-24">
             {/* Contact Details */}
             <div className="space-y-8">
               <div>
-                <h2 className="text-3xl font-bold text-text-primary mb-8">Get In Touch</h2>
+                <h2 className="text-3xl font-bold text-text-primary mb-10">Get In Touch</h2>
 
                 {/* Business Name */}
-                <div className="mb-8">
+                <div className="mb-10">
                   <h3 className="text-2xl font-semibold text-primary mb-2">NextPhase IT</h3>
+                  <p className="text-text-secondary">Professional IT Services & Solutions</p>
                 </div>
 
                 {/* Contact Info Cards */}
@@ -38,7 +40,7 @@ export default function ContactPage() {
                     <MapPin className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
                     <div>
                       <h4 className="font-semibold text-text-primary mb-2">Address</h4>
-                      <p className="text-text-secondary">
+                      <p className="text-text-secondary leading-relaxed">
                         83 Hardwick St
                         <br />
                         Clayton, NC 27527
@@ -53,7 +55,7 @@ export default function ContactPage() {
                       <h4 className="font-semibold text-text-primary mb-2">Phone</h4>
                       <a
                         href="tel:+19843109533"
-                        className="text-primary hover:text-primary-hover transition-colors font-medium"
+                        className="text-primary hover:text-primary-hover transition-colors font-medium text-lg"
                       >
                         (984) 310-9533
                       </a>
@@ -67,7 +69,7 @@ export default function ContactPage() {
                       <h4 className="font-semibold text-text-primary mb-2">Email</h4>
                       <a
                         href="mailto:support@nextphaseit.org"
-                        className="text-primary hover:text-primary-hover transition-colors font-medium"
+                        className="text-primary hover:text-primary-hover transition-colors font-medium text-lg"
                       >
                         support@nextphaseit.org
                       </a>
@@ -79,9 +81,9 @@ export default function ContactPage() {
                     <Clock className="h-6 w-6 text-primary mt-1 flex-shrink-0" />
                     <div>
                       <h4 className="font-semibold text-text-primary mb-2">Business Hours</h4>
-                      <div className="text-text-secondary">
-                        <p>Mon-Fri: 9:00 AM - 6:00 PM</p>
-                        <p>Sat-Sun: Closed</p>
+                      <div className="text-text-secondary leading-relaxed">
+                        <p>Monday - Friday: 9:00 AM - 6:00 PM</p>
+                        <p>Saturday - Sunday: Closed</p>
                       </div>
                     </div>
                   </div>
@@ -109,14 +111,14 @@ export default function ContactPage() {
           </div>
 
           {/* FAQ Section */}
-          <div className="bg-blue-50 rounded-xl p-8 mb-20">
+          <div className="bg-blue-50 rounded-xl p-10 mb-24">
             <h2 className="text-3xl font-bold text-text-primary mb-12 text-center">Frequently Asked Questions</h2>
 
             <div className="grid md:grid-cols-2 gap-8">
               {/* FAQ Item 1 */}
               <div className="bg-surface p-6 rounded-lg border border-border-color shadow-md">
                 <h3 className="text-xl font-semibold text-primary mb-4">How soon will I get a response?</h3>
-                <p className="text-text-secondary">
+                <p className="text-text-secondary leading-relaxed">
                   We typically respond to all inquiries within 2-4 hours during business hours. For urgent matters,
                   please call us directly at (984) 310-9533.
                 </p>
@@ -125,7 +127,7 @@ export default function ContactPage() {
               {/* FAQ Item 2 */}
               <div className="bg-surface p-6 rounded-lg border border-border-color shadow-md">
                 <h3 className="text-xl font-semibold text-primary mb-4">Do you offer emergency IT support?</h3>
-                <p className="text-text-secondary">
+                <p className="text-text-secondary leading-relaxed">
                   Yes, we provide 24/7 emergency IT support for critical business issues. Contact us immediately for
                   system outages or security incidents.
                 </p>
@@ -134,7 +136,7 @@ export default function ContactPage() {
               {/* FAQ Item 3 */}
               <div className="bg-surface p-6 rounded-lg border border-border-color shadow-md">
                 <h3 className="text-xl font-semibold text-primary mb-4">Can I schedule a security audit?</h3>
-                <p className="text-text-secondary">
+                <p className="text-text-secondary leading-relaxed">
                   We offer comprehensive security audits to identify vulnerabilities and strengthen your IT
                   infrastructure. Contact us to schedule your assessment.
                 </p>
@@ -143,7 +145,7 @@ export default function ContactPage() {
               {/* FAQ Item 4 */}
               <div className="bg-surface p-6 rounded-lg border border-border-color shadow-md">
                 <h3 className="text-xl font-semibold text-primary mb-4">Do you offer remote or onsite support?</h3>
-                <p className="text-text-secondary">
+                <p className="text-text-secondary leading-relaxed">
                   We provide both remote and onsite support services. Many issues can be resolved remotely, but we're
                   happy to visit your location when needed.
                 </p>
@@ -152,7 +154,7 @@ export default function ContactPage() {
               {/* FAQ Item 5 */}
               <div className="bg-surface p-6 rounded-lg border border-border-color shadow-md md:col-span-2">
                 <h3 className="text-xl font-semibold text-primary mb-4">What types of businesses do you work with?</h3>
-                <p className="text-text-secondary">
+                <p className="text-text-secondary leading-relaxed">
                   We work with businesses of all sizes, from small startups to large enterprises. Our services are
                   tailored to meet the unique IT needs of each organization, regardless of industry or size.
                 </p>
@@ -164,7 +166,7 @@ export default function ContactPage() {
           <div className="text-center">
             <div className="bg-primary text-surface rounded-xl p-12 shadow-lg">
               <h2 className="text-3xl font-bold mb-6">Ready to Get Started?</h2>
-              <p className="text-blue-100 mb-8 max-w-2xl mx-auto text-lg">
+              <p className="text-blue-100 mb-8 max-w-2xl mx-auto text-lg leading-relaxed">
                 Contact us today to discuss how NextPhase IT can help streamline your business operations and secure
                 your technology infrastructure.
               </p>
@@ -196,8 +198,8 @@ export default function ContactPage() {
             {/* Company Info */}
             <div className="lg:col-span-2">
               <h3 className="text-xl font-bold mb-4">NextPhase IT</h3>
-              <p className="text-gray-400 mb-6 max-w-md">
-                Empowering businesses with cutting-edge technology solutions and expert support.
+              <p className="text-gray-400 mb-6 max-w-md leading-relaxed">
+                Professional IT services and solutions for growing businesses.
               </p>
             </div>
 
@@ -230,8 +232,14 @@ export default function ContactPage() {
             </div>
           </div>
 
-          <div className="border-t border-gray-800 mt-8 pt-8 text-center text-gray-400">
+          <div className="border-t border-gray-800 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center text-gray-400">
             <p>&copy; 2024 NextPhase IT. All rights reserved.</p>
+            <a
+              href="https://portal.nextphaseit.org"
+              className="text-gray-400 hover:text-white transition-colors text-sm mt-2 md:mt-0"
+            >
+              Client Portal
+            </a>
           </div>
         </div>
       </footer>
