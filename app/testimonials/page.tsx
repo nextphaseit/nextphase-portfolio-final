@@ -24,7 +24,7 @@ function TestimonialCard({ content, author, position, company, image, rating }: 
       {/* Rating Stars */}
       <div className="flex items-center gap-1 mb-4">
         {[...Array(5)].map((_, i) => (
-          <Star key={i} size={16} className={i < rating ? "text-yellow-400 fill-current" : "text-text-muted"} />
+          <Star key={i} size={16} className={i < rating ? "text-accent fill-current" : "text-text-muted"} />
         ))}
         <span className="text-sm text-text-muted ml-2">({rating}/5)</span>
       </div>
@@ -148,7 +148,7 @@ export default function TestimonialsPage() {
               <div className="text-center">
                 <div className="flex items-center justify-center gap-1 mb-2">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={20} className="text-yellow-400 fill-current" />
+                    <Star key={i} size={20} className="text-accent fill-current" />
                   ))}
                 </div>
                 <div className="text-blue-100">Average Rating</div>
