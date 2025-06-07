@@ -69,7 +69,14 @@ export default function TestimonialsPage() {
       content:
         "I needed a booking website with integrated payments and automated emails. NextPhase IT delivered exactly what I envisioned—clean design, seamless user experience, and everything works like clockwork.",
     },
-    
+    {
+      author: "Sarah M.",
+      position: "Operations Manager",
+      company: "TechFlow Solutions",
+      image: "/placeholder.svg?height=48&width=48&text=SM",
+      rating: 5,
+      content:
+        "Outstanding service and support. NextPhase IT helped us migrate to Microsoft 365 seamlessly and provided excellent ongoing support. Their expertise in IT consulting is unmatched.",
     },
   ]
 
