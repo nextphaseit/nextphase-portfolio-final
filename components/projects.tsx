@@ -10,11 +10,13 @@ interface ServiceProps {
 
 function ServiceCard({ title, description, icon }: ServiceProps) {
   return (
-    <CardWrapper className="overflow-hidden group">
+    <CardWrapper className="overflow-hidden group hover:border-primary/40 transition-colors">
       <div className="text-primary mb-4 flex justify-center">
         <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">{icon}</div>
       </div>
-      <h3 className="text-lg font-semibold group-hover:text-primary transition-colors mb-2 text-center">{title}</h3>
+      <h3 className="text-lg font-semibold group-hover:text-primary transition-colors mb-2 text-center text-primary">
+        {title}
+      </h3>
       <p className="text-secondary text-sm text-center">{description}</p>
     </CardWrapper>
   )
@@ -55,18 +57,20 @@ export function Projects() {
   ]
 
   return (
-    <section className="py-16" id="works">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl font-bold mb-4 text-primary">Featured Services</h2>
-        <p className="text-secondary max-w-2xl mx-auto">
-          Comprehensive IT solutions designed to help small businesses thrive in the digital landscape. From web
-          development to cloud migrations, I provide end-to-end technology services.
-        </p>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {services.map((service, index) => (
-          <ServiceCard key={index} {...service} />
-        ))}
+    <section className="py-16 bg-background" id="works">
+      <div className="container mx-auto px-4">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold mb-4 text-primary">Featured Services</h2>
+          <p className="text-secondary max-w-2xl mx-auto">
+            Comprehensive IT solutions designed to help small businesses thrive in the digital landscape. From web
+            development to cloud migrations, I provide end-to-end technology services.
+          </p>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {services.map((service, index) => (
+            <ServiceCard key={index} {...service} />
+          ))}
+        </div>
       </div>
     </section>
   )

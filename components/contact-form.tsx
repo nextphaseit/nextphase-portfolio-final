@@ -39,14 +39,14 @@ export function ContactForm() {
           name="firstName"
           placeholder="First Name *"
           required
-          className="bg-card border border-primary/20 rounded-lg p-3 w-full focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+          className="bg-surface border border-color rounded-lg p-3 w-full focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-primary placeholder:text-muted"
         />
         <input
           type="text"
           name="lastName"
           placeholder="Last Name *"
           required
-          className="bg-card border border-primary/20 rounded-lg p-3 w-full focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+          className="bg-surface border border-color rounded-lg p-3 w-full focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-primary placeholder:text-muted"
         />
       </div>
       <input
@@ -54,14 +54,14 @@ export function ContactForm() {
         name="email"
         placeholder="Email Address *"
         required
-        className="bg-card border border-primary/20 rounded-lg p-3 w-full focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+        className="bg-surface border border-color rounded-lg p-3 w-full focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-primary placeholder:text-muted"
       />
       <textarea
         name="message"
         placeholder="Your Message *"
         rows={6}
         required
-        className="bg-card border border-primary/20 rounded-lg p-3 w-full focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all resize-vertical"
+        className="bg-surface border border-color rounded-lg p-3 w-full focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all resize-vertical text-primary placeholder:text-muted"
       />
 
       {/* Result Message */}
@@ -78,7 +78,7 @@ export function ContactForm() {
       <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
         {isSubmitting ? (
           <div className="flex items-center gap-2">
-            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-4 h-4 border-2 border-surface border-t-transparent rounded-full animate-spin"></div>
             Sending Message...
           </div>
         ) : (
@@ -86,7 +86,7 @@ export function ContactForm() {
         )}
       </Button>
 
-      <p className="text-xs text-gray-400 text-center">* Required fields. We'll respond within 24 hours.</p>
+      <p className="text-xs text-muted text-center">* Required fields. We'll respond within 24 hours.</p>
     </form>
   )
 }
