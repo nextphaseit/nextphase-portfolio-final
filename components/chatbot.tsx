@@ -546,11 +546,7 @@ export function Chatbot() {
           className="w-16 h-16 rounded-full bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 group relative"
           size="lg"
         >
-          <MessageCircle
-            size={28}
-            className="group-hover:scale-110 transition-transform text-white"
-            fill="currentColor"
-          />
+          <MessageCircle size={28} className="group-hover:scale-110 transition-transform text-white" />
           <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
         </Button>
       </div>
