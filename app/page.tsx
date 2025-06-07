@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Services } from "@/components/services"
 import { Stats } from "@/components/stats"
 import { Testimonials } from "@/components/testimonials"
-import { ContactForm } from "@/components/contact-form"
 import { Projects } from "@/components/projects"
 import { Skills } from "@/components/skills"
 import { Chatbot } from "@/components/chatbot"
@@ -83,9 +82,6 @@ export default function HomePage() {
 
       {/* Testimonials Section */}
       <Testimonials />
-
-      {/* Contact Section */}
-      <ContactForm />
 
       {/* Chatbot */}
       <Chatbot />
