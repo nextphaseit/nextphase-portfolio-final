@@ -1,4 +1,11 @@
+"use client"
+
+import { Button } from "@/components/ui/button"
+import { CardWrapper } from "@/components/ui/card-wrapper"
+import { Navbar } from "@/components/navbar"
 import { Chatbot } from "@/components/chatbot"
+import { Users, Target, Award, Heart, Mail, Download } from "lucide-react"
+import Link from "next/link"
 
 export default function AboutPage() {
   return (
@@ -18,8 +25,266 @@ export default function AboutPage() {
           </div>
         </div>
 
-        {/* Rest of the existing content goes here */}
-        <div className="container mx-auto px-4 py-16">{/* Move all existing content inside this container */}</div>
+        {/* Main Content */}
+        <div className="container mx-auto px-4 py-16">
+          {/* Company Overview */}
+          <section className="mb-16">
+            <div className="max-w-4xl mx-auto">
+              <h2 className="text-3xl font-bold mb-6 text-gray-900">Our Story</h2>
+              <p className="text-gray-600 mb-6">
+                NextPhase IT was founded with a simple mission: to make enterprise-level technology accessible to small
+                and medium-sized businesses. We believe that every business, regardless of size, deserves secure,
+                scalable, and efficient IT solutions.
+              </p>
+              <p className="text-gray-600 mb-6">
+                Our team combines years of experience in web development, cloud infrastructure, cybersecurity, and
+                business automation to deliver comprehensive solutions that help our clients focus on what they do best
+                – running their business.
+              </p>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-blue-600 mb-2">50+</div>
+                  <div className="text-gray-600">Projects Completed</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-blue-600 mb-2">99%</div>
+                  <div className="text-gray-600">Client Satisfaction</div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Values Section */}
+          <section className="mb-16">
+            <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">Our Core Values</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              <CardWrapper className="text-center">
+                <Users className="w-12 h-12 text-blue-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-3 text-gray-900">Client-Focused</h3>
+                <p className="text-gray-600">
+                  Every solution is tailored to meet your specific business needs and goals.
+                </p>
+              </CardWrapper>
+
+              <CardWrapper className="text-center">
+                <Target className="w-12 h-12 text-blue-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-3 text-gray-900">Results-Driven</h3>
+                <p className="text-gray-600">
+                  We measure success by the tangible improvements we bring to your business.
+                </p>
+              </CardWrapper>
+
+              <CardWrapper className="text-center">
+                <Award className="w-12 h-12 text-blue-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-3 text-gray-900">Excellence</h3>
+                <p className="text-gray-600">
+                  We maintain the highest standards in everything we do, from code to customer service.
+                </p>
+              </CardWrapper>
+
+              <CardWrapper className="text-center">
+                <Heart className="w-12 h-12 text-blue-600 mx-auto mb-4" />
+                <h3 className="text-xl font-semibold mb-3 text-gray-900">Integrity</h3>
+                <p className="text-gray-600">
+                  Honest communication and transparent processes build lasting partnerships.
+                </p>
+              </CardWrapper>
+            </div>
+          </section>
+
+          {/* Team Section */}
+          <section className="mb-16">
+            <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">Meet Our Team</h2>
+            <div className="max-w-2xl mx-auto">
+              <CardWrapper>
+                <div className="text-center p-8">
+                  <h3 className="text-2xl font-bold mb-2 text-gray-900">Adrian Knight</h3>
+                  <p className="text-blue-600 mb-4">Lead Web & IT Solutions Consultant</p>
+                  <p className="text-gray-600 mb-4">
+                    With over a decade of experience in web development and IT infrastructure, Adrian leads our team in
+                    delivering innovative solutions that drive business growth. Specializing in cloud migrations,
+                    security audits, and custom web applications.
+                  </p>
+                  <div className="flex justify-center md:justify-start gap-4">
+                    <a href="mailto:adrian.knight@nextphaseit.org" className="text-blue-600 hover:underline">
+                      adrian.knight@nextphaseit.org
+                    </a>
+                  </div>
+                </div>
+              </CardWrapper>
+            </div>
+          </section>
+
+          {/* NEW CLIENT CONTACT FORM SECTION */}
+          <section id="new-client-form" className="mb-16">
+            <CardWrapper className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+              <div className="p-8 md:p-12">
+                <div className="text-center mb-8">
+                  <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <span className="text-4xl">📋</span>
+                  </div>
+                  <h2 className="text-3xl font-bold mb-4 text-gray-900">Ready to Get Started?</h2>
+                  <p className="text-gray-600 max-w-2xl mx-auto mb-8">
+                    Complete our New Client Contact Form to begin your onboarding process. Our team will review your
+                    information and contact you within 24 hours to discuss your specific needs.
+                  </p>
+
+                  {/* Primary CTA Button */}
+                  <Button
+                    size="lg"
+                    asChild
+                    className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-8 py-4 text-lg"
+                  >
+                    <a
+                      href="https://forms.cloud.microsoft/r/QWtKpJuvTg"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-3"
+                    >
+                      <span className="text-xl">📨</span>
+                      Fill Out Form
+                    </a>
+                  </Button>
+
+                  <p className="text-sm text-gray-500 mt-4">
+                    Form opens in a new tab • Submission confirmation sent via email
+                  </p>
+                </div>
+
+                <div className="bg-white/50 p-6 rounded-lg mt-8">
+                  <h3 className="text-xl font-semibold mb-4 flex items-center text-gray-900">
+                    <Mail className="w-5 h-5 mr-2 text-blue-600" />
+                    What happens after you submit the form?
+                  </h3>
+                  <ul className="space-y-3 text-gray-700">
+                    <li className="flex items-start">
+                      <span className="text-blue-600 mr-2">1.</span>
+                      You'll receive an immediate confirmation email with a PDF copy of your submission
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-600 mr-2">2.</span>
+                      Your information is securely stored in our client intake system
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-600 mr-2">3.</span>A NextPhase IT consultant will review your
+                      information within 24 hours
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-600 mr-2">4.</span>
+                      We'll schedule an initial consultation to discuss your specific needs and goals
+                    </li>
+                    <li className="flex items-start">
+                      <span className="text-blue-600 mr-2">5.</span>
+                      You'll receive a customized proposal tailored to your business requirements
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Alternative Options */}
+                <div className="mt-8 pt-6 border-t border-gray-300">
+                  <p className="text-center text-gray-600 mb-4">Prefer other contact methods?</p>
+                  <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      asChild
+                      className="border-blue-300 text-blue-600 hover:bg-blue-600 hover:text-white"
+                    >
+                      <a href="mailto:info@nextphaseit.org">
+                        <Mail className="w-4 h-4 mr-2" />
+                        Email Us Directly
+                      </a>
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      asChild
+                      className="border-blue-300 text-blue-600 hover:bg-blue-600 hover:text-white"
+                    >
+                      <a href="tel:+19843109533">
+                        <span className="mr-2">📞</span>
+                        Call (984) 310-9533
+                      </a>
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      asChild
+                      className="border-blue-300 text-blue-600 hover:bg-blue-600 hover:text-white"
+                    >
+                      <Link href="/form">
+                        <Download className="w-4 h-4 mr-2" />
+                        Download PDF Form
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </CardWrapper>
+          </section>
+
+          {/* Why Choose Us */}
+          <section className="mb-16">
+            <h2 className="text-3xl font-bold text-center mb-12 text-gray-900">Why Choose NextPhase IT?</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="text-center">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl font-bold text-blue-600">24/7</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-3 text-gray-900">Round-the-Clock Support</h3>
+                <p className="text-gray-600">
+                  Our support team is available whenever you need assistance, ensuring your business never stops.
+                </p>
+              </div>
+
+              <div className="text-center">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl font-bold text-blue-600">🔒</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-3 text-gray-900">Enterprise Security</h3>
+                <p className="text-gray-600">
+                  Bank-level security protocols protect your data and ensure compliance with industry standards.
+                </p>
+              </div>
+
+              <div className="text-center">
+                <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl font-bold text-blue-600">⚡</span>
+                </div>
+                <h3 className="text-xl font-semibold mb-3 text-gray-900">Rapid Deployment</h3>
+                <p className="text-gray-600">
+                  Get up and running quickly with our streamlined implementation process and proven methodologies.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          {/* CTA Section */}
+          <section className="text-center">
+            <CardWrapper className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+              <div className="p-12">
+                <h2 className="text-3xl font-bold mb-4 text-gray-900">Transform Your Business Today</h2>
+                <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
+                  Join the growing number of businesses that trust NextPhase IT to power their digital transformation.
+                  Let's discuss how we can help you achieve your goals.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <Button size="lg" asChild className="bg-blue-600 hover:bg-blue-700">
+                    <Link href="/pricing">View Our Packages</Link>
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    asChild
+                    className="border-blue-600 text-blue-600 hover:bg-blue-600 hover:text-white"
+                  >
+                    <Link href="/contact">Contact Us Today</Link>
+                  </Button>
+                </div>
+              </div>
+            </CardWrapper>
+          </section>
+        </div>
       </div>
 
       {/* Chatbot */}
