@@ -1,71 +1,47 @@
-import { CardWrapper } from "./ui/card-wrapper"
-import Image from "next/image"
-import { Quote } from "lucide-react"
+import { FaStar } from "react-icons/fa"
 
-interface TestimonialProps {
-  content: string
-  author: string
-  position: string
-  image: string
-  title: string
-}
-
-function TestimonialCard({ content, author, position, image, title }: TestimonialProps) {
-  return (
-    <CardWrapper>
-      <Quote className="text-primary mb-4 h-8 w-8" />
-      <h4 className="font-semibold text-primary mb-2">{title}</h4>
-      <p className="text-gray-400 mb-6">{content}</p>
-      <div className="flex items-center gap-4">
-        <Image
-          src={image || "/placeholder.svg"}
-          alt={author}
-          width={48}
-          height={48}
-          className="rounded-full object-cover"
-        />
-        <div>
-          <h4 className="font-semibold">{author}</h4>
-          <p className="text-sm text-gray-400">{position}</p>
-        </div>
-      </div>
-    </CardWrapper>
-  )
-}
-
-export function Testimonials() {
-  const testimonials = [
+const Testimonials = () => {
+  const testimonialsData = [
     {
-      author: "Lucien R.",
-      position: "Owner, Lu's Kitchen",
-      image: "/images/lucien.jpg",
-      title: "IT Consulting Service",
-      content:
-        "NextPhase IT completely transformed our tech infrastructure. From email migration to securing our data with compliance in mind, Adrian and his team were responsive, knowledgeable, and truly professional. As a small business owner, I now feel confident knowing our systems are protected and efficient.",
+      id: 1,
+      name: "John Doe",
+      quote: "This is an amazing product! I highly recommend it.",
+      rating: 5,
     },
     {
-      author: "Alexis A.",
-      position: "Founder, Strokes of Faith",
-      image: "/images/about-img.png",
-      title: "Website & Automation Setup",
-      content:
-        "I needed a booking website with integrated payments and automated emails. NextPhase IT delivered exactly what I envisioned—clean design, seamless user experience, and everything works like clockwork. I highly recommend their services to any business needing tech done right.",
+      id: 2,
+      name: "Jane Smith",
+      quote: "I love the quality and the customer service is excellent.",
+      rating: 4,
+    },
+    {
+      id: 3,
+      name: "Peter Jones",
+      quote: "Great value for the price. I will definitely buy again.",
+      rating: 5,
     },
   ]
 
   return (
-    <section className="py-16" id="testimonials">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl font-bold mb-4">Client Testimonials</h2>
-        <p className="text-gray-400 max-w-2xl mx-auto">
-          Don't just take our word for it. Here's what our clients have to say about their experiences working with us.
-        </p>
-      </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {testimonials.map((testimonial, index) => (
-          <TestimonialCard key={index} {...testimonial} />
-        ))}
+    <section className="py-12 bg-background">
+      <div className="container mx-auto text-center">
+        <h2 className="text-3xl font-semibold mb-8 text-primary">What Our Customers Say</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {testimonialsData.map((testimonial) => (
+            <div key={testimonial.id} className="bg-surface rounded-lg shadow-md p-6 border border-color">
+              <p className="text-secondary italic mb-4">"{testimonial.quote}"</p>
+              <h4 className="text-primary font-semibold">{testimonial.name}</h4>
+              <div className="flex justify-center mt-2">
+                {Array.from({ length: testimonial.rating }).map((_, index) => (
+                  <FaStar key={index} className="text-accent" />
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   )
 }
+
+export default Testimonials

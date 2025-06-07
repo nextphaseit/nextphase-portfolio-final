@@ -12,7 +12,7 @@ import Link from "next/link"
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-white">
+    <main className="min-h-screen bg-background">
       <Navbar />
 
       {/* Hero Section */}
@@ -24,19 +24,19 @@ export default function HomePage() {
           <div className="grid grid-cols-1 gap-12 items-center">
             <div className="space-y-8 text-center">
               <div className="space-y-4">
-                <h1 className="text-4xl md:text-6xl font-bold leading-tight">
+                <h1 className="text-4xl md:text-6xl font-bold leading-tight text-primary">
                   Professional
                   <span className="text-primary block">IT Services</span>
                   for Your Business
                 </h1>
-                <p className="text-xl text-gray-400 leading-relaxed">
+                <p className="text-xl text-secondary leading-relaxed">
                   Comprehensive technology solutions, expert support, and strategic consulting to help your business
                   thrive in the digital age.
                 </p>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="lg" className="bg-primary hover:bg-primary/90" asChild>
+                <Button size="lg" className="bg-primary hover:bg-primary-hover" asChild>
                   <Link href="/about">
                     Get Started
                     <ArrowRight className="ml-2" size={20} />
@@ -54,7 +54,7 @@ export default function HomePage() {
                   <span className="text-sm">24/7 Support</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Star className="text-yellow-400" size={20} />
+                  <Star className="text-accent" size={20} />
                   <span className="text-sm">5-Star Rated</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -83,17 +83,17 @@ export default function HomePage() {
       <Testimonials />
 
       {/* Footer */}
-      <footer className="bg-card mt-20">
+      <footer className="bg-surface mt-20">
         <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-xl font-bold mb-4">NextPhase IT</h3>
-              <p className="text-gray-400 mb-4">Professional IT services and solutions for businesses of all sizes.</p>
+              <h3 className="text-xl font-bold mb-4 text-primary">NextPhase IT</h3>
+              <p className="text-secondary mb-4">Professional IT services and solutions for businesses of all sizes.</p>
               <div className="flex space-x-4">{/* Social media links would go here */}</div>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">Services</h4>
-              <ul className="space-y-2 text-gray-400">
+              <h4 className="font-semibold mb-4 text-primary">Services</h4>
+              <ul className="space-y-2 text-secondary">
                 <li>
                   <Link href="/#services" className="hover:text-primary transition-colors">
                     IT Support
@@ -117,8 +117,8 @@ export default function HomePage() {
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">Company</h4>
-              <ul className="space-y-2 text-gray-400">
+              <h4 className="font-semibold mb-4 text-primary">Company</h4>
+              <ul className="space-y-2 text-secondary">
                 <li>
                   <Link href="/about" className="hover:text-primary transition-colors">
                     About Us
@@ -142,8 +142,8 @@ export default function HomePage() {
               </ul>
             </div>
             <div>
-              <h4 className="font-semibold mb-4">Contact</h4>
-              <ul className="space-y-2 text-gray-400">
+              <h4 className="font-semibold mb-4 text-primary">Contact</h4>
+              <ul className="space-y-2 text-secondary">
                 <li>support@nextphaseit.org</li>
                 <li>(984) 310-9533</li>
                 <li>Charlotte, NC</li>
@@ -155,7 +155,7 @@ export default function HomePage() {
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400">
+          <div className="border-t border-gray-800 mt-12 pt-8 text-center text-secondary">
             <p>&copy; 2024 NextPhase IT. All rights reserved.</p>
           </div>
         </div>
