@@ -63,7 +63,7 @@ export default function TestimonialsPage() {
     {
       author: "Alexis A.",
       position: "Founder",
-      company: "All about IT",
+      company: "Strokes Of Faith",
       image: "/images/about-img.png",
       rating: 5,
       content:
