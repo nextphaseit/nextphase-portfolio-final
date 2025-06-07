@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect, useRef } from "react"
-import { MessageCircle, X, Bot, User, Send, ThumbsUp, ThumbsDown } from "lucide-react"
+import { X, Bot, User, Send, ThumbsUp, ThumbsDown } from "lucide-react"
 import { Button } from "./ui/button"
 import { createSupportTicket } from "@/app/actions/ticket"
 
@@ -543,10 +543,21 @@ export function Chatbot() {
       <div className="fixed bottom-6 right-6 z-50">
         <Button
           onClick={() => setIsOpen(true)}
-          className="w-16 h-16 rounded-full bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 group relative"
+          className="w-16 h-16 rounded-full bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 group relative flex items-center justify-center"
           size="lg"
         >
-          <MessageCircle size={28} className="group-hover:scale-110 transition-transform text-white" />
+          {/* Chat bubble SVG icon */}
+          <svg
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className="group-hover:scale-110 transition-transform text-white"
+          >
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
           <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
         </Button>
       </div>
