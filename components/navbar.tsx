@@ -48,18 +48,6 @@ export function Navbar() {
             <Link href="/#contact" className="text-gray-300 hover:text-primary transition-colors font-medium">
               Contact
             </Link>
-            <Link
-              href="/portal"
-              className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors font-medium shadow-lg"
-            >
-              Service Desk Portal
-            </Link>
-            <Link
-              href="/admin"
-              className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors font-medium shadow-lg"
-            >
-              Admin Portal
-            </Link>
           </div>
 
           {/* Mobile Hamburger Button */}
@@ -118,20 +106,6 @@ export function Navbar() {
                 onClick={closeMenu}
               >
                 Contact
-              </Link>
-              <Link
-                href="/portal"
-                className="block px-3 py-2 bg-primary text-white hover:bg-primary/90 rounded-md transition-colors font-medium mx-3 my-2 text-center"
-                onClick={closeMenu}
-              >
-                Service Desk Portal
-              </Link>
-              <Link
-                href="/admin"
-                className="block px-3 py-2 bg-red-600 text-white hover:bg-red-700 rounded-md transition-colors font-medium mx-3 my-2 text-center"
-                onClick={closeMenu}
-              >
-                Admin Portal
               </Link>
             </div>
           </div>
