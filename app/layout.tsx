@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
+import { Chatbot } from "@/components/chatbot"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -35,7 +36,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        {children}
+        {/* Chatbot - will be hidden on auth pages via component logic */}
+        <Chatbot />
+      </body>
     </html>
   )
 }
