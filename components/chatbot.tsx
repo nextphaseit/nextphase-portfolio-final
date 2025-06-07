@@ -541,25 +541,23 @@ export function Chatbot() {
   if (!isOpen) {
     return (
       <div className="fixed bottom-6 right-6 z-50">
-        <Button
+        <button
           onClick={() => setIsOpen(true)}
-          className="w-16 h-16 rounded-full bg-primary hover:bg-primary/90 shadow-lg hover:shadow-xl transition-all duration-300 group relative flex items-center justify-center"
-          size="lg"
+          className="group relative bg-white border border-gray-200 rounded-full p-2 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+          aria-label="Open Chat Assistant"
         >
-          {/* Chat bubble SVG icon */}
-          <svg
-            width="28"
-            height="28"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            className="group-hover:scale-110 transition-transform text-white"
-          >
-            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          {/* Professional Robot Head + Chat Bubble SVG */}
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="32" cy="32" r="28" stroke="#1F77B4" strokeWidth="4" fill="#1F77B4" />
+            <circle cx="24" cy="28" r="4" fill="#FFFFFF" />
+            <circle cx="40" cy="28" r="4" fill="#FFFFFF" />
+            <rect x="24" y="40" width="16" height="4" rx="2" fill="#FFFFFF" />
+            <rect x="46" y="12" width="12" height="8" rx="2" fill="#333333" />
           </svg>
+
+          {/* Online indicator */}
           <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
-        </Button>
+        </button>
       </div>
     )
   }
