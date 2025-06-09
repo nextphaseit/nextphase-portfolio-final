@@ -17,6 +17,38 @@ interface TestimonialProps {
 }
 
 function TestimonialCard({ content, author, position, company, image, rating }: TestimonialProps) {
+  let companyDisplay
+
+  if (author === "Lucien R.") {
+    companyDisplay = (
+      <p className="text-sm text-primary font-medium">
+        <a
+          href="https://www.orderluskitchen.online/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-primary-hover transition-colors underline"
+        >
+          {company}
+        </a>
+      </p>
+    )
+  } else if (author === "Alexis A.") {
+    companyDisplay = (
+      <p className="text-sm text-primary font-medium">
+        <a
+          href="https://www.strokesoffaith.art/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="hover:text-primary-hover transition-colors underline"
+        >
+          {company}
+        </a>
+      </p>
+    )
+  } else {
+    companyDisplay = <p className="text-sm text-primary font-medium">{company}</p>
+  }
+
   return (
     <div className="bg-surface border border-border-color rounded-lg p-8 h-full flex flex-col animate-fade-in shadow-sm hover:shadow-md transition-shadow">
       <Quote className="text-primary mb-4 h-8 w-8" />
@@ -42,7 +74,7 @@ function TestimonialCard({ content, author, position, company, image, rating }: 
         <div>
           <h4 className="font-semibold text-text-primary">{author}</h4>
           <p className="text-sm text-text-secondary">{position}</p>
-          <p className="text-sm text-primary font-medium">{company}</p>
+          {companyDisplay}
         </div>
       </div>
     </div>
