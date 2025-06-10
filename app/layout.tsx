@@ -4,6 +4,8 @@ import './globals.css'
 import { Navbar } from '@/components/navbar'
 import { ChatBotWidget } from '@/components/chat-bot-widget'
 import { Toaster } from 'sonner'
+import { AnimatedFooter } from "@/components/AnimatedFooter"
+import { LogoEasterEgg } from "@/components/LogoEasterEgg"
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -26,6 +28,7 @@ export default function RootLayout({
           <ChatBotWidget />
         </div>
         <Toaster position="top-center" />
+        <AnimatedFooter />
       </body>
     </html>
   )
