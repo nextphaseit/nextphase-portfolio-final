@@ -15,12 +15,28 @@ interface SuccessStory {
 
 const successStories: SuccessStory[] = [
   {
-    clientName: "Inner Clarity INC",
-    logo: "/images/inner-clarity-logo.png",
-    challenge: "Inner Clarity INC needed a reliable IT partner to handle their website hosting and security needs while they focused on growing their business.",
-    solution: "NextPhase IT implemented a comprehensive security solution including regular security audits, secure hosting infrastructure, and 24/7 monitoring.",
-    result: "Inner Clarity INC now enjoys peace of mind with their IT infrastructure, allowing them to focus on their core business operations.",
-    quote: "NextPhase IT has been excellent for our website hosting and security consults. Their proactive approach to security has given us confidence in our digital operations."
+    clientName: "Strokes of Faith",
+    logo: "/assets/logos/strokes-of-faith-logo.png",
+    challenge: "Strokes of Faith needed a modern, easy-to-manage website with integrated booking and payment features to streamline their art business.",
+    solution: "NextPhase IT designed and hosted a custom website, integrated a booking system, and automated payment processing for seamless client experiences.",
+    result: "Strokes of Faith now enjoys a professional online presence and efficient client management, freeing up more time for creativity.",
+    quote: "NextPhase IT made our website and booking system work beautifully — they truly brought our vision to life."
+  },
+  {
+    clientName: "Lu's Kitchen",
+    logo: "/assets/logos/lus-kitchen-logo.png",
+    challenge: "Lu's Kitchen wanted to boost their online visibility and streamline business communications with a fresh website and professional email setup.",
+    solution: "NextPhase IT redesigned their website, set up business email, and optimized the site for search engines to attract more customers.",
+    result: "Lu's Kitchen now benefits from increased web traffic, improved communication, and a strong digital brand.",
+    quote: "Our new website gives us so much more visibility. NextPhase IT was fantastic to work with."
+  },
+  {
+    clientName: "TruFix Repair",
+    logo: "/assets/logos/trufix-repair-logo.png",
+    challenge: "TruFix Repair needed secure, reliable email and compliance tools to support their growing tech repair business.",
+    solution: "NextPhase IT implemented Microsoft 365, managed business email, and configured security and compliance features for peace of mind.",
+    result: "TruFix Repair now has robust communication tools and meets industry security standards, helping them serve clients better.",
+    quote: "Thanks to NextPhase IT, we now have secure email and great client communication tools in place."
   }
 ]
 

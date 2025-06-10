@@ -5,7 +5,7 @@ import { motion } from "framer-motion"
 const stories = [
   {
     client: "Strokes of Faith",
-    logo: "/images/strokes-of-faith-logo.png",
+    logo: "/assets/logos/strokes-of-faith-logo.png",
     quote: "NextPhase IT made our website and booking system work beautifully — they truly brought our vision to life.",
     services: [
       "Website creation and hosting",
@@ -16,7 +16,7 @@ const stories = [
   },
   {
     client: "Lu's Kitchen",
-    logo: "/images/lus-kitchen-logo.png",
+    logo: "/assets/logos/lus-kitchen-logo.png",
     quote: "Our new website gives us so much more visibility. NextPhase IT was fantastic to work with.",
     services: [
       "Website redesign and hosting",
@@ -27,7 +27,7 @@ const stories = [
   },
   {
     client: "TruFix Repair",
-    logo: "/images/trufix-repair-logo.png",
+    logo: "/assets/logos/trufix-repair-logo.png",
     quote: "Thanks to NextPhase IT, we now have secure email and great client communication tools in place.",
     services: [
       "Microsoft 365 setup",
