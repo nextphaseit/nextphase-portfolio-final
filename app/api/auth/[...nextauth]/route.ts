@@ -1,23 +1,7 @@
 import NextAuth from "next-auth"
 import type { NextAuthOptions } from "next-auth"
 import CredentialsProvider from "next-auth/providers/credentials"
-
-// Try different import approaches for Microsoft provider
-let MicrosoftProvider: any
-try {
-  // Try the standard import
-  MicrosoftProvider = require("next-auth/providers/microsoft").default
-} catch (e) {
-  try {
-    // Try alternative import
-    const providers = require("next-auth/providers")
-    MicrosoftProvider = providers.MicrosoftProvider || providers.Microsoft
-  } catch (e2) {
-    // Fallback to Azure AD configured for Microsoft
-    MicrosoftProvider = require("next-auth/providers/azure-ad").default
-    console.warn("Using AzureAD provider as Microsoft provider fallback")
-  }
-}
+import AzureADProvider from "next-auth/providers/azure-ad"
 
 // Demo accounts for testing
 const DEMO_ACCOUNTS = [
@@ -53,20 +37,16 @@ const DEMO_ACCOUNTS = [
 // NextAuth configuration options
 export const authOptions: NextAuthOptions = {
   providers: [
-    // Microsoft Provider with PKCE enabled for Microsoft Identity Platform v2.0
-    MicrosoftProvider({
-      clientId: process.env.MICROSOFT_CLIENT_ID!,
-      clientSecret: process.env.MICROSOFT_CLIENT_SECRET!,
-      tenantId: process.env.MICROSOFT_TENANT_ID,
-      authorization: {
-        params: {
-          scope: "openid email profile",
-          response_type: "code",
-        },
-      },
-      // Ensure we use Microsoft Identity Platform v2.0 endpoints
-      wellKnown: `https://login.microsoftonline.com/${process.env.MICROSOFT_TENANT_ID || "common"}/v2.0/.well-known/openid_configuration`,
-    }),
+    // Azure AD Provider (works with Microsoft accounts)
+    ...(process.env.MICROSOFT_CLIENT_ID && process.env.MICROSOFT_CLIENT_SECRET
+      ? [
+          AzureADProvider({
+            clientId: process.env.MICROSOFT_CLIENT_ID,
+            clientSecret: process.env.MICROSOFT_CLIENT_SECRET,
+            tenantId: process.env.MICROSOFT_TENANT_ID || "common",
+          }),
+        ]
+      : []),
 
     // Credentials Provider for development and demo
     CredentialsProvider({

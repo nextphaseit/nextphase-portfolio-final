@@ -3,11 +3,27 @@
 import { useSession } from "next-auth/react"
 import { Button } from "@/components/ui/button"
 import { CardWrapper } from "@/components/ui/card-wrapper"
-import AuthStatus from "@/components/auth-status"
 import Link from "next/link"
+import { useEffect, useState } from "react"
 
 export default function DebugAuthPage() {
   const { data: session, status } = useSession()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-400">Loading...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-black text-white p-8">
@@ -16,7 +32,24 @@ export default function DebugAuthPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <CardWrapper>
           <h2 className="text-xl font-semibold mb-4">Authentication Status</h2>
-          <AuthStatus />
+          <div className="space-y-2">
+            <p>
+              <strong>Status:</strong> {status}
+            </p>
+            <p>
+              <strong>Authenticated:</strong> {session ? "Yes" : "No"}
+            </p>
+            {session?.user && (
+              <>
+                <p>
+                  <strong>Name:</strong> {session.user.name}
+                </p>
+                <p>
+                  <strong>Email:</strong> {session.user.email}
+                </p>
+              </>
+            )}
+          </div>
         </CardWrapper>
 
         <CardWrapper>

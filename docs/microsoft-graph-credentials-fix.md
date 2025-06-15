@@ -62,7 +62,7 @@ After updating the credentials:
 
 Let me also update the debug page to provide better credential testing:
 
-```typescriptreact file="app/debug/graph/page.tsx"
+\`\`\`typescriptreact file="app/debug/graph/page.tsx"
 [v0-no-op-code-block-prefix]"use client"
 
 import { useState } from "react"

@@ -118,7 +118,7 @@ For additional support, contact the NextPhase IT development team.
 
 Now let me add the Client Intake Submissions section to the Admin Portal:
 
-```typescriptreact file="app/admin/page.tsx"
+\`\`\`typescriptreact file="app/admin/page.tsx"
 [v0-no-op-code-block-prefix]"use client"
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
