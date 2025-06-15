@@ -4,6 +4,93 @@ import { Button } from "@/components/ui/button"
 import { Navbar } from "@/components/navbar"
 import { ArrowUp } from "lucide-react"
 import Image from "next/image"
+import { motion } from 'framer-motion';
+import Link from 'next/link';
+import {
+  FaGlobe,
+  FaEnvelope,
+  FaMicrosoft,
+  FaDatabase,
+  FaShieldAlt,
+  FaRobot,
+  FaHeadset,
+} from 'react-icons/fa';
+
+const services = [
+  {
+    icon: <FaGlobe className="h-8 w-8 text-accent" />,
+    title: 'Website Creation & Hosting',
+    description: 'Professional website design and reliable hosting solutions tailored to your business needs.',
+  },
+  {
+    icon: <FaEnvelope className="h-8 w-8 text-accent" />,
+    title: 'Business Email & Domain Setup',
+    description: 'Professional email setup with your business domain and comprehensive email management.',
+  },
+  {
+    icon: <FaMicrosoft className="h-8 w-8 text-accent" />,
+    title: 'Microsoft 365 + SharePoint Consulting',
+    description: 'Expert setup and optimization of Microsoft 365 and SharePoint for your business.',
+  },
+  {
+    icon: <FaRobot className="h-8 w-8 text-accent" />,
+    title: 'Workflow Automation',
+    description: 'Streamline your business processes with Power Automate and Zapier integrations.',
+  },
+  {
+    icon: <FaDatabase className="h-8 w-8 text-accent" />,
+    title: 'Data Migration Services',
+    description: 'Seamless data transfer and migration between systems with minimal downtime.',
+  },
+  {
+    icon: <FaShieldAlt className="h-8 w-8 text-accent" />,
+    title: 'HIPAA Security & Compliance Support',
+    description: 'Ensure your business meets healthcare industry security and compliance requirements.',
+  },
+  {
+    icon: <FaHeadset className="h-8 w-8 text-accent" />,
+    title: 'IT Support Desk',
+    description: 'Comprehensive IT support available remotely or onsite to keep your business running smoothly.',
+  },
+];
+
+function ServiceCard({ icon, title, description }: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      className="bg-white p-8 rounded-lg shadow-lg"
+    >
+      <div className="mb-4">{icon}</div>
+      <h3 className="text-xl font-semibold text-primary mb-2">{title}</h3>
+      <p className="text-gray-600 mb-4">{description}</p>
+      <Link
+        href="/contact"
+        className="text-accent hover:text-accent/90 font-medium inline-flex items-center"
+      >
+        Learn More
+        <svg
+          className="w-4 h-4 ml-2"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M9 5l7 7-7 7"
+          />
+        </svg>
+      </Link>
+    </motion.div>
+  );
+}
 
 const Services = () => {
   return (
@@ -28,78 +115,15 @@ const Services = () => {
         {/* Services Grid */}
         <section className="py-20">
           <div className="container mx-auto px-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {/* Cloud Solutions */}
-              <div className="bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="w-12 h-12 bg-[#0A4DA1]/10 rounded-lg flex items-center justify-center mb-6">
-                  <svg className="w-6 h-6 text-[#0A4DA1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold mb-4">Cloud Solutions</h3>
-                <p className="text-[#555555] mb-6">
-                  Modernize your infrastructure with secure, scalable cloud services. We help you migrate, optimize, and manage your cloud environment.
-                </p>
-                <ul className="text-[#555555] space-y-2 mb-6">
-                  <li>• Cloud Migration</li>
-                  <li>• Infrastructure as Code</li>
-                  <li>• Cloud Security</li>
-                </ul>
-              </div>
-
-              {/* Security Audits */}
-              <div className="bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="w-12 h-12 bg-[#0A4DA1]/10 rounded-lg flex items-center justify-center mb-6">
-                  <svg className="w-6 h-6 text-[#0A4DA1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold mb-4">Security Audits</h3>
-                <p className="text-[#555555] mb-6">
-                  Protect your business with comprehensive security assessments and proactive threat management.
-                </p>
-                <ul className="text-[#555555] space-y-2 mb-6">
-                  <li>• Vulnerability Assessment</li>
-                  <li>• Compliance Review</li>
-                  <li>• Security Training</li>
-                </ul>
-              </div>
-
-              {/* IT Support */}
-              <div className="bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="w-12 h-12 bg-[#0A4DA1]/10 rounded-lg flex items-center justify-center mb-6">
-                  <svg className="w-6 h-6 text-[#0A4DA1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold mb-4">IT Support</h3>
-                <p className="text-[#555555] mb-6">
-                  Reliable technical support and maintenance services to keep your business running smoothly.
-                </p>
-                <ul className="text-[#555555] space-y-2 mb-6">
-                  <li>• 24/7 Help Desk</li>
-                  <li>• Network Maintenance</li>
-                  <li>• Hardware Support</li>
-                </ul>
-              </div>
-
-              {/* Data Migration */}
-              <div className="bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="w-12 h-12 bg-[#0A4DA1]/10 rounded-lg flex items-center justify-center mb-6">
-                  <svg className="w-6 h-6 text-[#0A4DA1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold mb-4">Data Migration</h3>
-                <p className="text-[#555555] mb-6">
-                  Seamless data transfer and system migration with minimal disruption to your operations.
-                </p>
-                <ul className="text-[#555555] space-y-2 mb-6">
-                  <li>• System Migration</li>
-                  <li>• Data Backup</li>
-                  <li>• Recovery Planning</li>
-                </ul>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {services.map((service, index) => (
+                <ServiceCard
+                  key={service.title}
+                  icon={service.icon}
+                  title={service.title}
+                  description={service.description}
+                />
+              ))}
             </div>
           </div>
         </section>

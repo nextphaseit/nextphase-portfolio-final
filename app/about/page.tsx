@@ -4,6 +4,26 @@ import { Button } from "@/components/ui/button"
 import { Navbar } from "@/components/navbar"
 import { ArrowUp, Shield, Lightbulb, Users } from "lucide-react"
 import Image from "next/image"
+import { motion } from 'framer-motion'
+
+const values = [
+  {
+    title: 'Reliability',
+    description: 'We deliver consistent, dependable service you can count on.',
+  },
+  {
+    title: 'Innovation',
+    description: 'We stay ahead of technology trends to provide cutting-edge solutions.',
+  },
+  {
+    title: 'Partnership',
+    description: 'We work closely with you to understand and meet your business needs.',
+  },
+  {
+    title: 'Excellence',
+    description: 'We maintain the highest standards in everything we do.',
+  },
+]
 
 const About = () => {
   return (
@@ -12,70 +32,137 @@ const About = () => {
         <Navbar />
         
         {/* Hero Section */}
-        <section className="pt-32 pb-20 bg-[#F9FAFB]">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto text-center">
-              <h1 className="text-4xl lg:text-5xl font-bold mb-6 text-[#0A4DA1]">
-                About NextPhase IT
-              </h1>
-              <p className="text-xl text-[#555555]">
-                Empowering businesses through technology, trust, and innovation
+        <section className="bg-primary text-white py-20">
+          <div className="container">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-center"
+            >
+              <h1 className="text-4xl md:text-5xl font-bold mb-6">About NextPhase IT</h1>
+              <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+                Empowering small businesses with innovative IT solutions since 2020
               </p>
+            </motion.div>
+          </div>
+        </section>
+
+        {/* Founder Section */}
+        <section className="py-20">
+          <div className="container">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <h2 className="text-3xl font-bold text-primary mb-6">Meet Our Founder</h2>
+                <div className="space-y-4">
+                  <h3 className="text-2xl font-semibold">Adrian Knight</h3>
+                  <p className="text-gray-600">IT Consultant & Business Technology Expert</p>
+                  <p className="text-gray-600">
+                    With over a decade of experience in IT consulting and business technology,
+                    Adrian founded NextPhase IT to help small businesses leverage technology
+                    for growth and success. His passion for innovation and commitment to
+                    client success drives our company's mission.
+                  </p>
+                </div>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+                className="relative h-[400px] rounded-lg overflow-hidden"
+              >
+                <Image
+                  src="/images/founder.jpg"
+                  alt="Adrian Knight - Founder of NextPhase IT"
+                  fill
+                  className="object-cover"
+                />
+              </motion.div>
             </div>
           </div>
         </section>
 
-        {/* Mission Statement */}
-        <section className="py-20">
-          <div className="container mx-auto px-4">
-            <div className="max-w-3xl mx-auto text-center">
-              <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
-              <p className="text-xl text-[#555555] leading-relaxed">
-                At NextPhase IT, we're dedicated to transforming how businesses leverage technology. 
-                We believe in creating lasting partnerships that drive growth, security, and innovation 
-                for our clients.
+        {/* Mission Section */}
+        <section className="py-20 bg-gray-50">
+          <div className="container">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="max-w-3xl mx-auto text-center"
+            >
+              <h2 className="text-3xl font-bold text-primary mb-6">Our Mission</h2>
+              <p className="text-xl text-gray-600 mb-8">
+                To empower small businesses with technology solutions that drive growth,
+                efficiency, and success in the digital age.
               </p>
-            </div>
+            </motion.div>
           </div>
         </section>
 
         {/* Values Section */}
-        <section className="py-20 bg-[#F9FAFB]">
-          <div className="container mx-auto px-4">
-            <h2 className="text-3xl font-bold text-center mb-12">Our Values</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* Trust */}
-              <div className="bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="w-12 h-12 bg-[#0A4DA1]/10 rounded-lg flex items-center justify-center mb-6">
-                  <Shield className="w-6 h-6 text-[#0A4DA1]" />
-                </div>
-                <h3 className="text-xl font-bold mb-4">Trust</h3>
-                <p className="text-[#555555]">
-                  We build lasting relationships through transparency, reliability, and consistent delivery of excellence.
-                </p>
-              </div>
+        <section className="py-20">
+          <div className="container">
+            <motion.h2
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-3xl font-bold text-primary text-center mb-12"
+            >
+              Our Values
+            </motion.h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {values.map((value, index) => (
+                <motion.div
+                  key={value.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 + index * 0.1 }}
+                  className="bg-white p-6 rounded-lg shadow-lg"
+                >
+                  <h3 className="text-xl font-semibold text-primary mb-3">{value.title}</h3>
+                  <p className="text-gray-600">{value.description}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-              {/* Expertise */}
-              <div className="bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="w-12 h-12 bg-[#0A4DA1]/10 rounded-lg flex items-center justify-center mb-6">
-                  <Lightbulb className="w-6 h-6 text-[#0A4DA1]" />
+        {/* Background Section */}
+        <section className="py-20 bg-gray-50">
+          <div className="container">
+            <div className="max-w-3xl mx-auto">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+              >
+                <h2 className="text-3xl font-bold text-primary mb-6">Our Background</h2>
+                <div className="space-y-4 text-gray-600">
+                  <p>
+                    NextPhase IT was founded in 2020 with a clear vision: to provide
+                    small businesses with enterprise-level IT solutions at affordable
+                    prices. We recognized that many small businesses were struggling
+                    to keep up with technology demands while managing their core
+                    operations.
+                  </p>
+                  <p>
+                    Today, we're proud to serve businesses across North Carolina,
+                    helping them leverage technology to streamline operations,
+                    enhance security, and drive growth. Our team of certified
+                    professionals brings together decades of combined experience
+                    in IT consulting, web development, and business automation.
+                  </p>
+                  <p>
+                    We're committed to staying at the forefront of technology
+                    trends and best practices, ensuring our clients always have
+                    access to the most effective and efficient solutions for
+                    their business needs.
+                  </p>
                 </div>
-                <h3 className="text-xl font-bold mb-4">Expertise</h3>
-                <p className="text-[#555555]">
-                  Our team brings deep technical knowledge and industry experience to every project.
-                </p>
-              </div>
-
-              {/* Innovation */}
-              <div className="bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="w-12 h-12 bg-[#0A4DA1]/10 rounded-lg flex items-center justify-center mb-6">
-                  <Users className="w-6 h-6 text-[#0A4DA1]" />
-                </div>
-                <h3 className="text-xl font-bold mb-4">Innovation</h3>
-                <p className="text-[#555555]">
-                  We stay ahead of technology trends to provide cutting-edge solutions for our clients.
-                </p>
-              </div>
+              </motion.div>
             </div>
           </div>
         </section>

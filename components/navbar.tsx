@@ -1,142 +1,81 @@
 "use client"
 
 import Link from "next/link"
-import { useState, useEffect } from "react"
-import { Menu, X } from "lucide-react"
-import { Button } from "./ui/button"
-import Image from "next/image"
-import { usePathname } from "next/navigation"
-import { LogoEasterEgg } from "@/components/LogoEasterEgg"
+import { useState } from "react"
+import { FiMenu, FiX } from "react-icons/fi"
+import { motion } from "framer-motion"
 
-export function Navbar() {
+const navLinks = [
+  { href: '/', label: 'Home' },
+  { href: '/about', label: 'About' },
+  { href: '/services', label: 'Services' },
+  { href: '/book', label: 'Book Now' },
+  { href: '/reviews', label: 'Reviews' },
+  { href: '/contact', label: 'Contact' },
+]
+
+export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
-  const [isScrolled, setIsScrolled] = useState(false)
-  const pathname = usePathname()
-  const isHomePage = pathname === "/"
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 0)
-    }
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      isScrolled ? 'bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60 shadow-sm' : 
-      isHomePage ? 'bg-transparent' : 'bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/60'
-    }`}>
-      <div className="container mx-auto px-4">
+    <nav className="fixed w-full bg-primary text-white z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
+          {/* Logo */}
           <Link href="/" className="flex-shrink-0">
-            <LogoEasterEgg>
-              <Image
-                src="/images/nextphase-logo.png"
-                alt="NextPhase IT"
-                width={150}
-                height={40}
-                className="h-12 w-auto"
-              />
-            </LogoEasterEgg>
+            <span className="text-xl font-bold">NextPhase IT</span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
-            <Link href="/" className={`${isScrolled || !isHomePage ? 'text-[#222222]' : 'text-white'} hover:text-[#1E88E5] transition-colors font-medium`}>
-              Home
-            </Link>
-            <Link href="/services" className={`${isScrolled || !isHomePage ? 'text-[#222222]' : 'text-white'} hover:text-[#1E88E5] transition-colors font-medium`}>
-              Services
-            </Link>
-            <Link href="/success-stories" className={`${isScrolled || !isHomePage ? 'text-[#222222]' : 'text-white'} hover:text-[#1E88E5] transition-colors font-medium`}>
-              Success Stories
-            </Link>
-            <Link href="/about" className={`${isScrolled || !isHomePage ? 'text-[#222222]' : 'text-white'} hover:text-[#1E88E5] transition-colors font-medium`}>
-              About
-            </Link>
-            <Link href="/contact" className={`${isScrolled || !isHomePage ? 'text-[#222222]' : 'text-white'} hover:text-[#1E88E5] transition-colors font-medium`}>
-              Contact
-            </Link>
-            <Link href="/client-portal" className={`${isScrolled || !isHomePage ? 'text-[#222222]' : 'text-white'} hover:text-[#1E88E5] transition-colors font-medium`}>
-              Client Portal
-            </Link>
+          <div className="hidden md:block">
+            <div className="ml-10 flex items-baseline space-x-4">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="px-3 py-2 rounded-md text-sm font-medium hover:bg-accent hover:text-white transition-colors"
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
           </div>
 
-          {/* Mobile Navigation */}
+          {/* Mobile menu button */}
           <div className="md:hidden">
-            <button 
-              onClick={() => setIsOpen(!isOpen)} 
-              className={`p-2 ${isScrolled || !isHomePage ? 'text-[#222222]' : 'text-white'}`}
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="inline-flex items-center justify-center p-2 rounded-md text-white hover:bg-accent focus:outline-none"
             >
-              {isOpen ? <X size={24} /> : <Menu size={24} />}
+              {isOpen ? <FiX className="h-6 w-6" /> : <FiMenu className="h-6 w-6" />}
             </button>
           </div>
         </div>
-
-        {/* Mobile Menu */}
-        {isOpen && (
-          <div className={`fixed inset-0 bg-white z-50 transform ${isOpen ? 'translate-x-0' : 'translate-x-full'} transition-transform duration-300 ease-in-out`}>
-            <div className="container mx-auto px-4 py-8">
-              <div className="flex justify-between items-center mb-8">
-                <Link href="/" className="text-2xl font-bold text-[#1E88E5]">
-                  NextPhase IT
-                </Link>
-                <button
-                  onClick={() => setIsOpen(false)}
-                  className="text-[#222222] hover:text-[#1E88E5] transition-colors"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-              <nav className="space-y-4">
-                <Link
-                  href="/"
-                  className="block py-2 text-[#222222] hover:text-[#1E88E5] transition-colors font-medium"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Home
-                </Link>
-                <Link
-                  href="/services"
-                  className="block py-2 text-[#222222] hover:text-[#1E88E5] transition-colors font-medium"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Services
-                </Link>
-                <Link
-                  href="/success-stories"
-                  className="block py-2 text-[#222222] hover:text-[#1E88E5] transition-colors font-medium"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Success Stories
-                </Link>
-                <Link
-                  href="/about"
-                  className="block py-2 text-[#222222] hover:text-[#1E88E5] transition-colors font-medium"
-                  onClick={() => setIsOpen(false)}
-                >
-                  About
-                </Link>
-                <Link
-                  href="/contact"
-                  className="block py-2 text-[#222222] hover:text-[#1E88E5] transition-colors font-medium"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Contact
-                </Link>
-                <Link
-                  href="/client-portal"
-                  className="block py-2 text-[#222222] hover:text-[#1E88E5] transition-colors font-medium"
-                  onClick={() => setIsOpen(false)}
-                >
-                  Client Portal
-                </Link>
-              </nav>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Mobile menu */}
+      <motion.div
+        className="md:hidden"
+        initial={false}
+        animate={isOpen ? "open" : "closed"}
+        variants={{
+          open: { opacity: 1, height: "auto" },
+          closed: { opacity: 0, height: 0 }
+        }}
+      >
+        <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+          {navLinks.map((link) => (
+            <Link
+              key={link.href}
+              href={link.href}
+              className="block px-3 py-2 rounded-md text-base font-medium hover:bg-accent hover:text-white transition-colors"
+              onClick={() => setIsOpen(false)}
+            >
+              {link.label}
+            </Link>
+          ))}
+        </div>
+      </motion.div>
     </nav>
   )
 }

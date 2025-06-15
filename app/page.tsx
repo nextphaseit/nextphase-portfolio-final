@@ -8,6 +8,9 @@ import { FC, useState } from "react"
 import { FreeResources } from "@/components/free-resources"
 import Link from "next/link"
 import { event } from '@/lib/gtag'
+import { motion } from 'framer-motion'
+import { FaServer, FaLaptopCode, FaRobot } from 'react-icons/fa'
+import { FiCheckCircle } from 'react-icons/fi'
 
 const Home: FC = () => {
   const [currentTestimonial, setCurrentTestimonial] = useState(0)
@@ -27,6 +30,33 @@ const Home: FC = () => {
     })
   }
 
+  const services = [
+    {
+      icon: <FaServer className="h-8 w-8" />,
+      title: 'IT Support',
+      description: '24/7 technical support and maintenance for your business infrastructure.',
+    },
+    {
+      icon: <FaLaptopCode className="h-8 w-8" />,
+      title: 'Website Design',
+      description: 'Custom website development tailored to your business needs.',
+    },
+    {
+      icon: <FaRobot className="h-8 w-8" />,
+      title: 'Business Automation',
+      description: 'Streamline operations with Microsoft 365 and Power Automate solutions.',
+    },
+  ]
+
+  const whyChooseUs = [
+    'Reliable 24/7 Support',
+    'Fast Response Times',
+    'Affordable Solutions',
+    'Expert Team',
+    'Proven Track Record',
+    'Customized Approach',
+  ]
+
   return (
     <main className="min-h-screen bg-white text-[#222222]">
       {/* Content */}
@@ -38,17 +68,17 @@ const Home: FC = () => {
           <div className="container mx-auto px-4">
             <div className="max-w-3xl">
               <h1 className="text-4xl lg:text-6xl font-bold mb-6">
-                Modern IT Solutions for Your Business
+                Empowering Small Businesses Through Smart IT
               </h1>
               <p className="text-xl text-white/90 mb-8">
-                Empowering small businesses with cloud, security, and IT expertise.
+                Professional IT solutions tailored to your business needs
               </p>
-              <Link href="/book" onClick={handleBookingClick}>
+              <Link href="/services" onClick={handleBookingClick}>
                 <Button
                   size="lg"
                   className="bg-[#1E88E5] hover:bg-[#1E88E5]/90 text-white px-8 py-6 text-lg"
                 >
-                  Book a Consultation
+                  Explore Our Services
                 </Button>
               </Link>
             </div>
@@ -73,41 +103,40 @@ const Home: FC = () => {
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold text-center mb-12">Our Services</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {/* Cloud Solutions */}
-              <div className="bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="w-12 h-12 bg-[#0A4DA1]/10 rounded-lg flex items-center justify-center mb-6">
-                  <svg className="w-6 h-6 text-[#0A4DA1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold mb-4">Cloud Solutions</h3>
-                <p className="text-[#555555] mb-6">Modernize your cloud infrastructure.</p>
-                <a href="#" className="text-[#1E88E5] hover:text-[#0A4DA1] font-medium">Learn More →</a>
-              </div>
+              {services.map((service, index) => (
+                <motion.div
+                  key={service.title}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition-all duration-300"
+                >
+                  <div className="text-accent mb-4">{service.icon}</div>
+                  <h3 className="text-xl font-bold mb-4">{service.title}</h3>
+                  <p className="text-[#555555] mb-6">{service.description}</p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-              {/* Security Audits */}
-              <div className="bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="w-12 h-12 bg-[#0A4DA1]/10 rounded-lg flex items-center justify-center mb-6">
-                  <svg className="w-6 h-6 text-[#0A4DA1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold mb-4">Security Audits</h3>
-                <p className="text-[#555555] mb-6">Protect your data with thorough assessments.</p>
-                <a href="#" className="text-[#1E88E5] hover:text-[#0A4DA1] font-medium">Learn More →</a>
-              </div>
-
-              {/* IT Support */}
-              <div className="bg-white rounded-lg p-8 shadow-lg hover:shadow-xl transition-all duration-300">
-                <div className="w-12 h-12 bg-[#0A4DA1]/10 rounded-lg flex items-center justify-center mb-6">
-                  <svg className="w-6 h-6 text-[#0A4DA1]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                </div>
-                <h3 className="text-xl font-bold mb-4">IT Support</h3>
-                <p className="text-[#555555] mb-6">Reliable tech assistance for your business.</p>
-                <a href="#" className="text-[#1E88E5] hover:text-[#0A4DA1] font-medium">Learn More →</a>
-              </div>
+        {/* Why Choose Us Section */}
+        <section className="py-20 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <h2 className="text-3xl font-bold text-center mb-12">Why Choose Us</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {whyChooseUs.map((item, index) => (
+                <motion.div
+                  key={item}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="flex items-center space-x-3"
+                >
+                  <FiCheckCircle className="h-6 w-6 text-accent" />
+                  <span className="text-lg">{item}</span>
+                </motion.div>
+              ))}
             </div>
           </div>
         </section>
@@ -146,12 +175,12 @@ const Home: FC = () => {
         {/* CTA Banner */}
         <section className="py-16 bg-gradient-to-r from-[#F9FAFB] to-white">
           <div className="container mx-auto px-4 text-center">
-            <h2 className="text-3xl font-bold mb-6">Ready to elevate your IT?</h2>
+            <h2 className="text-3xl font-bold mb-6">Ready to Transform Your Business?</h2>
             <Button
               size="lg"
               className="bg-[#1E88E5] hover:bg-[#1E88E5]/90 text-white px-8 py-6 text-lg"
             >
-              Schedule a Consultation
+              Book a Free Discovery Call
             </Button>
           </div>
         </section>

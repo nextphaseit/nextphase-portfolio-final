@@ -6,12 +6,13 @@ import { ChatBotWidget } from '@/components/chat-bot-widget'
 import { Toaster } from 'sonner'
 import { AnimatedFooter } from "@/components/AnimatedFooter"
 import { LogoEasterEgg } from "@/components/LogoEasterEgg"
+import Footer from '@/components/Footer'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' })
 
 export const metadata: Metadata = {
-  title: 'NextPhase IT - Modern IT Solutions for Your Business',
-  description: 'Empowering small businesses with cloud, security, and IT expertise. Get reliable tech support and modern solutions for your business needs.',
+  title: 'NextPhase IT - Empowering Small Businesses Through Smart IT',
+  description: 'Professional IT services for small businesses including website design, email setup, Microsoft 365 consulting, and more.',
   generator: 'Next.js',
 }
 
@@ -21,12 +22,14 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
-        <div className="relative">
+    <html lang="en" className={inter.variable} suppressHydrationWarning>
+      <body className="min-h-screen flex flex-col">
+        <Navbar />
+        <main className="flex-grow pt-16">
           {children}
-          <ChatBotWidget />
-        </div>
+        </main>
+        <Footer />
+        <ChatBotWidget />
         <Toaster position="top-center" />
         <AnimatedFooter />
       </body>
