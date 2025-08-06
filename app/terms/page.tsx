@@ -113,7 +113,36 @@ export default function TermsPage() {
                 Service on this page.
               </p>
 
-              <h2>12. Contact Information</h2>
+              <h2>12. SMS & WhatsApp Opt-In Policy</h2>
+              <p><strong>Effective Date: August 2025</strong></p>
+              <p>
+                At NextPhase IT, we value your privacy and your preferences. By providing your phone number and submitting an order through our website, you agree to receive SMS and/or WhatsApp notifications related to your order status, pickup updates, or other service-related communications.
+              </p>
+
+              <h3>🔹 What You're Opting Into:</h3>
+              <ul>
+                <li>SMS or WhatsApp messages related to your order (confirmation, updates, pickup instructions)</li>
+                <li>No promotional messages will be sent unless you explicitly opt in to marketing</li>
+              </ul>
+
+              <h3>🔹 How We Get Your Consent:</h3>
+              <ul>
+                <li>You provide your number when placing an order</li>
+                <li>You agree to our terms at the time of order submission (with a checkbox or note on the form)</li>
+              </ul>
+
+              <h3>🔹 How to Opt Out:</h3>
+              <p>You may opt out of receiving messages at any time by:</p>
+              <ul>
+                <li>Replying STOP to any SMS or WhatsApp message</li>
+                <li>Contacting us directly at legal@nextphaseit.org</li>
+                <li>Notifying our staff during pickup</li>
+              </ul>
+
+              <h3>🔹 Message & Data Rates:</h3>
+              <p>Standard message and data rates may apply depending on your carrier.</p>
+
+              <h2>13. Contact Information</h2>
               <p>
                 If you have any questions about these Terms of Service, please
                 contact us at:
